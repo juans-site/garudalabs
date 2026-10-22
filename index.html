@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analisis Monitoring Percakapan</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--navy:#003D79;--navy2:#0a5299;--gold:#FFB700;--bg:#F3F6FA;--card:#fff;--ink:#1c2533;--mute:#6b7685;--line:#e3e8ef;--pos:#2e9b4f;--neg:#d93a3a;--neu:#8a929c}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+.wrap{max-width:1400px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;background:var(--navy);color:#fff;border-radius:14px;padding:16px 22px;border-bottom:5px solid var(--gold)}
+.brand{display:flex;gap:18px;align-items:center}
+.logo{height:48px;background:#fff;border-radius:8px;padding:6px 10px;display:flex;align-items:center}
+.logo img{height:36px}
+.logo span{color:var(--navy);font-weight:700;font-size:12px}
+h1{margin:0;font-size:24px;letter-spacing:.3px}
+.sub{color:var(--gold);font-weight:700;margin-top:2px}
+.total{background:#fff;color:var(--navy);border-radius:10px;padding:8px 18px;text-align:center}
+.total b{font-size:28px;display:block}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.card h2{margin:-14px -14px 12px;padding:8px 14px;font-size:13px;background:var(--navy);color:#fff;border-radius:12px 12px 0 0;border-bottom:3px solid var(--gold);text-transform:uppercase;letter-spacing:.4px}
+.c4{grid-column:span 4}.c3{grid-column:span 3}.c5{grid-column:span 5}.c2{grid-column:span 2}.c6{grid-column:span 6}.c7{grid-column:span 7}.c12{grid-column:span 12}
+@media(max-width:1100px){.c2,.c3,.c4,.c5,.c6,.c7{grid-column:span 6}}
+@media(max-width:700px){.c2,.c3,.c4,.c5,.c6,.c7{grid-column:span 12}header{padding:14px}h1{font-size:19px}}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.kpi .l{font-size:11px;font-weight:700}.kpi .v{font-size:26px;font-weight:800}.kpi .p{font-weight:700}
+.note{background:#f0f4fa;border-left:4px solid var(--gold);padding:8px 10px;border-radius:6px;margin-top:10px;font-size:13px}
+.note.red{background:#fdeeee;border-color:var(--neg)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:3px 0 3px 20px;position:relative;font-size:13px}
+ul.ck li:before{position:absolute;left:0;font-weight:800}
+.pos li:before{content:"✓";color:var(--pos)}.neg li:before{content:"✕";color:var(--neg)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+h3{font-size:13px;margin:0 0 6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--navy);font-size:12px}td.r,th.r{text-align:right}
+tfoot td{font-weight:700;color:var(--navy)}
+.bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+.bar .n{width:80px}.bar .t{flex:1;background:#f1f1f1;border-radius:4px;height:14px}.bar .f{background:var(--neg);height:100%;border-radius:4px}
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;font-size:12px}
+.phases div{border-radius:8px;padding:6px;text-align:center}
+.cloud{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;justify-content:center;padding:6px}
+.cloud span{font-weight:700;line-height:1.1}
+.post{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.post .no{background:var(--neg);color:#fff;border-radius:50%;width:20px;height:20px;flex:none;display:grid;place-items:center;font-size:11px}
+.post small{color:var(--mute)}
+.alert{text-align:center;padding:10px}
+.alert .ic{font-size:56px}.alert .lv{font-weight:800;font-size:28px;color:var(--neg)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;font-weight:600}
+.flow .s{background:#f0f4fa;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.flow .a{color:var(--neg);font-weight:800}
+.reco h3{color:var(--navy);margin-top:8px}
+.disc{border:2px solid var(--neg);background:#fff7f7}
+footer{text-align:center;color:var(--mute);font-size:12px;margin:16px 0}
+.badge{display:inline-block;background:var(--gold);color:var(--navy);font-weight:800;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">
+    <div class="logo"><img src="logo.png" alt="" onerror="this.parentNode.innerHTML='<span>LOGO</span>'"></div>
+    <div>
+      <h1>ANALISIS MONITORING PERCAKAPAN <span class="badge" id="badge"></span></h1>
+      <div class="sub" id="periode"></div>
+    </div>
+  </div>
+  <div class="total">TOTAL MENTION<b id="totalMention"></b></div>
+</header>
+
+<div class="grid">
+  <section class="card c4"><h2>1. Total Sentiment</h2><div class="kpis" id="kpis"></div><div class="note" id="sentNote"></div></section>
+  <section class="card c4"><h2>2. Penyebab Utama Sentiment</h2><div class="two">
+    <div><h3 style="color:var(--pos)">Penyebab Positif</h3><ul class="ck pos" id="causePos"></ul></div>
+    <div><h3 style="color:var(--neg)">Penyebab Negatif</h3><ul class="ck neg" id="causeNeg"></ul></div></div></section>
+  <section class="card c4"><h2>3. Share of Voice (Kanal)</h2><div class="two">
+    <div style="position:relative;height:190px"><canvas id="sov"></canvas></div>
+    <table id="sovTbl"></table></div><div class="note" id="sovNote"></div></section>
+
+  <section class="card c3"><h2>4. Share of Negative Voice</h2><div id="negBars"></div><div class="note red" id="negNote"></div></section>
+  <section class="card c5"><h2>5. Trend of Sentiment (per Jam)</h2><div style="position:relative;height:240px"><canvas id="trend"></canvas></div><div class="phases" id="phases"></div></section>
+  <section class="card c4"><h2>6. Word Cloud (Tema Dominan)</h2><div class="cloud" id="cloud"></div><div class="note" id="cloudNote"></div></section>
+
+  <section class="card c4"><h2>7. Top 5 Akun Negatif</h2><table id="topAcc"></table></section>
+  <section class="card c4"><h2>8. Contoh Postingan Negatif</h2><div id="posts"></div></section>
+  <section class="card c4"><h2>9. Krisis / Alert</h2><div class="alert"><div class="ic">🚨</div><div style="font-weight:700">LEVEL RISIKO:</div><div class="lv" id="risk"></div></div></section>
+
+  <section class="card c6"><h2>10. Narasi Krisis Utama</h2><div class="flow" id="flow"></div><div class="note red" id="impact"></div></section>
+  <section class="card c6 reco"><h2>11. Rekomendasi Tindak Lanjut</h2><div id="reco"></div></section>
+
+  <section class="card c7"><h2>12. Summary</h2><p id="summary" style="margin:0;line-height:1.6"></p></section>
+  <section class="card c5 disc"><h2 style="background:var(--neg);border-color:var(--neg)">⚠ Disclaimer / Keterangan Data</h2><p id="disclaimer" style="margin:0;font-size:13px;line-height:1.6"></p></section>
+</div>
+<footer>Dashboard monitoring independen · Sumber: <span id="src"></span></footer>
+</div>
+
+<script>
+/* ====== UBAH DATA DI SINI (nanti bisa diganti otomatis dari Google Sheets) ====== */
+const DATA = {
+  label: "DATA CONTOH",
+  periode: "06.00 – 14.00 | 1 Mei 2026",
+  sentiment: { positif: 147, negatif: 61, netral: 48 },
+  sentNote: "Mayoritas percakapan bernada positif, namun hampir seperempatnya bernada negatif, terutama terkait gangguan layanan aplikasi.",
+  causePos: ["Respons cepat akun resmi","Penjelasan peningkatan kualitas layanan aplikasi","Alternatif transaksi (ATM & internet banking)","Konten positif: penghargaan, literasi keuangan, kegiatan sosial"],
+  causeNeg: ["Aplikasi tidak bisa diakses / error","Maintenance di jam sibuk","Bertepatan dengan tanggal gajian","QRIS gagal digunakan","Transfer gagal","Saldo berkurang","Tidak ada notifikasi sebelumnya"],
+  kanal: [ // nama, total mention, mention negatif
+    ["Twitter/X",209,50],["Instagram",28,1],["TikTok",9,5],["Facebook",8,5],["Threads",2,0]
+  ],
+  trend: { jam:["06.00","07.00","08.00","09.00","10.00","11.00","12.00","13.00","14.00"],
+    positif:[2,1,2,6,15,50,27,24,16], negatif:[0,0,0,0,0,6,24,24,6], netral:[0,0,0,0,0,1,13,12,8] },
+  phases: [["FASE AWAL (06.00–10.00)","Muncul keluhan, volume relatif rendah","#e8f5ec"],["FASE ESKALASI (11.00–12.00)","Lonjakan percakapan & sentimen negatif tertinggi","#fdeeee"],["FASE STABILISASI (13.00–14.00)","Negatif menurun, respons resmi mulai dominan","#fff6dc"]],
+  words: [["aplikasi",42],["error",36],["gangguan",30],["transaksi",22],["gris",14],["transfer",20],["maintenance",18],["saldo",16],["tanggal 1",14],["pembayaran",12],["qris",12],["buka aplikasi",11],["tidak aplikasi",10],["stuck",10],["kapan selesai",10],["bim",9]],
+  cloudNote: "Tema dominan: gangguan aplikasi yang berdampak pada transaksi harian nasabah, terutama di tanggal gajian.",
+  topAkun: [["akun_contoh1",1139,"gagal QRIS dan pembayaran"],["akun_contoh2",752,"tidak bisa transaksi"],["akun_contoh3",1009,"aplikasi error terus"],["akun_contoh4",2811,"gangguan saat transaksi"],["akun_contoh5",351,"maintenance di waktu tidak tepat"]],
+  posts: [["@akun_contoh6","13:39","orang mah ditanggal gajian pasti error mulu"],["@akun_contoh7","13:39","tiap kali mau transfer pasti maintenance mulu"],["@akun_contoh8","11:26","aplikasinya gak bisa diakses min"],["@akun_contoh9","11:43","kenapa pemeliharaannya siang siang pas lagi rame"],["@akun_contoh10","11:33","maintenance server harusnya tengah malam"]],
+  risk: "TINGGI",
+  flow: ["Aplikasi tidak bisa diakses","Maintenance di jam sibuk","QRIS gagal","Transfer gagal","Saldo berkurang","Kapok, berpindah ke bank lain"],
+  impact: "Dampak: Reputasi turun • Experience terganggu • Loyalitas menurun",
+  reco: {
+    "Jangka Pendek":["Update status aplikasi berkala (30–60 menit)","Berikan estimasi penyelesaian & progress recovery","Pinned post di seluruh kanal resmi","Tegaskan dana & saldo nasabah aman","Respons proaktif jika saldo berkurang & transaksi menggantung"],
+    "Jangka Menengah":["Maintenance di luar jam sibuk","Notifikasi maintenance minimal H-1","Susun FAQ khusus gangguan aplikasi","Dashboard status layanan untuk publik"],
+    "Jangka Reputasi":["Komunikasi recovery setelah layanan normal","Publikasikan akar masalah & perbaikan","Dorong konten positif & keberhasilan pemulihan","Libatkan influencer & komunitas loyal"]
+  },
+  summary: "Monitoring periode 06.00–14.00 menunjukkan total {T} mention dengan dominasi sentimen positif ({P}). Terdapat lonjakan keluhan signifikan terkait gangguan layanan aplikasi yang menghasilkan {N} mention negatif ({NP}). Puncak eskalasi terjadi pukul 11.00–12.00, terutama di Twitter/X. Indikasi stabilisasi mulai terlihat menjelang akhir periode.",
+  disclaimer: "Analisis disusun berdasarkan data monitoring yang tersedia pada periode di atas dengan cakupan kanal Twitter/X, Instagram, Facebook, TikTok, dan Threads. Seluruh metrik merepresentasikan kanal yang berhasil terpantau dan dapat berubah. Dashboard ini adalah analisis independen, bukan publikasi resmi bank.",
+  sumber: "Data Monitoring 06.00 – 14.00"
+};
+/* ================================================================================ */
+
+const $=id=>document.getElementById(id), fmt=n=>n.toLocaleString('id-ID'),
+  pct=(a,b)=>(a/b*100).toFixed(2).replace('.',',')+'%';
+const S=DATA.sentiment, T=S.positif+S.negatif+S.netral;
+$('badge').textContent=DATA.label||''; if(!DATA.label)$('badge').remove();
+$('periode').textContent=DATA.periode; $('totalMention').textContent=fmt(T); $('src').textContent=DATA.sumber;
+$('kpis').innerHTML=[["😊 POSITIF",S.positif,'--pos'],["☹️ NEGATIF",S.negatif,'--neg'],["😐 NETRAL",S.netral,'--neu'],["TOTAL",T,'--navy']]
+  .map(([l,v,c])=>`<div class="kpi" style="color:var(${c})"><div class="l">${l}</div><div class="v">${fmt(v)}</div><div class="p">${pct(v,T)}</div></div>`).join('');
+$('sentNote').textContent=DATA.sentNote;
+$('causePos').innerHTML=DATA.causePos.map(x=>`<li>${x}</li>`).join('');
+$('causeNeg').innerHTML=DATA.causeNeg.map(x=>`<li>${x}</li>`).join('');
+
+const colors=['#003D79','#FFB700','#d93a3a','#4a8fd6','#8a929c'];
+const kT=DATA.kanal.reduce((s,k)=>s+k[1],0), kN=DATA.kanal.reduce((s,k)=>s+k[2],0);
+new Chart($('sov'),{type:'doughnut',data:{labels:DATA.kanal.map(k=>k[0]),datasets:[{data:DATA.kanal.map(k=>k[1]),backgroundColor:colors,borderWidth:2}]},
+  options:{cutout:'58%',maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+$('sovTbl').innerHTML='<tr><th>Kanal</th><th class="r">Vol</th><th class="r">SOV</th></tr>'+
+  DATA.kanal.map((k,i)=>`<tr><td><span style="color:${colors[i]}">●</span> ${k[0]}</td><td class="r">${k[1]}</td><td class="r">${pct(k[1],kT)}</td></tr>`).join('')+
+  `<tfoot><tr><td>TOTAL</td><td class="r">${kT}</td><td class="r">100%</td></tr></tfoot>`;
+const top=[...DATA.kanal].sort((a,b)=>b[1]-a[1])[0];
+$('sovNote').textContent=`${top[0]} mendominasi percakapan dengan ${pct(top[1],kT)} dari total mention.`;
+
+const negSorted=[...DATA.kanal].sort((a,b)=>b[2]-a[2]);
+$('negBars').innerHTML=negSorted.map(k=>`<div class="bar"><span class="n">${k[0]}</span><div class="t"><div class="f" style="width:${k[2]/negSorted[0][2]*100}%"></div></div><b>${k[2]}</b> <small>(${pct(k[2],kN)})</small></div>`).join('')+
+  `<div class="bar"><b class="n">TOTAL</b><span style="flex:1"></span><b>${kN}</b> <small>(100%)</small></div>`;
+$('negNote').textContent=`${negSorted[0][0]} menyumbang ${negSorted[0][2]} dari ${kN} mention negatif (${pct(negSorted[0][2],kN)}).`;
+
+const tr=DATA.trend, ds=(l,d,c)=>({label:l,data:d,borderColor:c,backgroundColor:c,tension:.3,pointRadius:4});
+new Chart($('trend'),{type:'line',data:{labels:tr.jam,datasets:[ds('Positif',tr.positif,'#2e9b4f'),ds('Negatif',tr.negatif,'#d93a3a'),ds('Netral',tr.netral,'#8a929c')]},
+  options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true}}}});
+$('phases').innerHTML=DATA.phases.map(p=>`<div style="background:${p[2]}"><b>${p[0]}</b><br>${p[1]}</div>`).join('');
+
+const wMax=Math.max(...DATA.words.map(w=>w[1])), wc=['#003D79','#d93a3a','#c98f00','#0a5299','#2e7d6b','#6b3fa0'];
+$('cloud').innerHTML=DATA.words.map((w,i)=>`<span style="font-size:${12+w[1]/wMax*30}px;color:${wc[i%wc.length]}">${w[0]}</span>`).join('');
+$('cloudNote').textContent=DATA.cloudNote;
+
+$('topAcc').innerHTML='<tr><th>No</th><th>Akun</th><th class="r">Followers</th><th>Narasi</th></tr>'+
+  DATA.topAkun.map((a,i)=>`<tr><td>${i+1}</td><td><b>${a[0]}</b></td><td class="r">${fmt(a[1])}</td><td>${a[2]}</td></tr>`).join('');
+$('posts').innerHTML=DATA.posts.map((p,i)=>`<div class="post"><span class="no">${i+1}</span><div><b>${p[0]}</b> <small>• ${p[1]}</small><br>“${p[2]}”</div></div>`).join('');
+$('risk').textContent=DATA.risk;
+$('flow').innerHTML=DATA.flow.map(f=>`<span class="s">${f}</span>`).join('<span class="a">→</span>');
+$('impact').textContent=DATA.impact;
+$('reco').innerHTML=Object.entries(DATA.reco).map(([k,v])=>`<h3>${k}</h3><ul class="ck pos">${v.map(x=>`<li>${x}</li>`).join('')}</ul>`).join('');
+$('summary').textContent=DATA.summary.replace('{T}',fmt(T)).replace('{P}',pct(S.positif,T)).replace('{N}',S.negatif).replace('{NP}',pct(S.negatif,T));
+$('disclaimer').textContent=DATA.disclaimer;
+</script>
+</body>
+</html>
