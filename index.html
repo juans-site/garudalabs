@@ -6,15 +6,16 @@
 <title>Analisis Monitoring Percakapan</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
-:root{--navy:#003D79;--navy2:#0a5299;--gold:#FFB700;--bg:#F3F6FA;--card:#fff;--ink:#1c2533;--mute:#6b7685;--line:#e3e8ef;--pos:#2e9b4f;--neg:#d93a3a;--neu:#8a929c}
+:root{--navy:#0D2B5B;--navy2:#0a5299;--gold:#FFB700;--bg:#F3F6FA;--card:#fff;--ink:#1c2533;--mute:#6b7685;--line:#e3e8ef;--pos:#2e9b4f;--neg:#d93a3a;--neu:#8a929c}
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
 .wrap{max-width:1400px;margin:0 auto;padding:16px}
 header{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;background:var(--navy);color:#fff;border-radius:14px;padding:16px 22px;border-bottom:5px solid var(--gold)}
 .brand{display:flex;gap:18px;align-items:center}
-.logo{height:48px;background:#fff;border-radius:8px;padding:6px 10px;display:flex;align-items:center}
-.logo img{height:36px}
+.logo{display:flex;align-items:center}
+.logo img{height:56px;display:block}@media(max-width:700px){.logo img{height:40px}}
 .logo span{color:var(--navy);font-weight:700;font-size:12px}
 h1{margin:0;font-size:24px;letter-spacing:.3px}
 .sub{color:var(--gold);font-weight:700;margin-top:2px}
@@ -58,124 +59,184 @@ tfoot td{font-weight:700;color:var(--navy)}
 .disc{border:2px solid var(--neg);background:#fff7f7}
 footer{text-align:center;color:var(--mute);font-size:12px;margin:16px 0}
 .badge{display:inline-block;background:var(--gold);color:var(--navy);font-weight:800;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;font-size:13px}
+.ctrl select{font:inherit;padding:4px 8px;border-radius:6px;border:0}
+#loading{text-align:center;padding:40px;color:var(--mute);font-weight:600}
+.post a{color:var(--navy2)}
+.sovgrid{display:grid;grid-template-columns:minmax(110px,1fr) auto;gap:12px;align-items:center}
+#sovTbl{font-size:12.5px}#sovTbl td,#sovTbl th{white-space:nowrap;padding:5px 4px}
+@media(max-width:420px){.sovgrid{grid-template-columns:1fr}}
+@media(max-width:700px){.brand{flex-direction:column;align-items:flex-start;gap:10px}.total{width:100%;display:flex;justify-content:space-between;align-items:center}.total b{font-size:24px}.kpis{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
   <div class="brand">
-    <div class="logo"><img src="logo.png" alt="" onerror="this.parentNode.innerHTML='<span>LOGO</span>'"></div>
+    <div class="logo"><img src="data:image/png;base64,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" alt="Logo" onerror="this.parentNode.innerHTML='<span>LOGO</span>'"></div>
     <div>
-      <h1>ANALISIS MONITORING PERCAKAPAN <span class="badge" id="badge"></span></h1>
-      <div class="sub" id="periode"></div>
+      <h1>ANALISIS MONITORING PERCAKAPAN</h1>
+      <div class="sub" id="periode">Memuat data…</div>
+      <div class="ctrl"><span>Tanggal: <select id="fTanggal"></select></span> <span>Sumber: <select id="fSumber"><option value="post">Post</option><option value="komentar">Komentar</option></select></span> <span id="updated" style="opacity:.8"></span></div>
     </div>
   </div>
-  <div class="total">TOTAL MENTION<b id="totalMention"></b></div>
+  <div class="total">TOTAL MENTION<b id="totalMention">–</b></div>
 </header>
+<div id="loading">Mengambil data dari Google Sheets…</div>
 
-<div class="grid">
+<div class="grid" id="main" style="display:none">
   <section class="card c4"><h2>1. Total Sentiment</h2><div class="kpis" id="kpis"></div><div class="note" id="sentNote"></div></section>
-  <section class="card c4"><h2>2. Penyebab Utama Sentiment</h2><div class="two">
+  <section class="card c4"><h2>2. Penyebab Utama Sentiment (Topik)</h2><div class="two">
     <div><h3 style="color:var(--pos)">Penyebab Positif</h3><ul class="ck pos" id="causePos"></ul></div>
     <div><h3 style="color:var(--neg)">Penyebab Negatif</h3><ul class="ck neg" id="causeNeg"></ul></div></div></section>
-  <section class="card c4"><h2>3. Share of Voice (Kanal)</h2><div class="two">
-    <div style="position:relative;height:190px"><canvas id="sov"></canvas></div>
+  <section class="card c4"><h2>3. Share of Voice (Kanal)</h2><div class="sovgrid">
+    <div style="position:relative;height:170px"><canvas id="sov"></canvas></div>
     <table id="sovTbl"></table></div><div class="note" id="sovNote"></div></section>
 
   <section class="card c3"><h2>4. Share of Negative Voice</h2><div id="negBars"></div><div class="note red" id="negNote"></div></section>
-  <section class="card c5"><h2>5. Trend of Sentiment (per Jam)</h2><div style="position:relative;height:240px"><canvas id="trend"></canvas></div><div class="phases" id="phases"></div></section>
-  <section class="card c4"><h2>6. Word Cloud (Tema Dominan)</h2><div class="cloud" id="cloud"></div><div class="note" id="cloudNote"></div></section>
+  <section class="card c5"><h2 id="trendTitle">5. Trend of Sentiment</h2><div style="position:relative;height:260px"><canvas id="trend"></canvas></div><div class="note" id="trendNote"></div></section>
+  <section class="card c4"><h2>6. Word Cloud (Percakapan Negatif)</h2><div class="cloud" id="cloud"></div></section>
 
   <section class="card c4"><h2>7. Top 5 Akun Negatif</h2><table id="topAcc"></table></section>
   <section class="card c4"><h2>8. Contoh Postingan Negatif</h2><div id="posts"></div></section>
-  <section class="card c4"><h2>9. Krisis / Alert</h2><div class="alert"><div class="ic">🚨</div><div style="font-weight:700">LEVEL RISIKO:</div><div class="lv" id="risk"></div></div></section>
+  <section class="card c4"><h2>9. Krisis / Alert</h2><div class="alert"><div class="ic">🚨</div><div style="font-weight:700">LEVEL RISIKO:</div><div class="lv" id="risk"></div><div id="riskNote" style="font-size:12px;color:var(--mute);margin-top:6px"></div></div></section>
 
-  <section class="card c6"><h2>10. Narasi Krisis Utama</h2><div class="flow" id="flow"></div><div class="note red" id="impact"></div></section>
+  <section class="card c6"><h2>10. Narasi Krisis Utama (Topik Negatif Terbesar)</h2><div class="flow" id="flow"></div><div class="note red" id="impact"></div></section>
   <section class="card c6 reco"><h2>11. Rekomendasi Tindak Lanjut</h2><div id="reco"></div></section>
 
   <section class="card c7"><h2>12. Summary</h2><p id="summary" style="margin:0;line-height:1.6"></p></section>
   <section class="card c5 disc"><h2 style="background:var(--neg);border-color:var(--neg)">⚠ Disclaimer / Keterangan Data</h2><p id="disclaimer" style="margin:0;font-size:13px;line-height:1.6"></p></section>
 </div>
-<footer>Dashboard monitoring independen · Sumber: <span id="src"></span></footer>
+<footer>Dashboard monitoring independen · Data otomatis dari Google Sheets "Monitoring Bank Mandiri"</footer>
 </div>
 
 <script>
-/* ====== UBAH DATA DI SINI (nanti bisa diganti otomatis dari Google Sheets) ====== */
-const DATA = {
-  label: "DATA CONTOH",
-  periode: "06.00 – 14.00 | 1 Mei 2026",
-  sentiment: { positif: 147, negatif: 61, netral: 48 },
-  sentNote: "Mayoritas percakapan bernada positif, namun hampir seperempatnya bernada negatif, terutama terkait gangguan layanan aplikasi.",
-  causePos: ["Respons cepat akun resmi","Penjelasan peningkatan kualitas layanan aplikasi","Alternatif transaksi (ATM & internet banking)","Konten positif: penghargaan, literasi keuangan, kegiatan sosial"],
-  causeNeg: ["Aplikasi tidak bisa diakses / error","Maintenance di jam sibuk","Bertepatan dengan tanggal gajian","QRIS gagal digunakan","Transfer gagal","Saldo berkurang","Tidak ada notifikasi sebelumnya"],
-  kanal: [ // nama, total mention, mention negatif
-    ["Twitter/X",209,50],["Instagram",28,1],["TikTok",9,5],["Facebook",8,5],["Threads",2,0]
-  ],
-  trend: { jam:["06.00","07.00","08.00","09.00","10.00","11.00","12.00","13.00","14.00"],
-    positif:[2,1,2,6,15,50,27,24,16], negatif:[0,0,0,0,0,6,24,24,6], netral:[0,0,0,0,0,1,13,12,8] },
-  phases: [["FASE AWAL (06.00–10.00)","Muncul keluhan, volume relatif rendah","#e8f5ec"],["FASE ESKALASI (11.00–12.00)","Lonjakan percakapan & sentimen negatif tertinggi","#fdeeee"],["FASE STABILISASI (13.00–14.00)","Negatif menurun, respons resmi mulai dominan","#fff6dc"]],
-  words: [["aplikasi",42],["error",36],["gangguan",30],["transaksi",22],["gris",14],["transfer",20],["maintenance",18],["saldo",16],["tanggal 1",14],["pembayaran",12],["qris",12],["buka aplikasi",11],["tidak aplikasi",10],["stuck",10],["kapan selesai",10],["bim",9]],
-  cloudNote: "Tema dominan: gangguan aplikasi yang berdampak pada transaksi harian nasabah, terutama di tanggal gajian.",
-  topAkun: [["akun_contoh1",1139,"gagal QRIS dan pembayaran"],["akun_contoh2",752,"tidak bisa transaksi"],["akun_contoh3",1009,"aplikasi error terus"],["akun_contoh4",2811,"gangguan saat transaksi"],["akun_contoh5",351,"maintenance di waktu tidak tepat"]],
-  posts: [["@akun_contoh6","13:39","orang mah ditanggal gajian pasti error mulu"],["@akun_contoh7","13:39","tiap kali mau transfer pasti maintenance mulu"],["@akun_contoh8","11:26","aplikasinya gak bisa diakses min"],["@akun_contoh9","11:43","kenapa pemeliharaannya siang siang pas lagi rame"],["@akun_contoh10","11:33","maintenance server harusnya tengah malam"]],
-  risk: "TINGGI",
-  flow: ["Aplikasi tidak bisa diakses","Maintenance di jam sibuk","QRIS gagal","Transfer gagal","Saldo berkurang","Kapok, berpindah ke bank lain"],
-  impact: "Dampak: Reputasi turun • Experience terganggu • Loyalitas menurun",
-  reco: {
-    "Jangka Pendek":["Update status aplikasi berkala (30–60 menit)","Berikan estimasi penyelesaian & progress recovery","Pinned post di seluruh kanal resmi","Tegaskan dana & saldo nasabah aman","Respons proaktif jika saldo berkurang & transaksi menggantung"],
-    "Jangka Menengah":["Maintenance di luar jam sibuk","Notifikasi maintenance minimal H-1","Susun FAQ khusus gangguan aplikasi","Dashboard status layanan untuk publik"],
-    "Jangka Reputasi":["Komunikasi recovery setelah layanan normal","Publikasikan akar masalah & perbaikan","Dorong konten positif & keberhasilan pemulihan","Libatkan influencer & komunitas loyal"]
-  },
-  summary: "Monitoring periode 06.00–14.00 menunjukkan total {T} mention dengan dominasi sentimen positif ({P}). Terdapat lonjakan keluhan signifikan terkait gangguan layanan aplikasi yang menghasilkan {N} mention negatif ({NP}). Puncak eskalasi terjadi pukul 11.00–12.00, terutama di Twitter/X. Indikasi stabilisasi mulai terlihat menjelang akhir periode.",
-  disclaimer: "Analisis disusun berdasarkan data monitoring yang tersedia pada periode di atas dengan cakupan kanal Twitter/X, Instagram, Facebook, TikTok, dan Threads. Seluruh metrik merepresentasikan kanal yang berhasil terpantau dan dapat berubah. Dashboard ini adalah analisis independen, bukan publikasi resmi bank.",
-  sumber: "Data Monitoring 06.00 – 14.00"
-};
-/* ================================================================================ */
+/* ===== PENGATURAN ===== */
+const SHEET_ID = "12BRmeOf5no04WlzBuokYGDkqMUivziw3dCLE6lcSz8M";
+const TABS = { post: "Data Post (Gabungan)", komentar: "Data Komentar (Gabungan)" };
+const RISK = { tinggi: 35, sedang: 20 }; // ambang % negatif
+/* ====================== */
 
 const $=id=>document.getElementById(id), fmt=n=>n.toLocaleString('id-ID'),
-  pct=(a,b)=>(a/b*100).toFixed(2).replace('.',',')+'%';
-const S=DATA.sentiment, T=S.positif+S.negatif+S.netral;
-$('badge').textContent=DATA.label||''; if(!DATA.label)$('badge').remove();
-$('periode').textContent=DATA.periode; $('totalMention').textContent=fmt(T); $('src').textContent=DATA.sumber;
-$('kpis').innerHTML=[["😊 POSITIF",S.positif,'--pos'],["☹️ NEGATIF",S.negatif,'--neg'],["😐 NETRAL",S.netral,'--neu'],["TOTAL",T,'--navy']]
-  .map(([l,v,c])=>`<div class="kpi" style="color:var(${c})"><div class="l">${l}</div><div class="v">${fmt(v)}</div><div class="p">${pct(v,T)}</div></div>`).join('');
-$('sentNote').textContent=DATA.sentNote;
-$('causePos').innerHTML=DATA.causePos.map(x=>`<li>${x}</li>`).join('');
-$('causeNeg').innerHTML=DATA.causeNeg.map(x=>`<li>${x}</li>`).join('');
+  pct=(a,b)=>b?(a/b*100).toFixed(2).replace('.',',')+'%':'0%',
+  esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const BULAN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const COLORS=['#0D2B5B','#FFB700','#d93a3a','#4a8fd6','#2e9b4f','#8a929c','#6b3fa0'];
+const cache={}, charts={};
 
-const colors=['#003D79','#FFB700','#d93a3a','#4a8fd6','#8a929c'];
-const kT=DATA.kanal.reduce((s,k)=>s+k[1],0), kN=DATA.kanal.reduce((s,k)=>s+k[2],0);
-new Chart($('sov'),{type:'doughnut',data:{labels:DATA.kanal.map(k=>k[0]),datasets:[{data:DATA.kanal.map(k=>k[1]),backgroundColor:colors,borderWidth:2}]},
-  options:{cutout:'58%',maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-$('sovTbl').innerHTML='<tr><th>Kanal</th><th class="r">Vol</th><th class="r">SOV</th></tr>'+
-  DATA.kanal.map((k,i)=>`<tr><td><span style="color:${colors[i]}">●</span> ${k[0]}</td><td class="r">${k[1]}</td><td class="r">${pct(k[1],kT)}</td></tr>`).join('')+
-  `<tfoot><tr><td>TOTAL</td><td class="r">${kT}</td><td class="r">100%</td></tr></tfoot>`;
-const topKanal=[...DATA.kanal].sort((a,b)=>b[1]-a[1])[0];
-$('sovNote').textContent=`${topKanal[0]} mendominasi percakapan dengan ${pct(topKanal[1],kT)} dari total mention.`;
+async function load(src){
+  if(cache[src]) return cache[src];
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(TABS[src])}&_=${Date.now()}`;
+  const txt=await fetch(url).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()});
+  const rows=Papa.parse(txt,{header:true,skipEmptyLines:true}).data;
+  return cache[src]=rows.map(r=>norm(r,src)).filter(r=>r.tgl&&r.sent);
+}
+// Normalisasi: tanggal bisa "dd/mm/yyyy" atau angka serial; jam bisa "HH:MM" atau pecahan hari
+function norm(r,src){
+  let t=r['Waktu']||'', tgl='';
+  if(/^\d{1,2}\/\d{1,2}\/\d{4}/.test(t)){const[d,m,y]=t.split(/[\/ ]/);tgl=`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`}
+  else if(/^\d+([.,]\d+)?$/.test(t)){const d=new Date(Date.UTC(1899,11,30)+parseFloat(t.replace(',','.'))*864e5);tgl=d.toISOString().slice(0,10)}
+  else if(/^\d{4}-\d{2}-\d{2}/.test(t)) tgl=t.slice(0,10);
+  let j=r['Jam']||'', jam=NaN;
+  if(/^\d{1,2}[:.]\d{2}/.test(j)) jam=parseInt(j);
+  else if(/^0?[.,]\d+$|^[01]$/.test(j)) jam=Math.floor(parseFloat(j.replace(',','.'))*24);
+  const s=(r['Sentimen']||'').trim().toLowerCase();
+  return {platform:(r['Platform']||'Lainnya').trim(), user:r['Username']||'', tgl, jam,
+    text:r['Caption']||r['Text Komentar']||'', topik:(r['Topik (tanpa label buzzer)']||r['Topik']||'Lainnya').trim(),
+    sent:s.startsWith('pos')?'positif':s.startsWith('neg')?'negatif':s?'netral':'', link:r['Link']||'',
+    eng:parseInt(r['Jumlah Komentar']||r['Jumlah Likes']||0)||0, tipe:r['Tipe']||''};
+}
+const tglLabel=t=>{const[y,m,d]=t.split('-');return `${+d} ${BULAN[m-1]} ${y}`};
+const count=(arr,key)=>{const m={};arr.forEach(x=>{const k=typeof key=='function'?key(x):x[key];m[k]=(m[k]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
 
-const negSorted=[...DATA.kanal].sort((a,b)=>b[2]-a[2]);
-$('negBars').innerHTML=negSorted.map(k=>`<div class="bar"><span class="n">${k[0]}</span><div class="t"><div class="f" style="width:${k[2]/negSorted[0][2]*100}%"></div></div><b>${k[2]}</b> <small>(${pct(k[2],kN)})</small></div>`).join('')+
-  `<div class="bar"><b class="n">TOTAL</b><span style="flex:1"></span><b>${kN}</b> <small>(100%)</small></div>`;
-$('negNote').textContent=`${negSorted[0][0]} menyumbang ${negSorted[0][2]} dari ${kN} mention negatif (${pct(negSorted[0][2],kN)}).`;
+async function render(){
+  const src=$('fSumber').value;
+  $('loading').style.display='block';$('loading').textContent='Mengambil data dari Google Sheets…';
+  let all;
+  try{all=await load(src)}catch(e){$('loading').textContent='Gagal mengambil data. Pastikan Google Sheets dibagikan "Anyone with the link – Viewer". ('+e.message+')';return}
+  const dates=[...new Set(all.map(r=>r.tgl))].sort();
+  const sel=$('fTanggal'), prev=sel.value;
+  sel.innerHTML='<option value="all">Semua tanggal</option>'+dates.slice().reverse().map(d=>`<option value="${d}">${tglLabel(d)}</option>`).join('');
+  sel.value=[...sel.options].some(o=>o.value===prev)?prev:'all';
+  const f=sel.value, D=f==='all'?all:all.filter(r=>r.tgl===f);
+  $('loading').style.display='none';$('main').style.display='grid';
+  $('updated').textContent='· diperbarui '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  $('periode').textContent=f==='all'?`${tglLabel(dates[0])} – ${tglLabel(dates.at(-1))}`:tglLabel(f);
 
-const tr=DATA.trend, ds=(l,d,c)=>({label:l,data:d,borderColor:c,backgroundColor:c,tension:.3,pointRadius:4});
-new Chart($('trend'),{type:'line',data:{labels:tr.jam,datasets:[ds('Positif',tr.positif,'#2e9b4f'),ds('Negatif',tr.negatif,'#d93a3a'),ds('Netral',tr.netral,'#8a929c')]},
-  options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true}}}});
-$('phases').innerHTML=DATA.phases.map(p=>`<div style="background:${p[2]}"><b>${p[0]}</b><br>${p[1]}</div>`).join('');
-
-const wMax=Math.max(...DATA.words.map(w=>w[1])), wc=['#003D79','#d93a3a','#c98f00','#0a5299','#2e7d6b','#6b3fa0'];
-$('cloud').innerHTML=DATA.words.map((w,i)=>`<span style="font-size:${12+w[1]/wMax*30}px;color:${wc[i%wc.length]}">${w[0]}</span>`).join('');
-$('cloudNote').textContent=DATA.cloudNote;
-
-$('topAcc').innerHTML='<tr><th>No</th><th>Akun</th><th class="r">Followers</th><th>Narasi</th></tr>'+
-  DATA.topAkun.map((a,i)=>`<tr><td>${i+1}</td><td><b>${a[0]}</b></td><td class="r">${fmt(a[1])}</td><td>${a[2]}</td></tr>`).join('');
-$('posts').innerHTML=DATA.posts.map((p,i)=>`<div class="post"><span class="no">${i+1}</span><div><b>${p[0]}</b> <small>• ${p[1]}</small><br>“${p[2]}”</div></div>`).join('');
-$('risk').textContent=DATA.risk;
-$('flow').innerHTML=DATA.flow.map(f=>`<span class="s">${f}</span>`).join('<span class="a">→</span>');
-$('impact').textContent=DATA.impact;
-$('reco').innerHTML=Object.entries(DATA.reco).map(([k,v])=>`<h3>${k}</h3><ul class="ck pos">${v.map(x=>`<li>${x}</li>`).join('')}</ul>`).join('');
-$('summary').textContent=DATA.summary.replace('{T}',fmt(T)).replace('{P}',pct(S.positif,T)).replace('{N}',S.negatif).replace('{NP}',pct(S.negatif,T));
-$('disclaimer').textContent=DATA.disclaimer;
+  const T=D.length, by=s=>D.filter(r=>r.sent===s), P=by('positif'), N=by('negatif'), Z=by('netral');
+  $('totalMention').textContent=fmt(T);
+  // 1
+  $('kpis').innerHTML=[["😊 POSITIF",P.length,'--pos'],["☹️ NEGATIF",N.length,'--neg'],["😐 NETRAL",Z.length,'--neu'],["TOTAL",T,'--navy']]
+    .map(([l,v,c])=>`<div class="kpi" style="color:var(${c})"><div class="l">${l}</div><div class="v">${fmt(v)}</div><div class="p">${pct(v,T)}</div></div>`).join('');
+  const dom=[['positif',P.length],['netral',Z.length],['negatif',N.length]].sort((a,b)=>b[1]-a[1])[0];
+  const negTop=count(N,'topik');
+  $('sentNote').textContent=`Percakapan didominasi sentimen ${dom[0]} (${pct(dom[1],T)}). Sentimen negatif mencapai ${pct(N.length,T)}${negTop[0]?`, terbesar terkait "${negTop[0][0]}"`:''}.`;
+  // 2
+  const li=(arr,tot)=>arr.slice(0,6).map(([k,v])=>`<li>${esc(k)} <small style="color:var(--mute)">(${v})</small></li>`).join('')||'<li>–</li>';
+  $('causePos').innerHTML=li(count(P,'topik'));$('causeNeg').innerHTML=li(negTop);
+  // 3
+  const kanal=count(D,'platform');
+  charts.sov?.destroy();
+  charts.sov=new Chart($('sov'),{type:'doughnut',data:{labels:kanal.map(k=>k[0]),datasets:[{data:kanal.map(k=>k[1]),backgroundColor:COLORS,borderWidth:2}]},options:{cutout:'58%',maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  $('sovTbl').innerHTML='<tr><th>Kanal</th><th class="r">Vol</th><th class="r">SOV</th></tr>'+
+    kanal.map((k,i)=>`<tr><td><span style="color:${COLORS[i%COLORS.length]}">●</span> ${esc(k[0])}</td><td class="r">${fmt(k[1])}</td><td class="r">${pct(k[1],T)}</td></tr>`).join('')+
+    `<tfoot><tr><td>TOTAL</td><td class="r">${fmt(T)}</td><td class="r">100%</td></tr></tfoot>`;
+  $('sovNote').textContent=kanal[0]?`${kanal[0][0]} mendominasi percakapan dengan ${pct(kanal[0][1],T)} dari total mention.`:'';
+  // 4
+  const negK=count(N,'platform'), nMax=negK[0]?.[1]||1;
+  $('negBars').innerHTML=negK.map(k=>`<div class="bar"><span class="n">${esc(k[0])}</span><div class="t"><div class="f" style="width:${k[1]/nMax*100}%"></div></div><b>${k[1]}</b> <small>(${pct(k[1],N.length)})</small></div>`).join('')+
+    `<div class="bar"><b class="n">TOTAL</b><span style="flex:1"></span><b>${N.length}</b></div>`;
+  $('negNote').textContent=negK[0]?`${negK[0][0]} menyumbang ${negK[0][1]} dari ${N.length} mention negatif (${pct(negK[0][1],N.length)}).`:'Tidak ada mention negatif.';
+  // 5 per jam (1 tanggal) atau per hari (semua)
+  let labels,key;
+  if(f==='all'){labels=dates;key=r=>r.tgl;$('trendTitle').textContent='5. Trend of Sentiment (per Hari)'}
+  else{labels=[...Array(24).keys()].map(h=>String(h).padStart(2,'0')+'.00');key=r=>String(r.jam).padStart(2,'0')+'.00';$('trendTitle').textContent='5. Trend of Sentiment (per Jam)'}
+  const ser=s=>labels.map(l=>D.filter(r=>r.sent===s&&key(r)===l).length);
+  const sp=ser('positif'),sn=ser('negatif'),sz=ser('netral');
+  if(f!=='all'){let last=labels.length-1;while(last>0&&sp[last]+sn[last]+sz[last]===0)last--;[labels,sp,sn,sz].forEach(a=>a.length=last+1)}
+  const ds=(l,d,c)=>({label:l,data:d,borderColor:c,backgroundColor:c,tension:.3,pointRadius:3});
+  charts.trend?.destroy();
+  charts.trend=new Chart($('trend'),{type:'line',data:{labels:labels.map(l=>f==='all'?tglLabel(l):l),datasets:[ds('Positif',sp,'#2e9b4f'),ds('Negatif',sn,'#d93a3a'),ds('Netral',sz,'#8a929c')]},
+    options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{y:{beginAtZero:true}}}});
+  const pk=sn.indexOf(Math.max(...sn));
+  $('trendNote').textContent=Math.max(...sn)>0?`Puncak sentimen negatif: ${f==='all'?tglLabel(labels[pk]):'pukul '+labels[pk]} (${sn[pk]} mention).`:'';
+  // 6 word cloud
+  const STOP=new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue gw lu kamu dia mereka nya ya ga gak nggak enggak tapi karena jadi lagi mau buat sama oleh dalam bank mandiri bankmandiri bmri livin the https http www com co id dll yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu min admin mohon terima kasih halo sahabat apa siapa udah udh sdh tdk gimana bagaimana'.split(' '));
+  const wc={};N.forEach(r=>r.text.toLowerCase().replace(/https?:\S+|[@#]\S+/g,' ').split(/[^a-z0-9]+/).forEach(w=>{if(w.length>3&&!STOP.has(w)&&!/^\d+$/.test(w))wc[w]=(wc[w]||0)+1}));
+  const words=Object.entries(wc).sort((a,b)=>b[1]-a[1]).slice(0,28), wMax=words[0]?.[1]||1, wcc=['#0D2B5B','#d93a3a','#c98f00','#0a5299','#2e7d6b','#6b3fa0'];
+  words.sort(()=>Math.random()-.5);
+  $('cloud').innerHTML=words.map((w,i)=>`<span title="${w[1]}x" style="font-size:${12+w[1]/wMax*30}px;color:${wcc[i%wcc.length]}">${esc(w[0])}</span>`).join('')||'–';
+  // 7
+  const acc={};N.forEach(r=>{const a=acc[r.user]||(acc[r.user]={n:0,eng:0,topik:{},pf:r.platform});a.n++;a.eng+=r.eng;a.topik[r.topik]=(a.topik[r.topik]||0)+1});
+  const topAcc=Object.entries(acc).sort((a,b)=>b[1].n-a[1].n||b[1].eng-a[1].eng).slice(0,5);
+  $('topAcc').innerHTML=`<tr><th>No</th><th>Akun</th><th class="r">Post Neg.</th><th class="r">${src==='post'?'Komentar':'Likes'}</th><th>Topik</th></tr>`+
+    topAcc.map(([u,a],i)=>`<tr><td>${i+1}</td><td><b>${esc(u)}</b><br><small style="color:var(--mute)">${esc(a.pf)}</small></td><td class="r">${a.n}</td><td class="r">${fmt(a.eng)}</td><td>${esc(Object.entries(a.topik).sort((x,y)=>y[1]-x[1])[0][0])}</td></tr>`).join('');
+  // 8
+  const ex=[...N].sort((a,b)=>b.eng-a.eng).slice(0,5);
+  $('posts').innerHTML=ex.map((p,i)=>`<div class="post"><span class="no">${i+1}</span><div><b>${esc(p.user)}</b> <small>• ${esc(p.platform)} • ${tglLabel(p.tgl)} • ${p.eng} ${src==='post'?'komentar':'likes'}</small><br>“${esc(p.text.slice(0,140))}${p.text.length>140?'…':''}” ${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener">lihat</a>`:''}</div></div>`).join('')||'–';
+  // 9
+  const nP=T?N.length/T*100:0, lvl=nP>=RISK.tinggi?'TINGGI':nP>=RISK.sedang?'SEDANG':'RENDAH';
+  $('risk').textContent=lvl;$('risk').style.color=lvl==='TINGGI'?'var(--neg)':lvl==='SEDANG'?'#c98f00':'var(--pos)';
+  $('riskNote').textContent=`Negatif ${pct(N.length,T)} (Tinggi ≥${RISK.tinggi}%, Sedang ≥${RISK.sedang}%)`;
+  // 10
+  $('flow').innerHTML=negTop.slice(0,5).map(([k,v])=>`<span class="s">${esc(k)} <b style="color:var(--neg)">${v}</b></span>`).join('<span class="a">→</span>')||'–';
+  $('impact').textContent=negTop.length?`${negTop.slice(0,3).reduce((s,x)=>s+x[1],0)} dari ${N.length} mention negatif (${pct(negTop.slice(0,3).reduce((s,x)=>s+x[1],0),N.length)}) berasal dari 3 topik teratas. Dampak: reputasi, kepercayaan nasabah, dan sentimen investor.`:'';
+  // 11
+  const t3=negTop.slice(0,3).map(x=>x[0]), negPf=negK[0]?.[0]||'kanal utama';
+  const reco={"Jangka Pendek":[...t3.map(t=>`Siapkan holding statement & klarifikasi untuk isu "${t}"`),`Perkuat respons akun resmi di ${negPf}`,"Pantau akun negatif dengan engagement tertinggi"],
+    "Jangka Menengah":["Susun FAQ untuk pertanyaan yang berulang","Koordinasi dengan unit terkait untuk penyelesaian isu","Laporan monitoring harian ke manajemen"],
+    "Jangka Reputasi":["Dorong konten positif dari topik "+(count(P,'topik')[0]?.[0]||'kinerja'),"Libatkan media & komunitas untuk narasi penyeimbang","Evaluasi tren NSI mingguan"]};
+  $('reco').innerHTML=Object.entries(reco).map(([k,v])=>`<h3>${k}</h3><ul class="ck pos">${v.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`).join('');
+  // 12
+  const nsi=T?Math.round((P.length-N.length)/T*100):0;
+  $('summary').textContent=`Monitoring periode ${$('periode').textContent} mencatat ${fmt(T)} ${src==='post'?'post':'komentar'}: ${fmt(P.length)} positif (${pct(P.length,T)}), ${fmt(N.length)} negatif (${pct(N.length,T)}), dan ${fmt(Z.length)} netral (${pct(Z.length,T)}), dengan Net Sentiment Index ${nsi}. `+
+    (negTop[0]?`Isu negatif terbesar adalah "${negTop[0][0]}" (${negTop[0][1]} mention)${negTop[1]?`, disusul "${negTop[1][0]}" (${negTop[1][1]})`:''}. `:'')+
+    (kanal[0]?`Percakapan paling banyak terjadi di ${kanal[0][0]} (${pct(kanal[0][1],T)}). `:'')+`Level risiko saat ini: ${lvl}.`;
+  $('disclaimer').textContent=`Analisis dihitung otomatis dari sheet "${TABS[src]}" (Google Sheets) pada kanal: ${kanal.map(k=>k[0]).join(', ')}. Sentimen dan topik mengikuti label di sheet. Metrik merepresentasikan data yang berhasil terpantau dan dapat berubah saat sheet diperbarui. Dashboard ini adalah analisis independen, bukan publikasi resmi bank.`;
+}
+$('fTanggal').onchange=render;$('fSumber').onchange=render;
+render();
+setInterval(()=>{delete cache.post;delete cache.komentar;render()},5*60*1000); // refresh tiap 5 menit
 </script>
 </body>
 </html>
