@@ -3,6 +3,9 @@ const SHEET_ID = "12BRmeOf5no04WlzBuokYGDkqMUivziw3dCLE6lcSz8M";
 const TABS = { post: "Post", komentar: "Komentar" };
 const RISK = { tinggi: 35, sedang: 20 };          // ambang % negatif
 const REFRESH_MENIT = 5;
+// Akun resmi Mandiri: sentimennya selalu dihitung Netral.
+// Otomatis: baris dengan Tipe "Akun Resmi". Tambahan: username di daftar ini (huruf besar/kecil diabaikan).
+const AKUN_RESMI = ['bankmandiri', 'bank mandiri', 'mandiricard', 'mandiricare', 'mandiri kartu kredit', 'livinpoin', 'mandiritaspen', 'bank mandiri taspen', 'mandiri update', 'wrausahamandiri'];
 /* ====================== */
 
 const $ = id => document.getElementById(id);
@@ -43,11 +46,13 @@ function norm(r, kind) {
   if (/^\d{1,2}[:.]\d{2}/.test(j)) { const [hh, mm] = j.split(/[:.]/); jamStr = hh.padStart(2, '0') + ':' + mm.slice(0, 2); }
   else if (/^0?[.,]\d+$|^[01]$/.test(j)) { const m = Math.round(parseFloat(j.replace(',', '.')) * 1440) % 1440; jamStr = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
   const s = (r['Sentimen'] || '').trim().toLowerCase();
+  const user = (r['Username'] || '').trim();
+  const resmi = /resmi/i.test(r['Tipe'] || '') || AKUN_RESMI.includes(user.toLowerCase());
   return {
     platform: (r['Platform'] || 'Lainnya').trim(), user: r['Username'] || '', tgl, jam,
     text: r['Caption'] || r['Text Komentar'] || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
-    sent: s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : s ? 'netral' : '',
+    sent: !s ? '' : resmi ? 'netral' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
     link: r['Link'] || '', jamStr, eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind
   };
 }
@@ -330,7 +335,7 @@ function renderRaw(reset) {
     <td class="nw"><b>${tglShort(r.tgl)} ${r.tgl.slice(0, 4)}</b><br><small>${r.jamStr || '–'}</small></td>
     <td class="acc"><b title="${esc(r.user)}">${esc(r.user || '–')}</b><span class="chip sm"><i style="background:${pColor(r.platform)}"></i>${esc(r.platform)}</span></td>
     <td class="cap"><div class="txt">${esc(r.text)}</div>${r.text.length > 220 ? '<button class="more">Selengkapnya</button>' : ''}</td>
-    <td><span class="badge ${r.sent}">${r.sent[0].toUpperCase() + r.sent.slice(1)}</span></td>
+    <td><span class="badge ${r.sent}">${r.sent[0].toUpperCase() + r.sent.slice(1)}</span>${r.resmi ? '<br><small>akun resmi</small>' : ''}</td>
     <td class="r">${fmt(r.eng)}<br><small>${r.kind === 'post' ? 'komentar' : 'likes'}</small></td>
     <td class="c">${r.link ? `<a class="lnk" href="${esc(r.link)}" target="_blank" rel="noopener" title="Buka link" aria-label="Buka link">↗</a>` : '–'}</td>
   </tr>`).join('') || '<tr><td colspan="6" class="empty">Tidak ada data yang cocok</td></tr>';
