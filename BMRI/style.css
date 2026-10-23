@@ -328,3 +328,10 @@ h1,.hero h1{font-family:"Playfair Display",Georgia,serif;font-weight:600;font-si
   .hero,[data-theme=light] .hero{min-height:0;background:var(--card)}
   .hero>div{max-width:100%}
 }
+
+/* Judul kembali ke font sebelumnya */
+h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800;font-size:32px;letter-spacing:-.4px}
+@media(max-width:640px){h1,.hero h1{font-size:24px}}
+/* Toggle sumber di baris tab: jangan ikut gaya tab */
+.tabs .seg button{border-bottom:0;margin-bottom:0;padding:7px 14px;color:var(--mute)}
+.tabs .seg button.on{color:var(--accent-ink);background:var(--accent)}
