@@ -198,3 +198,39 @@ footer{text-align:center;color:var(--mute);font-size:12px;margin:28px 0 8px}
 @media(max-width:640px){.sum-list li{grid-template-columns:1fr;gap:2px}}
 .issues .acc-top b{flex:none;overflow:visible;white-space:nowrap}
 .issues .nt{flex:1;min-width:0}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.tabs button{border:0;background:none;padding:10px 16px;font-weight:600;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--gold)}
+
+/* Raw data */
+.raw-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.raw-bar input,.raw-bar select{font:inherit;font-size:13px;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--ink)}
+.raw-bar input{flex:1;min-width:220px}
+.raw-bar .hint{margin-left:auto}
+.raw-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+.raw{width:100%;border-collapse:collapse;font-size:13px;min-width:860px}
+.raw th{position:sticky;top:0;background:var(--card2);color:var(--mute);font-weight:600;font-size:12px;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.raw th.sortable{cursor:pointer;user-select:none}.raw th.sortable:hover{color:var(--ink)}
+.raw th i{font-style:normal;color:var(--accent)}[data-theme=dark] .raw th i{color:var(--gold)}
+.raw td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+.raw tr:last-child td{border-bottom:0}
+.raw tbody tr:hover{background:var(--hover)}
+.raw small{color:var(--mute)}
+.raw .r{text-align:right}.raw .c{text-align:center}.raw .nw{white-space:nowrap}
+.raw .acc{max-width:200px}.raw .acc b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:6px}
+.raw .cap{min-width:320px;max-width:560px;line-height:1.5}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
+.badge.positif{color:var(--pos);background:color-mix(in srgb,var(--pos) 15%,transparent)}
+.badge.negatif{color:var(--neg);background:color-mix(in srgb,var(--neg) 15%,transparent)}
+.badge.netral{color:var(--neu);background:color-mix(in srgb,var(--neu) 18%,transparent)}
+.lnk{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);text-decoration:none;font-weight:700;color:var(--ink)}
+.lnk:hover{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.pager{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:16px;flex-wrap:wrap}
+.pager button{min-width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-weight:600;font-size:13px}
+.pager button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.pager button:disabled{opacity:.4;cursor:default}
+.pager span{color:var(--mute)}
+@media(max-width:640px){.raw-bar .hint{margin-left:0;width:100%}.raw-bar select{flex:1}}

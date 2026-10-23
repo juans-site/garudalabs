@@ -38,13 +38,17 @@ function norm(r, kind) {
   const j = r['Jam'] || ''; let jam = NaN;
   if (/^\d{1,2}[:.]\d{2}/.test(j)) jam = parseInt(j);
   else if (/^0?[.,]\d+$|^[01]$/.test(j)) jam = Math.floor(parseFloat(j.replace(',', '.')) * 24);
+  // jam lengkap HH:MM untuk tabel raw data
+  let jamStr = '';
+  if (/^\d{1,2}[:.]\d{2}/.test(j)) { const [hh, mm] = j.split(/[:.]/); jamStr = hh.padStart(2, '0') + ':' + mm.slice(0, 2); }
+  else if (/^0?[.,]\d+$|^[01]$/.test(j)) { const m = Math.round(parseFloat(j.replace(',', '.')) * 1440) % 1440; jamStr = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
   const s = (r['Sentimen'] || '').trim().toLowerCase();
   return {
     platform: (r['Platform'] || 'Lainnya').trim(), user: r['Username'] || '', tgl, jam,
     text: r['Caption'] || r['Text Komentar'] || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
     sent: s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : s ? 'netral' : '',
-    link: r['Link'] || '', eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind
+    link: r['Link'] || '', jamStr, eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind
   };
 }
 const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
@@ -81,6 +85,7 @@ async function render() {
 
   const single = from === to, isAll = from <= minD && to >= maxD, D = all.filter(r => inRange(r.tgl));
   $('loading').hidden = true; $('main').hidden = false;
+  state.rawD = D; state.rawUnitPost = state.src; renderRaw(true);
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
   const unit = { post: 'post', komentar: 'komentar', all: 'mention' }[state.src];
@@ -277,3 +282,49 @@ render();
 setInterval(() => { delete cache.post; delete cache.komentar; delete cache.all; render(); }, REFRESH_MENIT * 60 * 1000);
 
 document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b = e.target.closest('button'); if (!b) return; state[g.dataset.k] = b.dataset.v; [...g.children].forEach(x => x.classList.toggle('on', x === b)); render(); });
+
+/* ---------- Tab & Raw Data ---------- */
+const raw = { q: '', sent: '', pf: '', sort: 'dt', dir: -1, page: 1, size: 50 };
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewRaw').hidden = b.dataset.tab !== 'raw';
+  if (b.dataset.tab === 'dash') Object.values(charts).forEach(c => c.resize());
+});
+function renderRaw(reset) {
+  const D = state.rawD || [];
+  if (reset) {
+    raw.page = 1;
+    const pfs = [...new Set(D.map(r => r.platform))].sort();
+    if (raw.pf && !pfs.includes(raw.pf)) raw.pf = '';
+    $('rawPf').innerHTML = '<option value="">Semua platform</option>' + pfs.map(p => `<option ${p === raw.pf ? 'selected' : ''}>${esc(p)}</option>`).join('');
+  }
+  const q = raw.q.toLowerCase();
+  let rows = D.filter(r => (!raw.sent || r.sent === raw.sent) && (!raw.pf || r.platform === raw.pf) &&
+    (!q || (r.text + ' ' + r.user + ' ' + r.topik).toLowerCase().includes(q)));
+  const key = r => raw.sort === 'eng' ? r.eng : r.tgl + ' ' + (r.jamStr || '');
+  rows.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : 0) * raw.dir);
+  const pages = Math.max(1, Math.ceil(rows.length / raw.size)); raw.page = Math.min(raw.page, pages);
+  const start = (raw.page - 1) * raw.size, view = rows.slice(start, start + raw.size);
+  const engHead = state.src === 'post' ? 'Komentar' : state.src === 'komentar' ? 'Likes' : 'Komentar / Likes';
+  document.querySelector('th[data-sort=eng]').firstChild.textContent = engHead + ' ';
+  document.querySelectorAll('th.sortable i').forEach(i => i.textContent = i.parentNode.dataset.sort === raw.sort ? (raw.dir < 0 ? '▼' : '▲') : '');
+  $('rawCount').textContent = rows.length ? `${fmt(start + 1)}–${fmt(start + view.length)} dari ${fmt(rows.length)} baris` : '0 baris';
+  $('rawBody').innerHTML = view.map(r => `<tr>
+    <td class="nw"><b>${tglShort(r.tgl)} ${r.tgl.slice(0, 4)}</b><br><small>${r.jamStr || '–'}</small></td>
+    <td class="acc"><b title="${esc(r.user)}">${esc(r.user || '–')}</b><span class="chip sm"><i style="background:${pColor(r.platform)}"></i>${esc(r.platform)}</span></td>
+    <td class="cap">${esc(r.text)}</td>
+    <td><span class="badge ${r.sent}">${r.sent[0].toUpperCase() + r.sent.slice(1)}</span></td>
+    <td class="r">${fmt(r.eng)}<br><small>${r.kind === 'post' ? 'komentar' : 'likes'}</small></td>
+    <td class="c">${r.link ? `<a class="lnk" href="${esc(r.link)}" target="_blank" rel="noopener" title="Buka link" aria-label="Buka link">↗</a>` : '–'}</td>
+  </tr>`).join('') || '<tr><td colspan="6" class="empty">Tidak ada data yang cocok</td></tr>';
+  const btn = (p, l, dis) => `<button data-p="${p}" ${dis ? 'disabled' : ''} class="${p === raw.page ? 'on' : ''}">${l}</button>`;
+  const nums = [...new Set([1, raw.page - 1, raw.page, raw.page + 1, pages])].filter(p => p >= 1 && p <= pages).sort((a, b) => a - b);
+  let out = btn(raw.page - 1, '‹', raw.page === 1), prev = 0;
+  nums.forEach(p => { if (p - prev > 1) out += '<span>…</span>'; out += btn(p, p); prev = p; });
+  $('rawPager').innerHTML = out + btn(raw.page + 1, '›', raw.page === pages);
+}
+let qT; $('rawQ').oninput = e => { clearTimeout(qT); qT = setTimeout(() => { raw.q = e.target.value; raw.page = 1; renderRaw(); }, 250); };
+$('rawSent').onclick = e => { const b = e.target.closest('button'); if (!b) return; raw.sent = b.dataset.v; raw.page = 1; [...$('rawSent').children].forEach(x => x.classList.toggle('on', x === b)); renderRaw(); };
+$('rawPf').onchange = e => { raw.pf = e.target.value; raw.page = 1; renderRaw(); };
+document.querySelectorAll('th.sortable').forEach(th => th.onclick = () => { const s = th.dataset.sort; raw.dir = raw.sort === s ? -raw.dir : -1; raw.sort = s; raw.page = 1; renderRaw(); });
+$('rawPager').onclick = e => { const b = e.target.closest('button'); if (!b || b.disabled) return; raw.page = +b.dataset.p; renderRaw(); $('viewRaw').scrollIntoView({ behavior: 'smooth' }); };
