@@ -196,3 +196,5 @@ footer{text-align:center;color:var(--mute);font-size:12px;margin:28px 0 8px}
 .sum-list .sk{color:var(--mute);font-weight:600}
 .sum-list .pos{color:var(--pos);font-weight:600}.sum-list .neg{color:var(--neg);font-weight:600}
 @media(max-width:640px){.sum-list li{grid-template-columns:1fr;gap:2px}}
+.issues .acc-top b{flex:none;overflow:visible;white-space:nowrap}
+.issues .nt{flex:1;min-width:0}
