@@ -16,7 +16,7 @@ const PLATFORM_COLOR = { twitter: '#1d9bf0', x: '#1d9bf0', facebook: '#1877f2', 
 const pColor = p => PLATFORM_COLOR[p.toLowerCase().split(/[ /]/)[0]] || '#94a3b8';
 const SENT = { positif: '#22c55e', negatif: '#ef4444', netral: '#94a3b8' };
 
-const state = { src: 'post', from: null, to: null, preset: 'all' }; // from/to = 'yyyy-mm-dd', null = semua
+const state = { cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'all' }; // from/to = 'yyyy-mm-dd', null = semua
 const cache = {}, charts = {};
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
@@ -161,25 +161,37 @@ async function render() {
     <div class="meta"><span>💬 ${fmt(p.eng)} ${state.src === 'post' ? 'komentar' : 'likes'} · ${tglShort(p.tgl)}</span>${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">Lihat ↗</a>` : ''}</div></div>`).join('') || '<p>Tidak ada postingan negatif.</p>';
 
   /* Word cloud */
-  const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue gw lu kamu dia mereka nya ya ga gak nggak enggak tapi karena jadi lagi mau buat sama oleh dalam bank mandiri bankmandiri bmri the https http www com co id dll yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu min admin mohon terima kasih halo sahabat apa siapa udah udh sdh tdk gimana bagaimana'.split(' '));
-  const wc = {}; N.forEach(r => r.text.toLowerCase().replace(/https?:\S+|[@#]\S+/g, ' ').split(/[^a-z0-9]+/).forEach(w => { if (w.length > 3 && !STOP.has(w) && !/^\d+$/.test(w)) wc[w] = (wc[w] || 0) + 1; }));
+  const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue gw lu kamu dia mereka nya ya ga gak nggak enggak tapi karena jadi lagi mau buat sama oleh dalam bank mandiri bankmandiri bmri the https http www com co id dll yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu min admin mohon terima kasih halo sahabat apa siapa udah udh sdh tdk gimana bagaimana akibat belum dapat hari jangan kena usai terlihat milik khusus berbeda kapan setelah sedang hingga sampai menjadi tersebut karna emang memang banget sangat orang'.split(' '));
+  const cloudSrc = state.cloud === 'pos' ? P : N;
+  const wc = {}; cloudSrc.forEach(r => r.text.toLowerCase().replace(/https?:\S+|[@#]\S+/g, ' ').split(/[^a-z0-9]+/).forEach(w => { if (w.length > 3 && !STOP.has(w) && !/^\d+$/.test(w)) wc[w] = (wc[w] || 0) + 1; }));
   const words = Object.entries(wc).sort((a, b) => b[1] - a[1]).slice(0, 30), wMax = words[0]?.[1] || 1;
-  const wcc = ['#ef4444', '#FDB913', '#38bdf8', '#a78bfa', '#22c55e', '#f97316', css('--ink')];
+  const wcc = state.cloud === 'pos' ? ['#22c55e', '#38bdf8', '#FDB913', '#a78bfa', '#14b8a6', css('--ink')] : ['#ef4444', '#FDB913', '#f97316', '#a78bfa', '#38bdf8', css('--ink')];
   words.sort((a, b) => a[0].localeCompare(b[0]));
-  $('cloud').innerHTML = words.map((w, i) => `<span title="${w[1]}x" style="font-size:${12 + w[1] / wMax * 28}px;color:${wcc[i % wcc.length]}">${esc(w[0])}</span>`).join('') || '–';
+  $('cloud').innerHTML = words.map((w, i) => `<span title="${w[1]}x" style="font-size:${12 + w[1] / wMax * 26}px;color:${wcc[i % wcc.length]}">${esc(w[0])}</span>`).join('') || '<p class="empty">Belum ada data</p>';
+  $('cloudTitle').textContent = `Word Cloud ${state.cloud === 'pos' ? 'Positif' : 'Negatif'}`;
 
   /* Top akun */
-  const acc = {}; N.forEach(r => { const a = acc[r.user] || (acc[r.user] = { n: 0, eng: 0, topik: {}, pf: r.platform }); a.n++; a.eng += r.eng; a.topik[r.topik] = (a.topik[r.topik] || 0) + 1; });
+  const accSrc = state.acc === 'pos' ? P : N;
+  const acc = {}; accSrc.forEach(r => { const a = acc[r.user] || (acc[r.user] = { n: 0, eng: 0, topik: {}, pf: r.platform }); a.n++; a.eng += r.eng; a.topik[r.topik] = (a.topik[r.topik] || 0) + 1; });
   const topAcc = Object.entries(acc).sort((a, b) => b[1].n - a[1].n || b[1].eng - a[1].eng).slice(0, 5);
-  $('topAcc').innerHTML = `<tr><th>Akun</th><th class="r">Neg.</th><th class="r">${state.src === 'post' ? 'Komen' : 'Likes'}</th><th>Topik utama</th></tr>` +
-    topAcc.map(([u, a]) => `<tr><td><span class="av" style="color:${pColor(a.pf)}">${esc(u[0]?.toUpperCase() || '?')}</span><b>${esc(u)}</b><br><small style="margin-left:36px">${esc(a.pf)}</small></td><td class="r">${a.n}</td><td class="r">${fmt(a.eng)}</td><td>${esc(Object.entries(a.topik).sort((x, y) => y[1] - x[1])[0][0])}</td></tr>`).join('');
+  const accC = state.acc === 'pos' ? SENT.positif : SENT.negatif, accMax = topAcc[0]?.[1].n || 1, engLbl = state.src === 'post' ? 'komentar' : 'likes';
+  $('accTitle').textContent = `Top 5 Akun ${state.acc === 'pos' ? 'Positif' : 'Negatif'}`;
+  $('topAcc').innerHTML = topAcc.map(([u, a], i) => `<li>
+    <span class="rank">${i + 1}</span>
+    <span class="av" style="background:${pColor(a.pf)}22;color:${pColor(a.pf)}">${esc(u[0]?.toUpperCase() || '?')}</span>
+    <div class="acc-main"><div class="acc-top"><b title="${esc(u)}">${esc(u)}</b><span class="acc-n" style="color:${accC}">${a.n} ${state.src}</span></div>
+      <div class="acc-sub"><span class="chip sm"><i style="background:${pColor(a.pf)}"></i>${esc(a.pf)}</span><span title="${esc(Object.entries(a.topik).sort((x, y) => y[1] - x[1])[0][0])}">${esc(Object.entries(a.topik).sort((x, y) => y[1] - x[1])[0][0])}</span></div>
+      <div class="acc-bar"><i style="width:${a.n / accMax * 100}%;background:${accC}"></i></div></div>
+  </li>`).join('') || '<li class="empty">Belum ada data</li>';
+
 
   /* Risiko & narasi */
   $('riskRing').style.setProperty('--p', S.negP.toFixed(1)); $('riskRing').style.setProperty('--c', lvlColor);
   $('riskPct').textContent = pct(S.n, S.T);
   $('risk').textContent = lvl; $('risk').style.color = lvlColor;
   $('riskNote').textContent = `Tinggi ≥${RISK.tinggi}% · Sedang ≥${RISK.sedang}%`;
-  $('flow').innerHTML = negTop.slice(0, 4).map(([k, v]) => `<span class="s">${esc(k)} <b>${v}</b></span>`).join('<span class="a">→</span>') || '–';
+  const nMax = negTop[0]?.[1] || 1;
+  $('flow').innerHTML = negTop.slice(0, 4).map(([k, v], i) => `<li><span class="rank">${i + 1}</span><div><div class="acc-top"><span class="nt">${esc(k)}</span><b style="color:var(--neg)">${v}</b></div><div class="acc-bar"><i style="width:${v / nMax * 100}%;background:var(--neg)"></i></div></div></li>`).join('') || '<li class="empty">Tidak ada isu negatif</li>';
   const t3 = negTop.slice(0, 3).reduce((s, x) => s + x[1], 0);
   $('impact').textContent = negTop.length ? `${t3} dari ${N.length} mention negatif (${pct(t3, N.length)}) berasal dari 3 topik teratas. Dampak: reputasi, kepercayaan nasabah, dan sentimen investor.` : '';
 
@@ -247,3 +259,5 @@ $('drApply').onclick = () => {
 Chart.defaults.font.family = 'Plus Jakarta Sans, system-ui, sans-serif';
 render();
 setInterval(() => { delete cache.post; delete cache.komentar; render(); }, REFRESH_MENIT * 60 * 1000);
+
+document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b = e.target.closest('button'); if (!b) return; state[g.dataset.k] = b.dataset.v; [...g.children].forEach(x => x.classList.toggle('on', x === b)); render(); });

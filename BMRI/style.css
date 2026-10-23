@@ -152,3 +152,25 @@ footer{text-align:center;color:var(--mute);font-size:12px;margin:28px 0 8px}
   .h300{height:260px}
   .risk-body{gap:12px}
 }
+
+/* Toggles kecil, akun, isu */
+.seg.mini{padding:2px}.seg.mini button{padding:4px 10px;font-size:12px}
+.acc-list{list-style:none;margin:0;padding:0}
+.acc-list li{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.acc-list li:last-child{border-bottom:0}
+.rank{flex:none;width:20px;color:var(--mute);font-weight:700;font-size:12px;padding-top:6px;text-align:center}
+.acc-list .av{flex:none;width:32px;height:32px;margin:0;font-size:13px;border-radius:10px}
+.acc-main,.acc-list li>div{flex:1;min-width:0}
+.acc-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.acc-top b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc-n{flex:none;font-size:12px;font-weight:700}
+.acc-sub{display:flex;gap:8px;align-items:center;margin-top:4px;font-size:12px;color:var(--mute);min-width:0}
+.acc-sub>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip.sm{font-size:11px;padding:1px 8px;flex:none;color:var(--ink)}
+.acc-bar{height:4px;border-radius:3px;background:var(--card2);margin-top:8px;overflow:hidden}
+.acc-bar i{display:block;height:100%;border-radius:3px}
+.issues li{padding:8px 0}.issues .rank{padding-top:1px}
+.issues .nt{font-size:13px;font-weight:600;line-height:1.35}
+.risk .lbl{letter-spacing:.5px;font-weight:600}
+.risk-body{padding:4px 0 6px}
+.empty{color:var(--mute);text-align:center;padding:20px}

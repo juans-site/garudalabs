@@ -7,15 +7,15 @@
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light'}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 <header class="topbar">
   <div class="brand">
-    <img class="logo logo-dark" src="logo-dark.png" alt="Logo">
-    <img class="logo logo-light" src="logo-light.png" alt="Logo">
+    <img class="logo logo-dark" src="logo-dark.png?v=4" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png?v=4" alt="Logo">
     <span class="divider"></span>
     <span class="brand-t">Social Listening</span>
   </div>
@@ -61,11 +61,20 @@
     <section class="card mt"><div class="card-h"><h2>🔥 Postingan Negatif Teratas</h2><span class="hint">berdasarkan engagement</span></div><div class="posts" id="posts"></div></section>
 
     <div class="row three">
-      <section class="card"><div class="card-h"><h2>Word Cloud Negatif</h2></div><div class="cloud" id="cloud"></div></section>
-      <section class="card"><div class="card-h"><h2>Top 5 Akun Negatif</h2></div><table class="tbl" id="topAcc"></table></section>
+      <section class="card"><div class="card-h"><h2 id="cloudTitle">Word Cloud</h2>
+        <div class="seg mini" data-k="cloud"><button data-v="neg" class="on">Negatif</button><button data-v="pos">Positif</button></div></div>
+        <div class="cloud" id="cloud"></div></section>
+      <section class="card"><div class="card-h"><h2 id="accTitle">Top 5 Akun</h2>
+        <div class="seg mini" data-k="acc"><button data-v="neg" class="on">Negatif</button><button data-v="pos">Positif</button></div></div>
+        <ol class="acc-list" id="topAcc"></ol></section>
       <section class="card risk"><div class="card-h"><h2>Krisis / Alert</h2></div>
-        <div class="risk-body"><div class="risk-ring" id="riskRing"><b id="riskPct"></b><small>negatif</small></div><div><small>LEVEL RISIKO</small><div class="risk-lv" id="risk"></div><small id="riskNote"></small></div></div>
-        <h3 class="sub">Narasi Krisis Utama</h3><div class="flow" id="flow"></div><p class="impact" id="impact"></p>
+        <div class="risk-body">
+          <div class="risk-ring" id="riskRing"><b id="riskPct"></b><small>negatif</small></div>
+          <div><small class="lbl">LEVEL RISIKO</small><div class="risk-lv" id="risk"></div><small id="riskNote"></small></div>
+        </div>
+        <h3 class="sub">Narasi Krisis Utama</h3>
+        <ol class="acc-list issues" id="flow"></ol>
+        <p class="impact" id="impact"></p>
       </section>
     </div>
 
@@ -77,6 +86,6 @@
     <footer>Dashboard monitoring independen · Data otomatis dari Google Sheets</footer>
   </div>
 </main>
-<script src="app.js"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>
