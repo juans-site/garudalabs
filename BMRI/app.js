@@ -5,7 +5,10 @@ const RISK = { tinggi: 35, sedang: 20 };          // ambang % negatif
 const REFRESH_MENIT = 5;
 // Akun resmi Mandiri: sentimennya selalu dihitung Netral.
 // Otomatis: baris dengan Tipe "Akun Resmi". Tambahan: username di daftar ini (huruf besar/kecil diabaikan).
-const AKUN_RESMI = ['bankmandiri', 'bank mandiri', 'mandiricard', 'mandiricare', 'mandiri kartu kredit', 'livinpoin', 'mandiritaspen', 'bank mandiri taspen', 'mandiri update', 'wrausahamandiri'];
+const AKUN_RESMI = ['bankmandiri', 'bank mandiri', 'mandiricard', 'mandiricare', 'mandiri kartu kredit', 'livinpoin', 'mandiritaspen', 'bank mandiri taspen', 'mandiri update', 'wrausahamandiri', 'officialbankmandiri'];
+// Top 5 Akun tidak memasukkan akun media/berita (Tipe "Media" di sheet),
+// KECUALI homeless media di daftar ini (huruf besar/kecil diabaikan) — silakan tambah/kurangi.
+const HOMELESS_MEDIA = ['putrapostdaily', 'mojiupdates', 'volleyballidn', 'democrazymedia', 'updatenusantaracom', 'mediakonsumenid'];
 /* ====================== */
 
 const $ = id => document.getElementById(id);
@@ -53,7 +56,7 @@ function norm(r, kind) {
     text: r['Caption'] || r['Text Komentar'] || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
     sent: !s ? '' : resmi ? 'netral' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
-    link: r['Link'] || '', jamStr, eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind
+    link: r['Link'] || '', jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind
   };
 }
 const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
@@ -205,7 +208,7 @@ async function render() {
   /* Top akun */
   // tanpa News dan tanpa username kosong/tidak valid
   const badUser = u => !u || /^(-|—|–|n\/?a|null|unknown|anonim)$/i.test(u.trim());
-  const accSrc = (state.acc === 'pos' ? P : N).filter(r => !/^news/i.test(r.platform) && !badUser(r.user));
+  const accSrc = (state.acc === 'pos' ? P : N).filter(r => !/^news/i.test(r.platform) && !r.media && !badUser(r.user));
   const acc = {}; accSrc.forEach(r => { const a = acc[r.user] || (acc[r.user] = { n: 0, eng: 0, topik: {}, pf: r.platform }); a.n++; a.eng += r.eng; a.topik[r.topik] = (a.topik[r.topik] || 0) + 1; });
   const topAcc = Object.entries(acc).sort((a, b) => b[1].n - a[1].n || b[1].eng - a[1].eng).slice(0, 5);
   const accC = state.acc === 'pos' ? SENT.positif : SENT.negatif, accMax = topAcc[0]?.[1].n || 1, engLbl = state.src === 'post' ? 'komentar' : 'likes';
