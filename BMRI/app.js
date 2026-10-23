@@ -16,7 +16,7 @@ const PLATFORM_COLOR = { twitter: '#1d9bf0', x: '#1d9bf0', facebook: '#1877f2', 
 const pColor = p => PLATFORM_COLOR[p.toLowerCase().split(/[ /]/)[0]] || '#94a3b8';
 const SENT = { positif: '#22C55E', negatif: '#F05252', netral: '#94A3B8' };
 
-const state = { cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'all' }; // from/to = 'yyyy-mm-dd', null = semua
+const state = { gran: 'harian', cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'all' }; // from/to = 'yyyy-mm-dd', null = semua
 const cache = {}, charts = {};
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
@@ -113,52 +113,66 @@ async function render() {
   const lvlColor = { TINGGI: SENT.negatif, SEDANG: '#f59e0b', RENDAH: SENT.positif }[lvl];
   const sh = (s, k) => s ? s[k] / (s.T || 1) * 100 : undefined;
   const K = [
-    ['💬', 'Total Mention', fmt(S.T), perDay.map(s => s.T), css('--accent'), delta(cur.T, prev?.T, '')],
-    ['😊', 'Positif', `${fmt(S.p)} <small>${pct(S.p, S.T)}</small>`, perDay.map(s => s.p), SENT.positif, delta(sh(cur, 'p'), sh(prev, 'p'), ' pp')],
-    ['☹️', 'Negatif', `${fmt(S.n)} <small>${pct(S.n, S.T)}</small>`, perDay.map(s => s.n), SENT.negatif, delta(sh(cur, 'n'), sh(prev, 'n'), ' pp', true)],
-    ['😐', 'Netral', `${fmt(S.z)} <small>${pct(S.z, S.T)}</small>`, perDay.map(s => s.z), '#94a3b8', delta(sh(cur, 'z'), sh(prev, 'z'), ' pp')],
-    ['⚖️', 'Net Sentiment Index', (S.nsi > 0 ? '+' : '') + S.nsi, perDay.map(s => s.nsi), '#a78bfa', delta(cur.nsi, prev?.nsi, ' poin')],
-    ['🚨', 'Level Risiko', `<span style="color:${lvlColor}">${lvl}</span>`, perDay.map(s => s.negP), lvlColor, `negatif ${pct(S.n, S.T)} dari total`]
+    ['💬', 'Total Mention', fmt(S.T), '', perDay.map(s => s.T), css('--accent'), delta(cur.T, prev?.T, '')],
+    ['😊', 'Positif', fmt(S.p), pct(S.p, S.T), perDay.map(s => s.p), SENT.positif, delta(sh(cur, 'p'), sh(prev, 'p'), ' pp')],
+    ['☹️', 'Negatif', fmt(S.n), pct(S.n, S.T), perDay.map(s => s.n), SENT.negatif, delta(sh(cur, 'n'), sh(prev, 'n'), ' pp', true)],
+    ['😐', 'Netral', fmt(S.z), pct(S.z, S.T), perDay.map(s => s.z), SENT.netral, delta(sh(cur, 'z'), sh(prev, 'z'), ' pp')],
+    ['⚖️', 'Net Sentiment Index', (S.nsi > 0 ? '+' : '') + S.nsi, '', perDay.map(s => s.nsi), '#a78bfa', delta(cur.nsi, prev?.nsi, ' poin')],
+    ['🚨', 'Level Risiko', `<span style="color:${lvlColor}">${lvl[0] + lvl.slice(1).toLowerCase()}</span>`, `negatif ${pct(S.n, S.T)} dari total`, null, lvlColor, '']
   ];
-  $('kpis').innerHTML = K.map((k, i) => `<div class="kpi"><div class="top"><span class="ic">${k[0]}</span><canvas id="sp${i}"></canvas></div>
-    <div class="l">${k[1]}</div><div class="v">${k[2]}</div><div class="d">${k[5]}</div></div>`).join('');
-  document.querySelectorAll('.kpi .v small').forEach(s => s.style.cssText = 'font-size:13px;color:var(--mute);font-weight:600;margin-left:4px');
-  K.forEach((k, i) => new Chart($('sp' + i), { type: 'line', data: { labels: perDay.map((_, x) => x), datasets: [{ data: k[3], borderColor: k[4], borderWidth: 2, pointRadius: 0, tension: .4, fill: false }] },
-    options: { responsive: false, animation: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } } }));
+  const segs = Math.min(5, Math.ceil(S.negP / 10));
+  $('kpis').innerHTML = K.map((k, i) => `<div class="kpi">
+    <div class="kh"><span class="l">${k[1]}</span><span class="ic" style="background:${k[5]}26">${k[0]}</span></div>
+    <div class="v">${k[2]}</div>${k[3] ? `<div class="sub">${k[3]}</div>` : '<div class="sub">&nbsp;</div>'}
+    <div class="kf">${k[4] ? `<div class="d">${k[6]}</div><canvas id="sp${i}"></canvas>`
+      : `<div class="riskbar">${[0, 1, 2, 3, 4].map(x => `<i style="${x < segs ? `background:${k[5]}` : ''}"></i>`).join('')}</div>`}</div></div>`).join('');
+  K.forEach((k, i) => { if (!k[4]) return; new Chart($('sp' + i), { type: 'line', data: { labels: k[4].map((_, x) => x), datasets: [{ data: k[4], borderColor: k[5], borderWidth: 1.8, pointRadius: 0, tension: .35, fill: true,
+    backgroundColor: ctx => { const a = ctx.chart.chartArea; if (!a) return k[5] + '22'; const g = ctx.chart.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, k[5] + '55'); g.addColorStop(1, k[5] + '00'); return g; } }] },
+    options: { responsive: false, animation: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } } }); });
 
   /* Tren */
-  let labels, key;
-  if (!single) { labels = days; key = r => r.tgl; $('trendTitle').textContent = 'Tren Sentimen per Hari'; }
-  else { labels = [...Array(24).keys()].map(h => String(h).padStart(2, '0') + '.00'); key = r => String(r.jam).padStart(2, '0') + '.00'; $('trendTitle').textContent = 'Tren Sentimen per Jam'; }
+  // Pilihan granularitas grafik tren: Per Jam (khusus 1 hari), Harian, Mingguan, Bulanan
+  const gOpts = single ? [['jam', 'Per Jam']] : [['harian', 'Harian'], ['mingguan', 'Mingguan'], ['bulanan', 'Bulanan']];
+  if (!gOpts.some(o => o[0] === state.gran)) state.gran = gOpts[0][0];
+  $('fGran').innerHTML = gOpts.map(([v, l]) => `<option value="${v}" ${v === state.gran ? 'selected' : ''}>${l}</option>`).join('');
+  $('fGran').disabled = single;
+  const weekStart = d => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() - ((x.getUTCDay() + 6) % 7)); return x.toISOString().slice(0, 10); };
+  let labels, key, fmtL;
+  if (state.gran === 'jam') { labels = [...Array(24).keys()].map(h => String(h).padStart(2, '0') + '.00'); key = r => String(r.jam).padStart(2, '0') + '.00'; fmtL = l => l; }
+  else if (state.gran === 'mingguan') { labels = [...new Set(days.map(weekStart))]; key = r => weekStart(r.tgl); fmtL = l => 'Mg ' + tglShort(l); }
+  else if (state.gran === 'bulanan') { labels = [...new Set(days.map(d => d.slice(0, 7)))]; key = r => r.tgl.slice(0, 7); fmtL = l => BULAN[+l.slice(5) - 1] + ' ' + l.slice(0, 4); }
+  else { labels = days; key = r => r.tgl; fmtL = tglShort; }
+  $('trendTitle').textContent = 'Tren Sentimen ' + { jam: 'per Jam', harian: 'per Hari', mingguan: 'per Minggu', bulanan: 'per Bulan' }[state.gran];
   const ser = s => labels.map(l => D.filter(r => r.sent === s && key(r) === l).length);
   const sp = ser('positif'), sn = ser('negatif'), sz = ser('netral');
   if (single) { let last = labels.length - 1; while (last > 0 && sp[last] + sn[last] + sz[last] === 0) last--; [labels, sp, sn, sz].forEach(a => a.length = last + 1); }
   const area = (label, data, c) => ({ label, data, borderColor: c, borderWidth: 2.5, tension: .4, pointRadius: 0, pointHoverRadius: 5, fill: true,
     backgroundColor: ctx => { const { chart } = ctx, a = chart.chartArea; if (!a) return c + '22'; const g = chart.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, c + '40'); g.addColorStop(1, c + '00'); return g; } });
-  mk('cTrend', { type: 'line', data: { labels: labels.map(l => !single ? tglShort(l) : l), datasets: [area('Negatif', sn, SENT.negatif), area('Netral', sz, SENT.netral), area('Positif', sp, SENT.positif)] },
-    options: baseOpts({ interaction: { mode: 'index', intersect: false } }) });
+  mk('cTrend', { type: 'line', data: { labels: labels.map(fmtL), datasets: [area('Negatif', sn, SENT.negatif), area('Netral', sz, SENT.netral), area('Positif', sp, SENT.positif)] },
+    options: baseOpts({ interaction: { mode: 'index', intersect: false }, plugins: { ...baseOpts().plugins, legend: { display: false } } }) });
   const pk = sn.indexOf(Math.max(...sn));
-  $('trendNote').textContent = Math.max(...sn) > 0 ? `Puncak negatif: ${!single ? tglShort(labels[pk]) : 'pukul ' + labels[pk]} (${sn[pk]})` : '';
+  $('trendNote').textContent = Math.max(...sn) > 0 ? `Puncak negatif: ${state.gran === 'jam' ? 'pukul ' + labels[pk] : fmtL(labels[pk])} (${sn[pk]})` : '';
 
   /* Share of voice: bar horizontal */
   const kanal = count(D, 'platform');
-  mk('cSov', { type: 'bar', data: { labels: kanal.map(k => k[0]), datasets: [{ label: 'Mention', data: kanal.map(k => k[1]), backgroundColor: kanal.map(k => pColor(k[0])), borderRadius: 6, barThickness: 22 }] },
+  mk('cSov', { type: 'bar', data: { labels: kanal.map(k => k[0]), datasets: [{ label: 'Mention', data: kanal.map(k => k[1]), backgroundColor: kanal.map(k => pColor(k[0])), borderRadius: 4, barThickness: 16 }] },
+    plugins: [{ id: 'pctLbl', afterDatasetsDraw(c) { const { ctx } = c; ctx.save(); ctx.fillStyle = css('--ink'); ctx.font = '600 12px Plus Jakarta Sans, sans-serif'; ctx.textBaseline = 'middle'; c.getDatasetMeta(0).data.forEach((b, x) => ctx.fillText(pct(kanal[x][1], S.T), b.x + 8, b.y)); ctx.restore(); } }],
     options: baseOpts({ indexAxis: 'y', plugins: { ...baseOpts().plugins, legend: { display: false }, tooltip: { ...baseOpts().plugins.tooltip, callbacks: { label: c => ` ${fmt(c.raw)} mention (${pct(c.raw, S.T)})` } } },
-      scales: { x: { beginAtZero: true, grid: { color: css('--line'), borderDash: [4, 4] }, ticks: { color: css('--mute') }, border: { display: false } }, y: { grid: { display: false }, ticks: { color: css('--ink'), font: { weight: 600 } }, border: { display: false } } } }) });
+      layout: { padding: { right: 56 } }, scales: { x: { display: false, beginAtZero: true }, y: { grid: { display: false }, ticks: { color: css('--ink'), font: { weight: 600 } }, border: { display: false } } } }) });
   $('sovNote').textContent = kanal[0] ? `${kanal[0][0]} dominan (${pct(kanal[0][1], S.T)})` : '';
 
   /* Sentimen per kanal: grouped bar */
   const pf = kanal.map(k => k[0]);
   const by = s => pf.map(p => D.filter(r => r.platform === p && r.sent === s).length);
-  mk('cKanalSent', { type: 'bar', data: { labels: pf, datasets: [
-    { label: 'Positif', data: by('positif'), backgroundColor: SENT.positif, borderRadius: 6, maxBarThickness: 26 },
-    { label: 'Negatif', data: by('negatif'), backgroundColor: SENT.negatif, borderRadius: 6, maxBarThickness: 26 },
-    { label: 'Netral', data: by('netral'), backgroundColor: SENT.netral, borderRadius: 6, maxBarThickness: 26 }] }, options: baseOpts() });
+  $('kanalSent').innerHTML = `<div class="ks-h"><span></span><span></span><span>Negatif</span><span>Netral</span><span>Positif</span></div>` + pf.map((p, i) => {
+    const n = by('negatif')[i], z = by('netral')[i], q = by('positif')[i], t = n + z + q || 1;
+    return `<div class="ks-r"><span class="ks-n">${esc(p)}</span><div class="ks-bar"><i style="width:${n / t * 100}%;background:${SENT.negatif}"></i><i style="width:${z / t * 100}%;background:${SENT.netral}"></i><i style="width:${q / t * 100}%;background:${SENT.positif}"></i></div><span>${Math.round(n / t * 100)}%</span><span>${Math.round(z / t * 100)}%</span><span>${Math.round(q / t * 100)}%</span></div>`;
+  }).join('');
   const negK = count(N, 'platform');
   $('negNote').textContent = negK[0] ? `${negK[0][0]}: ${pct(negK[0][1], N.length)} dari negatif` : '';
 
   /* Penyebab */
-  const bars = (arr, c) => { const mx = arr[0]?.[1] || 1; return arr.slice(0, 6).map(([k, v]) => `<li><div class="t"><span>${esc(k)}</span><b>${v}</b></div><div class="bar"><i style="width:${v / mx * 100}%;background:${c}"></i></div></li>`).join('') || '<li>–</li>'; };
+  const bars = (arr, c) => { const mx = arr[0]?.[1] || 1; return arr.slice(0, 6).map(([k, v], x) => `<li><span class="num">${x + 1}</span><div class="cb"><div class="t"><span>${esc(k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${v / mx * 100}%;background:${c}"></i></div></div></li>`).join('') || '<li>–</li>'; };
   const negTop = count(N, 'topik');
   $('causePos').innerHTML = bars(count(P, 'topik'), SENT.positif);
   $('causeNeg').innerHTML = bars(negTop, SENT.negatif);
@@ -288,8 +302,8 @@ document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b =
 
 /* ---------- Tab & Raw Data ---------- */
 const raw = { q: '', sent: '', pf: '', sort: 'dt', dir: -1, page: 1, size: 50 };
-document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
   $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewRaw').hidden = b.dataset.tab !== 'raw';
   if (b.dataset.tab === 'dash') Object.values(charts).forEach(c => c.resize());
 });
@@ -337,3 +351,5 @@ $('rawBody').onclick = e => {
   const txt = t.querySelector('.txt'), more = t.querySelector('.more'); if (!more) return;
   txt.classList.toggle('open'); more.textContent = txt.classList.contains('open') ? 'Tutup' : 'Selengkapnya';
 };
+
+$('fGran').onchange = e => { state.gran = e.target.value; render(); };
