@@ -23,13 +23,14 @@ const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).
 /* ---------- Data ---------- */
 async function load(src) {
   if (cache[src]) return cache[src];
+  if (src === 'all') { const [p, k] = await Promise.all([load('post'), load('komentar')]); return cache.all = p.concat(k); }
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(TABS[src])}&_=${Date.now()}`;
   const txt = await fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); });
   const rows = Papa.parse(txt, { header: true, skipEmptyLines: true }).data;
-  return cache[src] = rows.map(norm).filter(r => r.tgl && r.sent);
+  return cache[src] = rows.map(r => norm(r, src)).filter(r => r.tgl && r.sent);
 }
 // Tanggal: "dd/mm/yyyy", serial angka, atau "yyyy-mm-dd". Jam: "HH:MM" atau pecahan hari.
-function norm(r) {
+function norm(r, kind) {
   const t = r['Waktu'] || ''; let tgl = '';
   if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(t)) { const [d, m, y] = t.split(/[\/ ]/); tgl = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`; }
   else if (/^\d+([.,]\d+)?$/.test(t)) tgl = new Date(Date.UTC(1899, 11, 30) + parseFloat(t.replace(',', '.')) * 864e5).toISOString().slice(0, 10);
@@ -43,7 +44,7 @@ function norm(r) {
     text: r['Caption'] || r['Text Komentar'] || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
     sent: s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : s ? 'netral' : '',
-    link: r['Link'] || '', eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0
+    link: r['Link'] || '', eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind
   };
 }
 const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
@@ -82,7 +83,7 @@ async function render() {
   $('loading').hidden = true; $('main').hidden = false;
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
-  const unit = state.src === 'post' ? 'post' : 'komentar';
+  const unit = { post: 'post', komentar: 'komentar', all: 'mention' }[state.src];
   $('periode').textContent = `Percakapan media sosial terkait Bank Mandiri · ${periode} · ${unit}`;
 
   const S = stats(D), N = D.filter(r => r.sent === 'negatif'), P = D.filter(r => r.sent === 'positif');
@@ -153,14 +154,16 @@ async function render() {
   const negTop = count(N, 'topik');
   $('causePos').innerHTML = bars(count(P, 'topik'), SENT.positif);
   $('causeNeg').innerHTML = bars(negTop, SENT.negatif);
+  $('causeHint').textContent = periode;
 
   /* Postingan negatif */
-  const ex = [...N].sort((a, b) => b.eng - a.eng).slice(0, 8);
-  $('postsHint').textContent = `${fmt(N.length)} ${unit} negatif · ${periode} · urut engagement`;
+  const NN = N.filter(r => !/^news/i.test(r.platform));
+  const ex = [...NN].sort((a, b) => b.eng - a.eng).slice(0, 8);
+  $('postsHint').textContent = `${fmt(NN.length)} ${unit} negatif · ${periode} · tanpa News · urut engagement`;
   $('posts').scrollLeft = 0;
   $('posts').innerHTML = ex.map(p => `<div class="post"><span class="chip"><i style="background:${pColor(p.platform)}"></i>${esc(p.platform)}</span>
     <div><b>${esc(p.user)}</b></div><p>“${esc(p.text.slice(0, 160))}${p.text.length > 160 ? '…' : ''}”</p>
-    <div class="meta"><span>💬 ${fmt(p.eng)} ${state.src === 'post' ? 'komentar' : 'likes'} · ${tglShort(p.tgl)}</span>${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">Lihat ↗</a>` : ''}</div></div>`).join('') || '<p>Tidak ada postingan negatif.</p>';
+    <div class="meta"><span>💬 ${fmt(p.eng)} ${p.kind === 'post' ? 'komentar' : 'likes'} · ${tglShort(p.tgl)}</span>${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">Lihat ↗</a>` : ''}</div></div>`).join('') || '<p>Tidak ada postingan negatif.</p>';
 
   /* Word cloud */
   const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue gw lu kamu dia mereka nya ya ga gak nggak enggak tapi karena jadi lagi mau buat sama oleh dalam bank mandiri bankmandiri bmri the https http www com co id dll yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu min admin mohon terima kasih halo sahabat apa siapa udah udh sdh tdk gimana bagaimana akibat belum dapat hari jangan kena usai terlihat milik khusus berbeda kapan setelah sedang hingga sampai menjadi tersebut karna emang memang banget sangat orang'.split(' '));
@@ -181,7 +184,7 @@ async function render() {
   $('topAcc').innerHTML = topAcc.map(([u, a], i) => `<li>
     <span class="rank">${i + 1}</span>
     <span class="av" style="background:${pColor(a.pf)}22;color:${pColor(a.pf)}">${esc(u[0]?.toUpperCase() || '?')}</span>
-    <div class="acc-main"><div class="acc-top"><b title="${esc(u)}">${esc(u)}</b><span class="acc-n" style="color:${accC}">${a.n} ${state.src}</span></div>
+    <div class="acc-main"><div class="acc-top"><b title="${esc(u)}">${esc(u)}</b><span class="acc-n" style="color:${accC}">${a.n} ${unit}</span></div>
       <div class="acc-sub"><span class="chip sm"><i style="background:${pColor(a.pf)}"></i>${esc(a.pf)}</span><span title="${esc(Object.entries(a.topik).sort((x, y) => y[1] - x[1])[0][0])}">${esc(Object.entries(a.topik).sort((x, y) => y[1] - x[1])[0][0])}</span></div>
       <div class="acc-bar"><i style="width:${a.n / accMax * 100}%;background:${accC}"></i></div></div>
   </li>`).join('') || '<li class="empty">Belum ada data</li>';
@@ -230,10 +233,12 @@ function applyPreset(dates) {
   const maxD = dates.at(-1), p = state.preset;
   if (p === 'custom') return;
   if (p === 'all') { state.from = state.to = null; return; }
-  const n = { last1: 1, last3: 3, last7: 7 }[p];
-  const sel = dates.slice(-n); state.from = sel[0]; state.to = maxD;
+  const n = { last1: 1, last3: 3, last7: 7, last30: 30 }[p];
+  // hitung mundur n hari kalender dari tanggal data terbaru
+  const d = new Date(maxD + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() - (n - 1));
+  state.from = d.toISOString().slice(0, 10); state.to = maxD;
 }
-const PRESETS = [['all', 'Semua periode'], ['last1', 'Hari terakhir'], ['last3', '3 hari terakhir'], ['last7', '7 hari terakhir']];
+const PRESETS = [['all', 'Semua periode'], ['last1', 'Hari terakhir'], ['last3', '3 hari terakhir'], ['last7', '7 hari terakhir'], ['last30', '30 hari terakhir']];
 function buildPicker(dates, from, to) {
   const maxD = dates.at(-1);
   $('presets').innerHTML = PRESETS.map(([k, l]) => `<button data-p="${k}" class="${state.preset === k ? 'on' : ''}">${l}${k === 'last1' ? `<small>${tglShort(maxD)}</small>` : ''}</button>`).join('');
@@ -259,6 +264,6 @@ $('drApply').onclick = () => {
 
 Chart.defaults.font.family = 'Plus Jakarta Sans, system-ui, sans-serif';
 render();
-setInterval(() => { delete cache.post; delete cache.komentar; render(); }, REFRESH_MENIT * 60 * 1000);
+setInterval(() => { delete cache.post; delete cache.komentar; delete cache.all; render(); }, REFRESH_MENIT * 60 * 1000);
 
 document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b = e.target.closest('button'); if (!b) return; state[g.dataset.k] = b.dataset.v; [...g.children].forEach(x => x.classList.toggle('on', x === b)); render(); });
