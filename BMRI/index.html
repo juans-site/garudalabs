@@ -63,6 +63,9 @@ footer{text-align:center;color:var(--mute);font-size:12px;margin:16px 0}
 .ctrl select{font:inherit;padding:4px 8px;border-radius:6px;border:0}
 #loading{text-align:center;padding:40px;color:var(--mute);font-weight:600}
 .post a{color:var(--navy2)}
+.sovgrid{display:grid;grid-template-columns:minmax(110px,1fr) auto;gap:12px;align-items:center}
+#sovTbl{font-size:12.5px}#sovTbl td,#sovTbl th{white-space:nowrap;padding:5px 4px}
+@media(max-width:420px){.sovgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -85,8 +88,8 @@ footer{text-align:center;color:var(--mute);font-size:12px;margin:16px 0}
   <section class="card c4"><h2>2. Penyebab Utama Sentiment (Topik)</h2><div class="two">
     <div><h3 style="color:var(--pos)">Penyebab Positif</h3><ul class="ck pos" id="causePos"></ul></div>
     <div><h3 style="color:var(--neg)">Penyebab Negatif</h3><ul class="ck neg" id="causeNeg"></ul></div></div></section>
-  <section class="card c4"><h2>3. Share of Voice (Kanal)</h2><div class="two">
-    <div style="position:relative;height:190px"><canvas id="sov"></canvas></div>
+  <section class="card c4"><h2>3. Share of Voice (Kanal)</h2><div class="sovgrid">
+    <div style="position:relative;height:170px"><canvas id="sov"></canvas></div>
     <table id="sovTbl"></table></div><div class="note" id="sovNote"></div></section>
 
   <section class="card c3"><h2>4. Share of Negative Voice</h2><div id="negBars"></div><div class="note red" id="negNote"></div></section>
