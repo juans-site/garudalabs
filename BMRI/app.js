@@ -176,7 +176,9 @@ async function render() {
   $('cloudTitle').textContent = `Word Cloud ${state.cloud === 'pos' ? 'Positif' : 'Negatif'}`;
 
   /* Top akun */
-  const accSrc = state.acc === 'pos' ? P : N;
+  // tanpa News dan tanpa username kosong/tidak valid
+  const badUser = u => !u || /^(-|—|–|n\/?a|null|unknown|anonim)$/i.test(u.trim());
+  const accSrc = (state.acc === 'pos' ? P : N).filter(r => !/^news/i.test(r.platform) && !badUser(r.user));
   const acc = {}; accSrc.forEach(r => { const a = acc[r.user] || (acc[r.user] = { n: 0, eng: 0, topik: {}, pf: r.platform }); a.n++; a.eng += r.eng; a.topik[r.topik] = (a.topik[r.topik] || 0) + 1; });
   const topAcc = Object.entries(acc).sort((a, b) => b[1].n - a[1].n || b[1].eng - a[1].eng).slice(0, 5);
   const accC = state.acc === 'pos' ? SENT.positif : SENT.negatif, accMax = topAcc[0]?.[1].n || 1, engLbl = state.src === 'post' ? 'komentar' : 'likes';
