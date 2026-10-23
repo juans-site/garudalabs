@@ -174,3 +174,11 @@ footer{text-align:center;color:var(--mute);font-size:12px;margin:28px 0 8px}
 .risk .lbl{letter-spacing:.5px;font-weight:600}
 .risk-body{padding:4px 0 6px}
 .empty{color:var(--mute);text-align:center;padding:20px}
+
+.posts{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.posts::-webkit-scrollbar{height:8px}.posts::-webkit-scrollbar-track{background:transparent}
+.posts::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+
+.beta{font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 55%,transparent)}
+[data-theme=light] .beta{color:#9a6b00;background:#fff4d6;border-color:#f3c64f}
+@media(max-width:640px){.brand-t{display:none}.beta{display:inline-block}}

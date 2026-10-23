@@ -64,10 +64,10 @@ function mk(id, cfg) { charts[id]?.destroy(); charts[id] = new Chart($(id), cfg)
 
 /* ---------- Render ---------- */
 async function render() {
-  $('loading').hidden = false; $('loading').textContent = 'Mengambil data dari Google Sheets…';
+  $('loading').hidden = false; $('loading').textContent = 'Memuat data…';
   let all;
   try { all = await load(state.src); }
-  catch (e) { $('loading').textContent = `Gagal mengambil data. Pastikan Google Sheets dibagikan "Anyone with the link – Viewer". (${e.message})`; return; }
+  catch (e) { $('loading').textContent = `Gagal memuat data. Silakan muat ulang halaman beberapa saat lagi. (${e.message})`; return; }
   const dates = [...new Set(all.map(r => r.tgl))].sort();
   const minD = dates[0], maxD = dates.at(-1);
   applyPreset(dates);
@@ -156,6 +156,8 @@ async function render() {
 
   /* Postingan negatif */
   const ex = [...N].sort((a, b) => b.eng - a.eng).slice(0, 8);
+  $('postsHint').textContent = `${fmt(N.length)} ${unit} negatif · ${periode} · urut engagement`;
+  $('posts').scrollLeft = 0;
   $('posts').innerHTML = ex.map(p => `<div class="post"><span class="chip"><i style="background:${pColor(p.platform)}"></i>${esc(p.platform)}</span>
     <div><b>${esc(p.user)}</b></div><p>“${esc(p.text.slice(0, 160))}${p.text.length > 160 ? '…' : ''}”</p>
     <div class="meta"><span>💬 ${fmt(p.eng)} ${state.src === 'post' ? 'komentar' : 'likes'} · ${tglShort(p.tgl)}</span>${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">Lihat ↗</a>` : ''}</div></div>`).join('') || '<p>Tidak ada postingan negatif.</p>';
@@ -208,7 +210,6 @@ async function render() {
   $('summaryText').textContent = `Monitoring periode ${periode} mencatat ${fmt(S.T)} ${unit}: ${fmt(S.p)} positif (${pct(S.p, S.T)}), ${fmt(S.n)} negatif (${pct(S.n, S.T)}), dan ${fmt(S.z)} netral (${pct(S.z, S.T)}), dengan Net Sentiment Index ${S.nsi}. ` +
     (negTop[0] ? `Isu negatif terbesar adalah "${negTop[0][0]}" (${negTop[0][1]} mention)${negTop[1] ? `, disusul "${negTop[1][0]}" (${negTop[1][1]})` : ''}. ` : '') +
     (kanal[0] ? `Percakapan paling banyak terjadi di ${kanal[0][0]} (${pct(kanal[0][1], S.T)}). ` : '') + `Level risiko saat ini: ${lvl}.`;
-  $('disclaimer').textContent = `Dihitung otomatis dari sheet "${TABS[state.src]}" pada kanal: ${kanal.map(k => k[0]).join(', ')}. Sentimen dan topik mengikuti label di sheet; data hari berjalan bisa belum lengkap. Rekomendasi adalah template otomatis yang perlu ditinjau. Dashboard ini analisis independen, bukan publikasi resmi bank.`;
 }
 
 /* ---------- UI ---------- */
