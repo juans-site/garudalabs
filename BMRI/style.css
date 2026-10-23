@@ -189,3 +189,10 @@ footer{text-align:center;color:var(--mute);font-size:12px;margin:28px 0 8px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .post>div:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.sum-list{list-style:none;margin:0;padding:0}
+.sum-list li{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);line-height:1.5;font-size:13.5px}
+.sum-list li:last-child{border-bottom:0}
+.sum-list .sk{color:var(--mute);font-weight:600}
+.sum-list .pos{color:var(--pos);font-weight:600}.sum-list .neg{color:var(--neg);font-weight:600}
+@media(max-width:640px){.sum-list li{grid-template-columns:1fr;gap:2px}}

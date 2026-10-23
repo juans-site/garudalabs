@@ -207,14 +207,22 @@ async function render() {
   const reco = {
     'Jangka Pendek': [...negTop.slice(0, 3).map(x => `Holding statement & klarifikasi isu "${x[0]}"`), `Perkuat respons akun resmi di ${negPf}`],
     'Jangka Menengah': ['Susun FAQ untuk pertanyaan berulang', 'Koordinasi dengan unit terkait untuk penyelesaian isu', 'Laporan monitoring harian ke manajemen'],
-    'Jangka Reputasi': [`Dorong konten positif: ${count(P, 'topik')[0]?.[0] || 'kinerja'}`, 'Libatkan media & komunitas untuk narasi penyeimbang', 'Evaluasi tren NSI mingguan']
+    'Jangka Panjang': [`Dorong konten positif: ${count(P, 'topik')[0]?.[0] || 'kinerja'}`, 'Libatkan media & komunitas untuk narasi penyeimbang', 'Evaluasi tren NSI mingguan']
   };
   $('reco').innerHTML = Object.entries(reco).map(([k, v]) => `<div><h3>${k}</h3><ul>${v.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');
 
   /* Summary */
-  $('summaryText').textContent = `Monitoring periode ${periode} mencatat ${fmt(S.T)} ${unit}: ${fmt(S.p)} positif (${pct(S.p, S.T)}), ${fmt(S.n)} negatif (${pct(S.n, S.T)}), dan ${fmt(S.z)} netral (${pct(S.z, S.T)}), dengan Net Sentiment Index ${S.nsi}. ` +
-    (negTop[0] ? `Isu negatif terbesar adalah "${negTop[0][0]}" (${negTop[0][1]} mention)${negTop[1] ? `, disusul "${negTop[1][0]}" (${negTop[1][1]})` : ''}. ` : '') +
-    (kanal[0] ? `Percakapan paling banyak terjadi di ${kanal[0][0]} (${pct(kanal[0][1], S.T)}). ` : '') + `Level risiko saat ini: ${lvl}.`;
+  const posTop = count(P, 'topik');
+  const pts = [
+    ['Periode', `${periode} · ${fmt(S.T)} ${unit}`],
+    ['Sentimen', `<span class="pos">${fmt(S.p)} positif (${pct(S.p, S.T)})</span> · <span class="neg">${fmt(S.n)} negatif (${pct(S.n, S.T)})</span> · ${fmt(S.z)} netral (${pct(S.z, S.T)})`],
+    ['Net Sentiment Index', `${S.nsi > 0 ? '+' : ''}${S.nsi}`],
+    negTop[0] && ['Isu negatif utama', esc(negTop.slice(0, 2).map(x => `${x[0]} (${fmt(x[1])})`).join('; '))],
+    posTop[0] && ['Isu positif utama', esc(posTop.slice(0, 2).map(x => `${x[0]} (${fmt(x[1])})`).join('; '))],
+    kanal[0] && ['Kanal dominan', `${esc(kanal[0][0])} (${pct(kanal[0][1], S.T)})${negK[0] ? `; negatif terbanyak di ${esc(negK[0][0])}` : ''}`],
+    ['Level risiko', `<b style="color:${lvlColor}">${lvl}</b>`]
+  ].filter(Boolean);
+  $('summaryText').innerHTML = pts.map(([k, v]) => `<li><span class="sk">${k}</span><span class="sv">${v}</span></li>`).join('');
 }
 
 /* ---------- UI ---------- */
