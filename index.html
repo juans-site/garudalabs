@@ -150,8 +150,8 @@ new Chart($('sov'),{type:'doughnut',data:{labels:DATA.kanal.map(k=>k[0]),dataset
 $('sovTbl').innerHTML='<tr><th>Kanal</th><th class="r">Vol</th><th class="r">SOV</th></tr>'+
   DATA.kanal.map((k,i)=>`<tr><td><span style="color:${colors[i]}">●</span> ${k[0]}</td><td class="r">${k[1]}</td><td class="r">${pct(k[1],kT)}</td></tr>`).join('')+
   `<tfoot><tr><td>TOTAL</td><td class="r">${kT}</td><td class="r">100%</td></tr></tfoot>`;
-const top=[...DATA.kanal].sort((a,b)=>b[1]-a[1])[0];
-$('sovNote').textContent=`${top[0]} mendominasi percakapan dengan ${pct(top[1],kT)} dari total mention.`;
+const topKanal=[...DATA.kanal].sort((a,b)=>b[1]-a[1])[0];
+$('sovNote').textContent=`${topKanal[0]} mendominasi percakapan dengan ${pct(topKanal[1],kT)} dari total mention.`;
 
 const negSorted=[...DATA.kanal].sort((a,b)=>b[2]-a[2]);
 $('negBars').innerHTML=negSorted.map(k=>`<div class="bar"><span class="n">${k[0]}</span><div class="t"><div class="f" style="width:${k[2]/negSorted[0][2]*100}%"></div></div><b>${k[2]}</b> <small>(${pct(k[2],kN)})</small></div>`).join('')+
