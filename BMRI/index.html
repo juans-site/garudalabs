@@ -1,1 +1,238 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analisis Monitoring Percakapan</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root{--navy:#003D79;--navy2:#0a5299;--gold:#FFB700;--bg:#F3F6FA;--card:#fff;--ink:#1c2533;--mute:#6b7685;--line:#e3e8ef;--pos:#2e9b4f;--neg:#d93a3a;--neu:#8a929c}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+.wrap{max-width:1400px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;background:var(--navy);color:#fff;border-radius:14px;padding:16px 22px;border-bottom:5px solid var(--gold)}
+.brand{display:flex;gap:18px;align-items:center}
+.logo{height:48px;background:#fff;border-radius:8px;padding:6px 10px;display:flex;align-items:center}
+.logo img{height:36px}
+.logo span{color:var(--navy);font-weight:700;font-size:12px}
+h1{margin:0;font-size:24px;letter-spacing:.3px}
+.sub{color:var(--gold);font-weight:700;margin-top:2px}
+.total{background:#fff;color:var(--navy);border-radius:10px;padding:8px 18px;text-align:center}
+.total b{font-size:28px;display:block}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.card h2{margin:-14px -14px 12px;padding:8px 14px;font-size:13px;background:var(--navy);color:#fff;border-radius:12px 12px 0 0;border-bottom:3px solid var(--gold);text-transform:uppercase;letter-spacing:.4px}
+.c4{grid-column:span 4}.c3{grid-column:span 3}.c5{grid-column:span 5}.c2{grid-column:span 2}.c6{grid-column:span 6}.c7{grid-column:span 7}.c12{grid-column:span 12}
+@media(max-width:1100px){.c2,.c3,.c4,.c5,.c6,.c7{grid-column:span 6}}
+@media(max-width:700px){.c2,.c3,.c4,.c5,.c6,.c7{grid-column:span 12}header{padding:14px}h1{font-size:19px}}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.kpi .l{font-size:11px;font-weight:700}.kpi .v{font-size:26px;font-weight:800}.kpi .p{font-weight:700}
+.note{background:#f0f4fa;border-left:4px solid var(--gold);padding:8px 10px;border-radius:6px;margin-top:10px;font-size:13px}
+.note.red{background:#fdeeee;border-color:var(--neg)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:3px 0 3px 20px;position:relative;font-size:13px}
+ul.ck li:before{position:absolute;left:0;font-weight:800}
+.pos li:before{content:"✓";color:var(--pos)}.neg li:before{content:"✕";color:var(--neg)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+h3{font-size:13px;margin:0 0 6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--navy);font-size:12px}td.r,th.r{text-align:right}
+tfoot td{font-weight:700;color:var(--navy)}
+.bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+.bar .n{width:80px}.bar .t{flex:1;background:#f1f1f1;border-radius:4px;height:14px}.bar .f{background:var(--neg);height:100%;border-radius:4px}
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;font-size:12px}
+.phases div{border-radius:8px;padding:6px;text-align:center}
+.cloud{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;justify-content:center;padding:6px}
+.cloud span{font-weight:700;line-height:1.1}
+.post{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.post .no{background:var(--neg);color:#fff;border-radius:50%;width:20px;height:20px;flex:none;display:grid;place-items:center;font-size:11px}
+.post small{color:var(--mute)}
+.alert{text-align:center;padding:10px}
+.alert .ic{font-size:56px}.alert .lv{font-weight:800;font-size:28px;color:var(--neg)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;font-weight:600}
+.flow .s{background:#f0f4fa;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.flow .a{color:var(--neg);font-weight:800}
+.reco h3{color:var(--navy);margin-top:8px}
+.disc{border:2px solid var(--neg);background:#fff7f7}
+footer{text-align:center;color:var(--mute);font-size:12px;margin:16px 0}
+.badge{display:inline-block;background:var(--gold);color:var(--navy);font-weight:800;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;font-size:13px}
+.ctrl select{font:inherit;padding:4px 8px;border-radius:6px;border:0}
+#loading{text-align:center;padding:40px;color:var(--mute);font-weight:600}
+.post a{color:var(--navy2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">
+    <div class="logo"><img src="logo.png" alt="" onerror="this.parentNode.innerHTML='<span>LOGO</span>'"></div>
+    <div>
+      <h1>ANALISIS MONITORING PERCAKAPAN</h1>
+      <div class="sub" id="periode">Memuat data…</div>
+      <div class="ctrl">Tanggal: <select id="fTanggal"></select> Sumber: <select id="fSumber"><option value="post">Post</option><option value="komentar">Komentar</option></select> <span id="updated" style="opacity:.8"></span></div>
+    </div>
+  </div>
+  <div class="total">TOTAL MENTION<b id="totalMention">–</b></div>
+</header>
+<div id="loading">Mengambil data dari Google Sheets…</div>
 
+<div class="grid" id="main" style="display:none">
+  <section class="card c4"><h2>1. Total Sentiment</h2><div class="kpis" id="kpis"></div><div class="note" id="sentNote"></div></section>
+  <section class="card c4"><h2>2. Penyebab Utama Sentiment (Topik)</h2><div class="two">
+    <div><h3 style="color:var(--pos)">Penyebab Positif</h3><ul class="ck pos" id="causePos"></ul></div>
+    <div><h3 style="color:var(--neg)">Penyebab Negatif</h3><ul class="ck neg" id="causeNeg"></ul></div></div></section>
+  <section class="card c4"><h2>3. Share of Voice (Kanal)</h2><div class="two">
+    <div style="position:relative;height:190px"><canvas id="sov"></canvas></div>
+    <table id="sovTbl"></table></div><div class="note" id="sovNote"></div></section>
+
+  <section class="card c3"><h2>4. Share of Negative Voice</h2><div id="negBars"></div><div class="note red" id="negNote"></div></section>
+  <section class="card c5"><h2 id="trendTitle">5. Trend of Sentiment</h2><div style="position:relative;height:260px"><canvas id="trend"></canvas></div><div class="note" id="trendNote"></div></section>
+  <section class="card c4"><h2>6. Word Cloud (Percakapan Negatif)</h2><div class="cloud" id="cloud"></div></section>
+
+  <section class="card c4"><h2>7. Top 5 Akun Negatif</h2><table id="topAcc"></table></section>
+  <section class="card c4"><h2>8. Contoh Postingan Negatif</h2><div id="posts"></div></section>
+  <section class="card c4"><h2>9. Krisis / Alert</h2><div class="alert"><div class="ic">🚨</div><div style="font-weight:700">LEVEL RISIKO:</div><div class="lv" id="risk"></div><div id="riskNote" style="font-size:12px;color:var(--mute);margin-top:6px"></div></div></section>
+
+  <section class="card c6"><h2>10. Narasi Krisis Utama (Topik Negatif Terbesar)</h2><div class="flow" id="flow"></div><div class="note red" id="impact"></div></section>
+  <section class="card c6 reco"><h2>11. Rekomendasi Tindak Lanjut</h2><div id="reco"></div></section>
+
+  <section class="card c7"><h2>12. Summary</h2><p id="summary" style="margin:0;line-height:1.6"></p></section>
+  <section class="card c5 disc"><h2 style="background:var(--neg);border-color:var(--neg)">⚠ Disclaimer / Keterangan Data</h2><p id="disclaimer" style="margin:0;font-size:13px;line-height:1.6"></p></section>
+</div>
+<footer>Dashboard monitoring independen · Data otomatis dari Google Sheets "Monitoring Bank Mandiri"</footer>
+</div>
+
+<script>
+/* ===== PENGATURAN ===== */
+const SHEET_ID = "12BRmeOf5no04WlzBuokYGDkqMUivziw3dCLE6lcSz8M";
+const TABS = { post: "Data Post (Gabungan)", komentar: "Data Komentar (Gabungan)" };
+const RISK = { tinggi: 35, sedang: 20 }; // ambang % negatif
+/* ====================== */
+
+const $=id=>document.getElementById(id), fmt=n=>n.toLocaleString('id-ID'),
+  pct=(a,b)=>b?(a/b*100).toFixed(2).replace('.',',')+'%':'0%',
+  esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const BULAN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const COLORS=['#003D79','#FFB700','#d93a3a','#4a8fd6','#2e9b4f','#8a929c','#6b3fa0'];
+const cache={}, charts={};
+
+async function load(src){
+  if(cache[src]) return cache[src];
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(TABS[src])}&_=${Date.now()}`;
+  const txt=await fetch(url).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()});
+  const rows=Papa.parse(txt,{header:true,skipEmptyLines:true}).data;
+  return cache[src]=rows.map(r=>norm(r,src)).filter(r=>r.tgl&&r.sent);
+}
+// Normalisasi: tanggal bisa "dd/mm/yyyy" atau angka serial; jam bisa "HH:MM" atau pecahan hari
+function norm(r,src){
+  let t=r['Waktu']||'', tgl='';
+  if(/^\d{1,2}\/\d{1,2}\/\d{4}/.test(t)){const[d,m,y]=t.split(/[\/ ]/);tgl=`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`}
+  else if(/^\d+([.,]\d+)?$/.test(t)){const d=new Date(Date.UTC(1899,11,30)+parseFloat(t.replace(',','.'))*864e5);tgl=d.toISOString().slice(0,10)}
+  else if(/^\d{4}-\d{2}-\d{2}/.test(t)) tgl=t.slice(0,10);
+  let j=r['Jam']||'', jam=NaN;
+  if(/^\d{1,2}[:.]\d{2}/.test(j)) jam=parseInt(j);
+  else if(/^0?[.,]\d+$|^[01]$/.test(j)) jam=Math.floor(parseFloat(j.replace(',','.'))*24);
+  const s=(r['Sentimen']||'').trim().toLowerCase();
+  return {platform:(r['Platform']||'Lainnya').trim(), user:r['Username']||'', tgl, jam,
+    text:r['Caption']||r['Text Komentar']||'', topik:(r['Topik (tanpa label buzzer)']||r['Topik']||'Lainnya').trim(),
+    sent:s.startsWith('pos')?'positif':s.startsWith('neg')?'negatif':s?'netral':'', link:r['Link']||'',
+    eng:parseInt(r['Jumlah Komentar']||r['Jumlah Likes']||0)||0, tipe:r['Tipe']||''};
+}
+const tglLabel=t=>{const[y,m,d]=t.split('-');return `${+d} ${BULAN[m-1]} ${y}`};
+const count=(arr,key)=>{const m={};arr.forEach(x=>{const k=typeof key=='function'?key(x):x[key];m[k]=(m[k]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+
+async function render(){
+  const src=$('fSumber').value;
+  $('loading').style.display='block';$('loading').textContent='Mengambil data dari Google Sheets…';
+  let all;
+  try{all=await load(src)}catch(e){$('loading').textContent='Gagal mengambil data. Pastikan Google Sheets dibagikan "Anyone with the link – Viewer". ('+e.message+')';return}
+  const dates=[...new Set(all.map(r=>r.tgl))].sort();
+  const sel=$('fTanggal'), prev=sel.value;
+  sel.innerHTML='<option value="all">Semua tanggal</option>'+dates.slice().reverse().map(d=>`<option value="${d}">${tglLabel(d)}</option>`).join('');
+  sel.value=[...sel.options].some(o=>o.value===prev)?prev:'all';
+  const f=sel.value, D=f==='all'?all:all.filter(r=>r.tgl===f);
+  $('loading').style.display='none';$('main').style.display='grid';
+  $('updated').textContent='· diperbarui '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  $('periode').textContent=f==='all'?`${tglLabel(dates[0])} – ${tglLabel(dates.at(-1))}`:tglLabel(f);
+
+  const T=D.length, by=s=>D.filter(r=>r.sent===s), P=by('positif'), N=by('negatif'), Z=by('netral');
+  $('totalMention').textContent=fmt(T);
+  // 1
+  $('kpis').innerHTML=[["😊 POSITIF",P.length,'--pos'],["☹️ NEGATIF",N.length,'--neg'],["😐 NETRAL",Z.length,'--neu'],["TOTAL",T,'--navy']]
+    .map(([l,v,c])=>`<div class="kpi" style="color:var(${c})"><div class="l">${l}</div><div class="v">${fmt(v)}</div><div class="p">${pct(v,T)}</div></div>`).join('');
+  const dom=[['positif',P.length],['netral',Z.length],['negatif',N.length]].sort((a,b)=>b[1]-a[1])[0];
+  const negTop=count(N,'topik');
+  $('sentNote').textContent=`Percakapan didominasi sentimen ${dom[0]} (${pct(dom[1],T)}). Sentimen negatif mencapai ${pct(N.length,T)}${negTop[0]?`, terbesar terkait "${negTop[0][0]}"`:''}.`;
+  // 2
+  const li=(arr,tot)=>arr.slice(0,6).map(([k,v])=>`<li>${esc(k)} <small style="color:var(--mute)">(${v})</small></li>`).join('')||'<li>–</li>';
+  $('causePos').innerHTML=li(count(P,'topik'));$('causeNeg').innerHTML=li(negTop);
+  // 3
+  const kanal=count(D,'platform');
+  charts.sov?.destroy();
+  charts.sov=new Chart($('sov'),{type:'doughnut',data:{labels:kanal.map(k=>k[0]),datasets:[{data:kanal.map(k=>k[1]),backgroundColor:COLORS,borderWidth:2}]},options:{cutout:'58%',maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  $('sovTbl').innerHTML='<tr><th>Kanal</th><th class="r">Vol</th><th class="r">SOV</th></tr>'+
+    kanal.map((k,i)=>`<tr><td><span style="color:${COLORS[i%COLORS.length]}">●</span> ${esc(k[0])}</td><td class="r">${fmt(k[1])}</td><td class="r">${pct(k[1],T)}</td></tr>`).join('')+
+    `<tfoot><tr><td>TOTAL</td><td class="r">${fmt(T)}</td><td class="r">100%</td></tr></tfoot>`;
+  $('sovNote').textContent=kanal[0]?`${kanal[0][0]} mendominasi percakapan dengan ${pct(kanal[0][1],T)} dari total mention.`:'';
+  // 4
+  const negK=count(N,'platform'), nMax=negK[0]?.[1]||1;
+  $('negBars').innerHTML=negK.map(k=>`<div class="bar"><span class="n">${esc(k[0])}</span><div class="t"><div class="f" style="width:${k[1]/nMax*100}%"></div></div><b>${k[1]}</b> <small>(${pct(k[1],N.length)})</small></div>`).join('')+
+    `<div class="bar"><b class="n">TOTAL</b><span style="flex:1"></span><b>${N.length}</b></div>`;
+  $('negNote').textContent=negK[0]?`${negK[0][0]} menyumbang ${negK[0][1]} dari ${N.length} mention negatif (${pct(negK[0][1],N.length)}).`:'Tidak ada mention negatif.';
+  // 5 per jam (1 tanggal) atau per hari (semua)
+  let labels,key;
+  if(f==='all'){labels=dates;key=r=>r.tgl;$('trendTitle').textContent='5. Trend of Sentiment (per Hari)'}
+  else{labels=[...Array(24).keys()].map(h=>String(h).padStart(2,'0')+'.00');key=r=>String(r.jam).padStart(2,'0')+'.00';$('trendTitle').textContent='5. Trend of Sentiment (per Jam)'}
+  const ser=s=>labels.map(l=>D.filter(r=>r.sent===s&&key(r)===l).length);
+  const sp=ser('positif'),sn=ser('negatif'),sz=ser('netral');
+  if(f!=='all'){let last=labels.length-1;while(last>0&&sp[last]+sn[last]+sz[last]===0)last--;[labels,sp,sn,sz].forEach(a=>a.length=last+1)}
+  const ds=(l,d,c)=>({label:l,data:d,borderColor:c,backgroundColor:c,tension:.3,pointRadius:3});
+  charts.trend?.destroy();
+  charts.trend=new Chart($('trend'),{type:'line',data:{labels:labels.map(l=>f==='all'?tglLabel(l):l),datasets:[ds('Positif',sp,'#2e9b4f'),ds('Negatif',sn,'#d93a3a'),ds('Netral',sz,'#8a929c')]},
+    options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{y:{beginAtZero:true}}}});
+  const pk=sn.indexOf(Math.max(...sn));
+  $('trendNote').textContent=Math.max(...sn)>0?`Puncak sentimen negatif: ${f==='all'?tglLabel(labels[pk]):'pukul '+labels[pk]} (${sn[pk]} mention).`:'';
+  // 6 word cloud
+  const STOP=new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue gw lu kamu dia mereka nya ya ga gak nggak enggak tapi karena jadi lagi mau buat sama oleh dalam bank mandiri bankmandiri bmri livin the https http www com co id dll yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu min admin mohon terima kasih halo sahabat apa siapa udah udh sdh tdk gimana bagaimana'.split(' '));
+  const wc={};N.forEach(r=>r.text.toLowerCase().replace(/https?:\S+|[@#]\S+/g,' ').split(/[^a-z0-9]+/).forEach(w=>{if(w.length>3&&!STOP.has(w)&&!/^\d+$/.test(w))wc[w]=(wc[w]||0)+1}));
+  const words=Object.entries(wc).sort((a,b)=>b[1]-a[1]).slice(0,28), wMax=words[0]?.[1]||1, wcc=['#003D79','#d93a3a','#c98f00','#0a5299','#2e7d6b','#6b3fa0'];
+  words.sort(()=>Math.random()-.5);
+  $('cloud').innerHTML=words.map((w,i)=>`<span title="${w[1]}x" style="font-size:${12+w[1]/wMax*30}px;color:${wcc[i%wcc.length]}">${esc(w[0])}</span>`).join('')||'–';
+  // 7
+  const acc={};N.forEach(r=>{const a=acc[r.user]||(acc[r.user]={n:0,eng:0,topik:{},pf:r.platform});a.n++;a.eng+=r.eng;a.topik[r.topik]=(a.topik[r.topik]||0)+1});
+  const topAcc=Object.entries(acc).sort((a,b)=>b[1].n-a[1].n||b[1].eng-a[1].eng).slice(0,5);
+  $('topAcc').innerHTML=`<tr><th>No</th><th>Akun</th><th class="r">Post Neg.</th><th class="r">${src==='post'?'Komentar':'Likes'}</th><th>Topik</th></tr>`+
+    topAcc.map(([u,a],i)=>`<tr><td>${i+1}</td><td><b>${esc(u)}</b><br><small style="color:var(--mute)">${esc(a.pf)}</small></td><td class="r">${a.n}</td><td class="r">${fmt(a.eng)}</td><td>${esc(Object.entries(a.topik).sort((x,y)=>y[1]-x[1])[0][0])}</td></tr>`).join('');
+  // 8
+  const ex=[...N].sort((a,b)=>b.eng-a.eng).slice(0,5);
+  $('posts').innerHTML=ex.map((p,i)=>`<div class="post"><span class="no">${i+1}</span><div><b>${esc(p.user)}</b> <small>• ${esc(p.platform)} • ${tglLabel(p.tgl)} • ${p.eng} ${src==='post'?'komentar':'likes'}</small><br>“${esc(p.text.slice(0,140))}${p.text.length>140?'…':''}” ${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener">lihat</a>`:''}</div></div>`).join('')||'–';
+  // 9
+  const nP=T?N.length/T*100:0, lvl=nP>=RISK.tinggi?'TINGGI':nP>=RISK.sedang?'SEDANG':'RENDAH';
+  $('risk').textContent=lvl;$('risk').style.color=lvl==='TINGGI'?'var(--neg)':lvl==='SEDANG'?'#c98f00':'var(--pos)';
+  $('riskNote').textContent=`Negatif ${pct(N.length,T)} (Tinggi ≥${RISK.tinggi}%, Sedang ≥${RISK.sedang}%)`;
+  // 10
+  $('flow').innerHTML=negTop.slice(0,5).map(([k,v])=>`<span class="s">${esc(k)} <b style="color:var(--neg)">${v}</b></span>`).join('<span class="a">→</span>')||'–';
+  $('impact').textContent=negTop.length?`${negTop.slice(0,3).reduce((s,x)=>s+x[1],0)} dari ${N.length} mention negatif (${pct(negTop.slice(0,3).reduce((s,x)=>s+x[1],0),N.length)}) berasal dari 3 topik teratas. Dampak: reputasi, kepercayaan nasabah, dan sentimen investor.`:'';
+  // 11
+  const t3=negTop.slice(0,3).map(x=>x[0]), negPf=negK[0]?.[0]||'kanal utama';
+  const reco={"Jangka Pendek":[...t3.map(t=>`Siapkan holding statement & klarifikasi untuk isu "${t}"`),`Perkuat respons akun resmi di ${negPf}`,"Pantau akun negatif dengan engagement tertinggi"],
+    "Jangka Menengah":["Susun FAQ untuk pertanyaan yang berulang","Koordinasi dengan unit terkait untuk penyelesaian isu","Laporan monitoring harian ke manajemen"],
+    "Jangka Reputasi":["Dorong konten positif dari topik "+(count(P,'topik')[0]?.[0]||'kinerja'),"Libatkan media & komunitas untuk narasi penyeimbang","Evaluasi tren NSI mingguan"]};
+  $('reco').innerHTML=Object.entries(reco).map(([k,v])=>`<h3>${k}</h3><ul class="ck pos">${v.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`).join('');
+  // 12
+  const nsi=T?Math.round((P.length-N.length)/T*100):0;
+  $('summary').textContent=`Monitoring periode ${$('periode').textContent} mencatat ${fmt(T)} ${src==='post'?'post':'komentar'}: ${fmt(P.length)} positif (${pct(P.length,T)}), ${fmt(N.length)} negatif (${pct(N.length,T)}), dan ${fmt(Z.length)} netral (${pct(Z.length,T)}), dengan Net Sentiment Index ${nsi}. `+
+    (negTop[0]?`Isu negatif terbesar adalah "${negTop[0][0]}" (${negTop[0][1]} mention)${negTop[1]?`, disusul "${negTop[1][0]}" (${negTop[1][1]})`:''}. `:'')+
+    (kanal[0]?`Percakapan paling banyak terjadi di ${kanal[0][0]} (${pct(kanal[0][1],T)}). `:'')+`Level risiko saat ini: ${lvl}.`;
+  $('disclaimer').textContent=`Analisis dihitung otomatis dari sheet "${TABS[src]}" (Google Sheets) pada kanal: ${kanal.map(k=>k[0]).join(', ')}. Sentimen dan topik mengikuti label di sheet. Metrik merepresentasikan data yang berhasil terpantau dan dapat berubah saat sheet diperbarui. Dashboard ini adalah analisis independen, bukan publikasi resmi bank.`;
+}
+$('fTanggal').onchange=render;$('fSumber').onchange=render;
+render();
+setInterval(()=>{delete cache.post;delete cache.komentar;render()},5*60*1000); // refresh tiap 5 menit
+</script>
+</body>
+</html>
