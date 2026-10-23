@@ -234,3 +234,12 @@ footer{text-align:center;color:var(--mute);font-size:12px;margin:28px 0 8px}
 .pager button:disabled{opacity:.4;cursor:default}
 .pager span{color:var(--mute)}
 @media(max-width:640px){.raw-bar .hint{margin-left:0;width:100%}.raw-bar select{flex:1}}
+
+/* Raw data: tabel bisa di-scroll di dalam kartu, header kolom tetap terlihat */
+.raw-wrap{max-height:calc(100vh - 230px);min-height:320px;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.raw-wrap::-webkit-scrollbar{width:8px;height:8px}.raw-wrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+.raw thead th{z-index:2}
+.raw .cap .txt{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.raw .cap .txt.open{display:block}
+.raw .cap .more{border:0;background:none;padding:0;margin-top:4px;font-size:12px;font-weight:600;color:var(--mute);cursor:pointer}
+.raw .cap .more:hover{color:var(--ink)}

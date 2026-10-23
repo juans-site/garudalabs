@@ -85,7 +85,7 @@ async function render() {
 
   const single = from === to, isAll = from <= minD && to >= maxD, D = all.filter(r => inRange(r.tgl));
   $('loading').hidden = true; $('main').hidden = false;
-  state.rawD = D; state.rawUnitPost = state.src; renderRaw(true);
+  state.rawD = D; state.rawUnitPost = state.src; renderRaw(true); document.querySelector('.raw-wrap').scrollTop = 0;
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
   const unit = { post: 'post', komentar: 'komentar', all: 'mention' }[state.src];
@@ -312,7 +312,7 @@ function renderRaw(reset) {
   $('rawBody').innerHTML = view.map(r => `<tr>
     <td class="nw"><b>${tglShort(r.tgl)} ${r.tgl.slice(0, 4)}</b><br><small>${r.jamStr || '–'}</small></td>
     <td class="acc"><b title="${esc(r.user)}">${esc(r.user || '–')}</b><span class="chip sm"><i style="background:${pColor(r.platform)}"></i>${esc(r.platform)}</span></td>
-    <td class="cap">${esc(r.text)}</td>
+    <td class="cap"><div class="txt">${esc(r.text)}</div>${r.text.length > 220 ? '<button class="more">Selengkapnya</button>' : ''}</td>
     <td><span class="badge ${r.sent}">${r.sent[0].toUpperCase() + r.sent.slice(1)}</span></td>
     <td class="r">${fmt(r.eng)}<br><small>${r.kind === 'post' ? 'komentar' : 'likes'}</small></td>
     <td class="c">${r.link ? `<a class="lnk" href="${esc(r.link)}" target="_blank" rel="noopener" title="Buka link" aria-label="Buka link">↗</a>` : '–'}</td>
@@ -327,4 +327,10 @@ let qT; $('rawQ').oninput = e => { clearTimeout(qT); qT = setTimeout(() => { raw
 $('rawSent').onclick = e => { const b = e.target.closest('button'); if (!b) return; raw.sent = b.dataset.v; raw.page = 1; [...$('rawSent').children].forEach(x => x.classList.toggle('on', x === b)); renderRaw(); };
 $('rawPf').onchange = e => { raw.pf = e.target.value; raw.page = 1; renderRaw(); };
 document.querySelectorAll('th.sortable').forEach(th => th.onclick = () => { const s = th.dataset.sort; raw.dir = raw.sort === s ? -raw.dir : -1; raw.sort = s; raw.page = 1; renderRaw(); });
-$('rawPager').onclick = e => { const b = e.target.closest('button'); if (!b || b.disabled) return; raw.page = +b.dataset.p; renderRaw(); $('viewRaw').scrollIntoView({ behavior: 'smooth' }); };
+$('rawPager').onclick = e => { const b = e.target.closest('button'); if (!b || b.disabled) return; raw.page = +b.dataset.p; renderRaw(); document.querySelector('.raw-wrap').scrollTop = 0; };
+// buka / tutup caption panjang
+$('rawBody').onclick = e => {
+  const t = e.target.closest('.cap'); if (!t || !(e.target.closest('.more') || e.target.closest('.txt'))) return;
+  const txt = t.querySelector('.txt'), more = t.querySelector('.more'); if (!more) return;
+  txt.classList.toggle('open'); more.textContent = txt.classList.contains('open') ? 'Tutup' : 'Selengkapnya';
+};
