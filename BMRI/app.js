@@ -14,7 +14,7 @@ const tglLabel = t => { const [y, m, d] = t.split('-'); return `${+d} ${BULAN[m 
 const tglShort = t => { const [, m, d] = t.split('-'); return `${+d} ${BULAN[m - 1]}`; };
 const PLATFORM_COLOR = { twitter: '#1d9bf0', x: '#1d9bf0', facebook: '#1877f2', instagram: '#e1306c', tiktok: '#25d5e4', youtube: '#ff3b30', threads: '#9b8cff', linkedin: '#0a66c2', news: '#f59e0b', media: '#f59e0b' };
 const pColor = p => PLATFORM_COLOR[p.toLowerCase().split(/[ /]/)[0]] || '#94a3b8';
-const SENT = { positif: '#22c55e', negatif: '#ef4444', netral: '#94a3b8' };
+const SENT = { positif: '#22C55E', negatif: '#F05252', netral: '#94A3B8' };
 
 const state = { cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'all' }; // from/to = 'yyyy-mm-dd', null = semua
 const cache = {}, charts = {};
@@ -94,7 +94,10 @@ async function render() {
   const S = stats(D), N = D.filter(r => r.sent === 'negatif'), P = D.filter(r => r.sent === 'positif');
 
   /* KPI + sparkline per hari + perbandingan dengan hari sebelumnya */
-  const perDay = dates.map(d => stats(all.filter(r => r.tgl === d)));
+  // Grafik kecil mengikuti date range: per hari, atau per jam bila hanya 1 hari
+  const perDay = single
+    ? [...Array(24).keys()].map(h => stats(D.filter(r => r.jam === h)))
+    : days.map(d => stats(D.filter(r => r.tgl === d)));
   // Pembanding: periode sebelumnya dengan jumlah hari yang sama
   const span = days.length, prevDays = dates.filter(d => d < from).slice(-span);
   const cur = S, prev = (!isAll && prevDays.length === span) ? stats(all.filter(r => prevDays.includes(r.tgl))) : undefined;
@@ -120,7 +123,7 @@ async function render() {
   $('kpis').innerHTML = K.map((k, i) => `<div class="kpi"><div class="top"><span class="ic">${k[0]}</span><canvas id="sp${i}"></canvas></div>
     <div class="l">${k[1]}</div><div class="v">${k[2]}</div><div class="d">${k[5]}</div></div>`).join('');
   document.querySelectorAll('.kpi .v small').forEach(s => s.style.cssText = 'font-size:13px;color:var(--mute);font-weight:600;margin-left:4px');
-  K.forEach((k, i) => new Chart($('sp' + i), { type: 'line', data: { labels: dates, datasets: [{ data: k[3], borderColor: k[4], borderWidth: 2, pointRadius: 0, tension: .4, fill: false }] },
+  K.forEach((k, i) => new Chart($('sp' + i), { type: 'line', data: { labels: perDay.map((_, x) => x), datasets: [{ data: k[3], borderColor: k[4], borderWidth: 2, pointRadius: 0, tension: .4, fill: false }] },
     options: { responsive: false, animation: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } } }));
 
   /* Tren */
@@ -175,7 +178,7 @@ async function render() {
   const cloudSrc = state.cloud === 'pos' ? P : N;
   const wc = {}; cloudSrc.forEach(r => r.text.toLowerCase().replace(/https?:\S+|[@#]\S+/g, ' ').split(/[^a-z0-9]+/).forEach(w => { if (w.length > 3 && !STOP.has(w) && !/^\d+$/.test(w)) wc[w] = (wc[w] || 0) + 1; }));
   const words = Object.entries(wc).sort((a, b) => b[1] - a[1]).slice(0, 30), wMax = words[0]?.[1] || 1;
-  const wcc = state.cloud === 'pos' ? ['#22c55e', '#38bdf8', '#FDB913', '#a78bfa', '#14b8a6', css('--ink')] : ['#ef4444', '#FDB913', '#f97316', '#a78bfa', '#38bdf8', css('--ink')];
+  const wcc = state.cloud === 'pos' ? ['#22c55e', '#38bdf8', '#FFBE00', '#a78bfa', '#14b8a6', css('--ink')] : ['#F05252', '#FFBE00', '#f97316', '#a78bfa', '#38bdf8', css('--ink')];
   words.sort((a, b) => a[0].localeCompare(b[0]));
   $('cloud').innerHTML = words.map((w, i) => `<span title="${w[1]}x" style="font-size:${12 + w[1] / wMax * 26}px;color:${wcc[i % wcc.length]}">${esc(w[0])}</span>`).join('') || '<p class="empty">Belum ada data</p>';
   $('cloudTitle').textContent = `Word Cloud ${state.cloud === 'pos' ? 'Positif' : 'Negatif'}`;

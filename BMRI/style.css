@@ -1,13 +1,14 @@
 :root{
-  --gold:#FDB913;--navy:#0D2B5B;--pos:#22c55e;--neg:#ef4444;--neu:#94a3b8;
+  --gold:#FFBE00;--navy:#0D2B5B;--pos:#22C55E;--neg:#F05252;--neu:#94A3B8;
   --radius:16px;--side:260px;
 }
 [data-theme=dark]{
-  --bg:#0a0f1a;--side-bg:#0d1422;--card:#111a2b;--card2:#16213a;--line:#1f2b42;
-  --ink:#e8edf6;--mute:#8b98ae;--accent:#FDB913;--accent-ink:#0D2B5B;--scheme:dark;--hover:#18243b;--active:#1b2c4a;
+  /* Charcoal Black · Near Black · Graphite · Dark Gray · Soft White · Muted Gray · Mandiri Yellow */
+  --bg:#18191B;--nav:#111214;--card:#242629;--card2:#2C2E32;--line:#393B40;
+  --ink:#F4F4F5;--mute:#A1A1AA;--accent:#FFBE00;--accent-ink:#111214;--scheme:dark;--hover:#2C2E32;--active:#33363B;
 }
 [data-theme=light]{
-  --bg:#f3f5f9;--side-bg:#ffffff;--card:#ffffff;--card2:#f6f8fc;--line:#e4e8f0;
+  --bg:#f3f5f9;--nav:#ffffff;--card:#ffffff;--card2:#f6f8fc;--line:#e4e8f0;
   --ink:#16213a;--mute:#66728a;--accent:#0D2B5B;--accent-ink:#fff;--scheme:light;--hover:#f1f4f9;--active:#e8eef8;
 }
 *{box-sizing:border-box}
@@ -243,3 +244,6 @@ footer{text-align:center;color:var(--mute);font-size:12px;margin:28px 0 8px}
 .raw .cap .txt.open{display:block}
 .raw .cap .more{border:0;background:none;padding:0;margin-top:4px;font-size:12px;font-weight:600;color:var(--mute);cursor:pointer}
 .raw .cap .more:hover{color:var(--ink)}
+
+/* Navbar warna tersendiri */
+.topbar{background:var(--nav)}
