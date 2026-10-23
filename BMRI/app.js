@@ -64,7 +64,7 @@ function mk(id, cfg) { charts[id]?.destroy(); charts[id] = new Chart($(id), cfg)
 
 /* ---------- Render ---------- */
 async function render() {
-  $('loading').hidden = false; $('loading').textContent = 'Memuat data…';
+  $('loading').hidden = !$('main').hidden; // spinner hanya saat pertama memuat
   let all;
   try { all = await load(state.src); }
   catch (e) { $('loading').textContent = `Gagal memuat data. Silakan muat ulang halaman beberapa saat lagi. (${e.message})`; return; }
