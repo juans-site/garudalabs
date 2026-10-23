@@ -1,6 +1,6 @@
 /* ===== PENGATURAN ===== */
 const SHEET_ID = "12BRmeOf5no04WlzBuokYGDkqMUivziw3dCLE6lcSz8M";
-const TABS = { post: "Data Post (Gabungan)", komentar: "Data Komentar (Gabungan)" };
+const TABS = { post: "Post", komentar: "Komentar" };
 const RISK = { tinggi: 35, sedang: 20 };          // ambang % negatif
 const REFRESH_MENIT = 5;
 /* ====================== */
