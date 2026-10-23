@@ -16,7 +16,7 @@ const PLATFORM_COLOR = { twitter: '#1d9bf0', x: '#1d9bf0', facebook: '#1877f2', 
 const pColor = p => PLATFORM_COLOR[p.toLowerCase().split(/[ /]/)[0]] || '#94a3b8';
 const SENT = { positif: '#22c55e', negatif: '#ef4444', netral: '#94a3b8' };
 
-const state = { src: 'post', tgl: 'all' };
+const state = { src: 'post', from: null, to: null, preset: 'all' }; // from/to = 'yyyy-mm-dd', null = semua
 const cache = {}, charts = {};
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
@@ -69,14 +69,19 @@ async function render() {
   try { all = await load(state.src); }
   catch (e) { $('loading').textContent = `Gagal mengambil data. Pastikan Google Sheets dibagikan "Anyone with the link – Viewer". (${e.message})`; return; }
   const dates = [...new Set(all.map(r => r.tgl))].sort();
-  if (state.tgl !== 'all' && !dates.includes(state.tgl)) state.tgl = 'all';
-  $('fTanggal').innerHTML = `<button data-v="all">Semua</button>` + dates.map(d => `<button data-v="${d}">${tglShort(d)}</button>`).join('');
-  [...$('fTanggal').children].forEach(b => b.classList.toggle('on', b.dataset.v === state.tgl));
+  const minD = dates[0], maxD = dates.at(-1);
+  applyPreset(dates);
+  const from = state.from || minD, to = state.to || maxD;
+  const inRange = d => d >= from && d <= to;
+  const days = dates.filter(inRange);
+  buildPicker(dates, from, to);
 
-  const f = state.tgl, D = f === 'all' ? all : all.filter(r => r.tgl === f);
+
+
+  const single = from === to, isAll = from <= minD && to >= maxD, D = all.filter(r => inRange(r.tgl));
   $('loading').hidden = true; $('main').hidden = false;
-  $('updated').textContent = 'Diperbarui ' + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ` · otomatis tiap ${REFRESH_MENIT} menit`;
-  const periode = f === 'all' ? `${tglLabel(dates[0])} – ${tglLabel(dates.at(-1))}` : tglLabel(f);
+
+  const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
   const unit = state.src === 'post' ? 'post' : 'komentar';
   $('periode').textContent = `Percakapan media sosial terkait Bank Mandiri · ${periode} · ${unit}`;
 
@@ -84,13 +89,16 @@ async function render() {
 
   /* KPI + sparkline per hari + perbandingan dengan hari sebelumnya */
   const perDay = dates.map(d => stats(all.filter(r => r.tgl === d)));
-  const idx = f === 'all' ? dates.length - 1 : dates.indexOf(f);
-  const cur = perDay[idx], prev = perDay[idx - 1];
+  // Pembanding: periode sebelumnya dengan jumlah hari yang sama
+  const span = days.length, prevDays = dates.filter(d => d < from).slice(-span);
+  const cur = S, prev = (!isAll && prevDays.length === span) ? stats(all.filter(r => prevDays.includes(r.tgl))) : undefined;
+  const prevLbl = prevDays.length ? (span === 1 ? tglShort(prevDays[0]) : `${span} hari sebelumnya`) : '';
+
   const delta = (a, b, unitTxt, inverse) => {
-    if (f === 'all') return `<span>tren ${dates.length} hari (grafik kecil)</span>`;
+    if (isAll) return `<span>tren ${dates.length} hari</span>`;
     if (b === undefined) return `<span>tidak ada pembanding</span>`;
     const d = a - b, good = inverse ? d < 0 : d > 0, cls = d === 0 ? '' : good ? 'up' : 'down';
-    return `<b class="${cls}">${d > 0 ? '▲ +' : d < 0 ? '▼ ' : ''}${(Math.round(d * 10) / 10).toString().replace('.', ',')}${unitTxt}</b> vs ${tglShort(dates[idx - 1])}`;
+    return `<b class="${cls}">${d > 0 ? '▲ +' : d < 0 ? '▼ ' : ''}${(Math.round(d * 10) / 10).toString().replace('.', ',')}${unitTxt}</b> vs ${prevLbl}`;
   };
   const lvl = S.negP >= RISK.tinggi ? 'TINGGI' : S.negP >= RISK.sedang ? 'SEDANG' : 'RENDAH';
   const lvlColor = { TINGGI: SENT.negatif, SEDANG: '#f59e0b', RENDAH: SENT.positif }[lvl];
@@ -111,17 +119,17 @@ async function render() {
 
   /* Tren */
   let labels, key;
-  if (f === 'all') { labels = dates; key = r => r.tgl; $('trendTitle').textContent = 'Tren Sentimen per Hari'; }
+  if (!single) { labels = days; key = r => r.tgl; $('trendTitle').textContent = 'Tren Sentimen per Hari'; }
   else { labels = [...Array(24).keys()].map(h => String(h).padStart(2, '0') + '.00'); key = r => String(r.jam).padStart(2, '0') + '.00'; $('trendTitle').textContent = 'Tren Sentimen per Jam'; }
   const ser = s => labels.map(l => D.filter(r => r.sent === s && key(r) === l).length);
   const sp = ser('positif'), sn = ser('negatif'), sz = ser('netral');
-  if (f !== 'all') { let last = labels.length - 1; while (last > 0 && sp[last] + sn[last] + sz[last] === 0) last--; [labels, sp, sn, sz].forEach(a => a.length = last + 1); }
+  if (single) { let last = labels.length - 1; while (last > 0 && sp[last] + sn[last] + sz[last] === 0) last--; [labels, sp, sn, sz].forEach(a => a.length = last + 1); }
   const area = (label, data, c) => ({ label, data, borderColor: c, borderWidth: 2.5, tension: .4, pointRadius: 0, pointHoverRadius: 5, fill: true,
     backgroundColor: ctx => { const { chart } = ctx, a = chart.chartArea; if (!a) return c + '22'; const g = chart.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, c + '40'); g.addColorStop(1, c + '00'); return g; } });
-  mk('cTrend', { type: 'line', data: { labels: labels.map(l => f === 'all' ? tglShort(l) : l), datasets: [area('Negatif', sn, SENT.negatif), area('Netral', sz, SENT.netral), area('Positif', sp, SENT.positif)] },
+  mk('cTrend', { type: 'line', data: { labels: labels.map(l => !single ? tglShort(l) : l), datasets: [area('Negatif', sn, SENT.negatif), area('Netral', sz, SENT.netral), area('Positif', sp, SENT.positif)] },
     options: baseOpts({ interaction: { mode: 'index', intersect: false } }) });
   const pk = sn.indexOf(Math.max(...sn));
-  $('trendNote').textContent = Math.max(...sn) > 0 ? `Puncak negatif: ${f === 'all' ? tglShort(labels[pk]) : 'pukul ' + labels[pk]} (${sn[pk]})` : '';
+  $('trendNote').textContent = Math.max(...sn) > 0 ? `Puncak negatif: ${!single ? tglShort(labels[pk]) : 'pukul ' + labels[pk]} (${sn[pk]})` : '';
 
   /* Share of voice: bar horizontal */
   const kanal = count(D, 'platform');
@@ -199,14 +207,42 @@ $('themeBtn').onclick = () => {
   setThemeIcon(); render();
 };
 setThemeIcon();
-$('fTanggal').onclick = e => { const b = e.target.closest('button'); if (!b) return; state.tgl = b.dataset.v; render(); };
+
 $('fSumber').onclick = e => { const b = e.target.closest('button'); if (!b) return; state.src = b.dataset.v; [...$('fSumber').children].forEach(x => x.classList.toggle('on', x === b)); render(); };
-$('menuBtn').onclick = () => document.body.classList.toggle('nav-open');
-$('backdrop').onclick = () => document.body.classList.remove('nav-open');
-document.querySelectorAll('nav a').forEach(a => a.onclick = () => document.body.classList.remove('nav-open'));
-// Sorot menu sesuai bagian yang sedang dilihat
-const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) document.querySelectorAll('nav a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-40% 0px -55% 0px' });
-document.querySelectorAll('nav a').forEach(a => { const s = document.querySelector(a.getAttribute('href')); if (s) io.observe(s); });
+
+
+
+// Date range picker
+function applyPreset(dates) {
+  const maxD = dates.at(-1), p = state.preset;
+  if (p === 'custom') return;
+  if (p === 'all') { state.from = state.to = null; return; }
+  const n = { last1: 1, last3: 3, last7: 7 }[p];
+  const sel = dates.slice(-n); state.from = sel[0]; state.to = maxD;
+}
+const PRESETS = [['all', 'Semua periode'], ['last1', 'Hari terakhir'], ['last3', '3 hari terakhir'], ['last7', '7 hari terakhir']];
+function buildPicker(dates, from, to) {
+  const maxD = dates.at(-1);
+  $('presets').innerHTML = PRESETS.map(([k, l]) => `<button data-p="${k}" class="${state.preset === k ? 'on' : ''}">${l}${k === 'last1' ? `<small>${tglShort(maxD)}</small>` : ''}</button>`).join('');
+  $('dFrom').min = $('dTo').min = dates[0]; $('dFrom').max = $('dTo').max = maxD;
+  $('dFrom').value = from; $('dTo').value = to;
+  const lbl = PRESETS.find(p => p[0] === state.preset);
+  $('drLabel').textContent = state.preset === 'custom' ? (from === to ? tglLabel(from) : `${tglShort(from)} – ${tglLabel(to)}`) : lbl[1];
+}
+const pop = $('drPop'), openPop = o => { pop.hidden = !o; $('drBtn').setAttribute('aria-expanded', o); };
+$('drBtn').onclick = e => { e.stopPropagation(); openPop(pop.hidden); };
+pop.onclick = e => e.stopPropagation();
+document.addEventListener('click', () => openPop(false));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') openPop(false); });
+$('presets').onclick = e => { const b = e.target.closest('button'); if (!b) return; state.preset = b.dataset.p; openPop(false); render(); };
+$('drCancel').onclick = () => openPop(false);
+$('drApply').onclick = () => {
+  let a = $('dFrom').value, b = $('dTo').value; if (!a || !b) return;
+  if (a > b) [a, b] = [b, a];
+  state.preset = 'custom'; state.from = a; state.to = b; openPop(false); render();
+};
+
+
 
 Chart.defaults.font.family = 'Plus Jakarta Sans, system-ui, sans-serif';
 render();

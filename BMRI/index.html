@@ -12,80 +12,69 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
-<aside class="sidebar" id="sidebar">
-  <div class="brand"><img src="logo.png" alt="Logo"><div><b>Monitoring</b><small>Social Listening</small></div></div>
-  <nav>
-    <div class="nav-label">Analisis</div>
-    <a href="#ringkasan" class="active"><i>▦</i>Ringkasan</a>
-    <a href="#tren"><i>↗</i>Tren Sentimen</a>
-    <a href="#kanal"><i>◎</i>Kanal</a>
-    <a href="#isu"><i>#</i>Isu & Topik</a>
-    <a href="#postingan"><i>✎</i>Postingan Negatif</a>
-    <a href="#akun"><i>☺</i>Akun Negatif</a>
-    <div class="nav-label">Laporan</div>
-    <a href="#krisis"><i>⚠</i>Krisis & Alert</a>
-    <a href="#rekomendasi"><i>✓</i>Rekomendasi</a>
-    <a href="#summary"><i>≡</i>Summary</a>
-  </nav>
-  <div class="side-foot">
-    <label>Sumber data</label>
-    <div class="seg" id="fSumber"><button data-v="post" class="on">Post</button><button data-v="komentar">Komentar</button></div>
-    <small id="updated">Memuat…</small>
+<header class="topbar">
+  <div class="brand">
+    <img class="logo logo-dark" src="logo-dark.png" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png" alt="Logo">
+    <span class="divider"></span>
+    <span class="brand-t">Social Listening</span>
   </div>
-</aside>
-<div class="backdrop" id="backdrop"></div>
+  <button class="icon-btn" id="themeBtn" aria-label="Ganti tema" title="Mode gelap / terang"></button>
+</header>
 
-<main>
-  <header class="topbar">
-    <button class="icon-btn menu" id="menuBtn" aria-label="Menu">☰</button>
-    <div class="crumb">Monitoring <span>›</span> <b>Bank Mandiri</b></div>
-    <div class="top-right">
-      <span class="live"><i></i>Live dari Google Sheets</span>
-      <button class="icon-btn" id="themeBtn" aria-label="Ganti tema" title="Dark / Light"></button>
+<main class="content">
+  <div class="page-head">
+    <div><h1>Analisis Monitoring Percakapan</h1><p id="periode">Memuat data…</p></div>
+    <div class="controls">
+      <div class="seg" id="fSumber"><button data-v="post" class="on">Post</button><button data-v="komentar">Komentar</button></div>
+      <div class="dr">
+        <button class="dr-btn" id="drBtn" aria-haspopup="true" aria-expanded="false"><span>📅</span><b id="drLabel">Semua periode</b><span class="caret">▾</span></button>
+        <div class="dr-pop" id="drPop" hidden>
+          <div class="presets" id="presets"></div>
+          <div class="custom">
+            <label>Rentang kustom</label>
+            <div class="dates"><input type="date" id="dFrom"><span>–</span><input type="date" id="dTo"></div>
+            <div class="dr-act"><button class="btn ghost" id="drCancel">Batal</button><button class="btn" id="drApply">Terapkan</button></div>
+          </div>
+        </div>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <div class="content">
-    <div class="page-head" id="ringkasan">
-      <div><h1>Analisis Monitoring Percakapan</h1><p id="periode">Memuat data…</p></div>
-      <div class="seg" id="fTanggal"></div>
+  <div id="loading" class="loading">Mengambil data dari Google Sheets…</div>
+
+  <div id="main" hidden>
+    <section class="kpis" id="kpis"></section>
+
+    <div class="row">
+      <section class="card"><div class="card-h"><h2 id="trendTitle">Tren Sentimen</h2><span class="hint" id="trendNote"></span></div><div class="chart h300"><canvas id="cTrend"></canvas></div></section>
+      <section class="card"><div class="card-h"><h2>Share of Voice per Kanal</h2><span class="hint" id="sovNote"></span></div><div class="chart h300"><canvas id="cSov"></canvas></div></section>
     </div>
 
-    <div id="loading" class="loading">Mengambil data dari Google Sheets…</div>
-
-    <div id="main" hidden>
-      <section class="kpis" id="kpis"></section>
-
-      <div class="row">
-        <section class="card" id="tren"><div class="card-h"><h2 id="trendTitle">Tren Sentimen</h2><span class="hint" id="trendNote"></span></div><div class="chart h300"><canvas id="cTrend"></canvas></div></section>
-        <section class="card" id="kanal"><div class="card-h"><h2>Share of Voice per Kanal</h2><span class="hint" id="sovNote"></span></div><div class="chart h300"><canvas id="cSov"></canvas></div></section>
-      </div>
-
-      <div class="row">
-        <section class="card"><div class="card-h"><h2>Sentimen per Kanal</h2><span class="hint" id="negNote"></span></div><div class="chart h300"><canvas id="cKanalSent"></canvas></div></section>
-        <section class="card" id="isu"><div class="card-h"><h2>Penyebab Utama Sentimen</h2></div>
-          <div class="cause"><div><h3 class="pos">Positif</h3><ul id="causePos"></ul></div><div><h3 class="neg">Negatif</h3><ul id="causeNeg"></ul></div></div>
-        </section>
-      </div>
-
-      <section class="card" id="postingan"><div class="card-h"><h2>🔥 Postingan Negatif Teratas</h2><span class="hint">berdasarkan engagement</span></div><div class="posts" id="posts"></div></section>
-
-      <div class="row three">
-        <section class="card"><div class="card-h"><h2>Word Cloud Negatif</h2></div><div class="cloud" id="cloud"></div></section>
-        <section class="card" id="akun"><div class="card-h"><h2>Top 5 Akun Negatif</h2></div><table class="tbl" id="topAcc"></table></section>
-        <section class="card risk" id="krisis"><div class="card-h"><h2>Krisis / Alert</h2></div>
-          <div class="risk-body"><div class="risk-ring" id="riskRing"><b id="riskPct"></b><small>negatif</small></div><div><small>LEVEL RISIKO</small><div class="risk-lv" id="risk"></div><small id="riskNote"></small></div></div>
-          <h3 class="sub">Narasi Krisis Utama</h3><div class="flow" id="flow"></div><p class="impact" id="impact"></p>
-        </section>
-      </div>
-
-      <div class="row">
-        <section class="card" id="rekomendasi"><div class="card-h"><h2>Rekomendasi Tindak Lanjut</h2></div><div class="reco" id="reco"></div></section>
-        <section class="card" id="summary"><div class="card-h"><h2>Summary</h2></div><p class="summary" id="summaryText"></p>
-          <div class="disc"><b>⚠ Disclaimer</b><p id="disclaimer"></p></div></section>
-      </div>
-      <footer>Dashboard monitoring independen · Data otomatis dari Google Sheets</footer>
+    <div class="row">
+      <section class="card"><div class="card-h"><h2>Sentimen per Kanal</h2><span class="hint" id="negNote"></span></div><div class="chart h300"><canvas id="cKanalSent"></canvas></div></section>
+      <section class="card"><div class="card-h"><h2>Penyebab Utama Sentimen</h2></div>
+        <div class="cause"><div><h3 class="pos">Positif</h3><ul id="causePos"></ul></div><div><h3 class="neg">Negatif</h3><ul id="causeNeg"></ul></div></div>
+      </section>
     </div>
+
+    <section class="card mt"><div class="card-h"><h2>🔥 Postingan Negatif Teratas</h2><span class="hint">berdasarkan engagement</span></div><div class="posts" id="posts"></div></section>
+
+    <div class="row three">
+      <section class="card"><div class="card-h"><h2>Word Cloud Negatif</h2></div><div class="cloud" id="cloud"></div></section>
+      <section class="card"><div class="card-h"><h2>Top 5 Akun Negatif</h2></div><table class="tbl" id="topAcc"></table></section>
+      <section class="card risk"><div class="card-h"><h2>Krisis / Alert</h2></div>
+        <div class="risk-body"><div class="risk-ring" id="riskRing"><b id="riskPct"></b><small>negatif</small></div><div><small>LEVEL RISIKO</small><div class="risk-lv" id="risk"></div><small id="riskNote"></small></div></div>
+        <h3 class="sub">Narasi Krisis Utama</h3><div class="flow" id="flow"></div><p class="impact" id="impact"></p>
+      </section>
+    </div>
+
+    <div class="row">
+      <section class="card"><div class="card-h"><h2>Rekomendasi Tindak Lanjut</h2></div><div class="reco" id="reco"></div></section>
+      <section class="card"><div class="card-h"><h2>Summary</h2></div><p class="summary" id="summaryText"></p>
+        <div class="disc"><b>⚠ Disclaimer</b><p id="disclaimer"></p></div></section>
+    </div>
+    <footer>Dashboard monitoring independen · Data otomatis dari Google Sheets</footer>
   </div>
 </main>
 <script src="app.js"></script>
