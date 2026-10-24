@@ -335,3 +335,43 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
 /* Toggle sumber di baris tab: jangan ikut gaya tab */
 .tabs .seg button{border-bottom:0;margin-bottom:0;padding:7px 14px;color:var(--mute)}
 .tabs .seg button.on{color:var(--accent-ink);background:var(--accent)}
+
+/* ===== SNA ===== */
+.sna-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.sna-bar input{font:inherit;font-size:13px;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--ink);min-width:200px}
+.sna-bar .hint{margin-left:auto}
+.sna-grid{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.sna-canvas{position:relative;padding:0;overflow:hidden;height:calc(100vh - 210px);min-height:520px;
+  background:radial-gradient(circle at 1px 1px,var(--line) 1px,transparent 0) 0 0/22px 22px,var(--card)}
+#snaGraph{position:absolute;inset:0}
+.sna-zoom{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:6px;z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.sna-zoom button{width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--ink);font-size:18px;font-weight:600}
+.sna-zoom button:hover{background:var(--hover)}
+.sna-zoom span{font-size:11px;color:var(--mute);font-weight:600;padding:2px 0}
+.sna-legend{position:absolute;left:14px;bottom:14px;display:flex;flex-wrap:wrap;gap:6px 14px;max-width:calc(100% - 100px);background:color-mix(in srgb,var(--card2) 92%,transparent);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12px;z-index:5}
+.sna-legend span{display:flex;align-items:center;gap:6px}
+.sna-legend i{width:10px;height:10px;border-radius:50%}
+.sna-legend .lg-note{color:var(--mute)}
+.sna-empty,.sna-load{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);font-weight:600;z-index:4}
+.sna-empty[hidden],.sna-load[hidden]{display:none}
+.sna-load{background:color-mix(in srgb,var(--card) 60%,transparent)}
+.sna-side{display:flex;flex-direction:column;gap:20px}
+.sna-side .card{padding:18px}
+.sna-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sna-stats.sm{grid-template-columns:repeat(3,1fr);margin-top:14px}
+.sna-stats div{background:var(--card2);border-radius:10px;padding:10px 12px}
+.sna-stats small{display:block;color:var(--mute);font-size:12px}
+.sna-stats b{font-size:20px}
+.sna-stats.sm b{font-size:16px}
+.sna-stats p{grid-column:1/-1;margin:2px 0 0}
+.clickable{cursor:pointer}.clickable:hover{background:var(--hover);border-radius:8px}
+.sd-h{display:flex;gap:12px;align-items:center}
+.sd-h .av{width:40px;height:40px;border-radius:12px;margin:0;font-size:16px}
+.sd-h a{font-size:12px;color:var(--accent);text-decoration:none;font-weight:600}
+[data-theme=dark] .sd-h a{color:var(--gold)}
+.sd-conn{list-style:none;margin:0;padding:0}
+.sd-conn li{display:flex;justify-content:space-between;padding:7px 6px;font-size:13px;border-bottom:1px solid var(--line)}
+.sd-conn li:last-child{border-bottom:0}
+.x{border:0;background:none;color:var(--mute);font-size:20px;line-height:1}
+@media(max-width:1100px){.sna-grid{grid-template-columns:1fr}.sna-canvas{height:520px}}
+@media(max-width:640px){.sna-canvas{height:440px;min-height:0}.sna-bar input{flex:1;min-width:0}.sna-bar .hint{margin-left:0;width:100%}.sna-legend{max-width:calc(100% - 28px);bottom:10px;left:10px;font-size:11px}}

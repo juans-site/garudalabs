@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bank Mandiri - Garuda Labs Intelligent Media Monitoring</title>
+<meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Dashboard monitoring percakapan media sosial terkait Bank Mandiri: sentimen, kanal, isu utama, dan level risiko.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Garuda Labs">
 <meta property="og:title" content="Bank Mandiri - Garuda Labs Intelligent Media Monitoring">
 <meta property="og:description" content="Dashboard monitoring percakapan media sosial terkait Bank Mandiri: sentimen, kanal, isu utama, dan level risiko.">
-<meta property="og:url" content="https://garudalabs.co.id/BMRI/">
+<meta property="og:url" content="https://garudalabs.co.id/NeG6aJL7TEKAxRKTpM/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Bank Mandiri - Garuda Labs Intelligent Media Monitoring">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light'}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=25">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
 </head>
 <body>
 <header class="topbar">
   <div class="brand">
-    <img class="logo logo-dark" src="logo-dark.png?v=24" alt="Logo">
-    <img class="logo logo-light" src="logo-light.png?v=24" alt="Logo">
+    <img class="logo logo-dark" src="logo-dark.png?v=25" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png?v=25" alt="Logo">
     <span class="divider"></span>
     <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="beta">Beta</span>
   </div>
@@ -55,6 +57,7 @@
     <div class="tabs" role="tablist">
       <button role="tab" data-tab="dash" class="on">📊 Dashboard</button>
       <button role="tab" data-tab="raw">📄 Raw Data</button>
+      <button role="tab" data-tab="sna">🕸️ SNA</button>
       <div class="seg" id="fSumber"><button data-v="post" class="on">Post</button><button data-v="komentar">Komentar</button><button data-v="all">All</button></div>
     </div>
     <div id="viewDash">
@@ -123,9 +126,40 @@
       </section>
     </div>
 
+    <div id="viewSna" hidden>
+      <div class="sna-bar">
+        <div class="seg mini" id="snaPf"><button data-v="Twitter" class="on">Twitter</button><button data-v="Threads">Threads</button></div>
+        <div class="seg mini" id="snaColor"><button data-v="sent" class="on">Warna: Sentimen</button><button data-v="kom">Warna: Komunitas</button></div>
+        <input type="search" id="snaQ" placeholder="Cari akun…" list="snaList"><datalist id="snaList"></datalist>
+        <span class="hint" id="snaHint"></span>
+      </div>
+      <div class="sna-grid">
+        <section class="card sna-canvas">
+          <div id="snaGraph"></div>
+          <div class="sna-zoom" role="group" aria-label="Navigasi zoom">
+            <button id="zIn" title="Perbesar">+</button>
+            <span id="zLvl">100%</span>
+            <button id="zOut" title="Perkecil">−</button>
+            <button id="zFit" title="Paskan ke layar">⤢</button>
+            <button id="zRe" title="Susun ulang">↻</button>
+          </div>
+          <div class="sna-legend" id="snaLegend"></div>
+          <div class="sna-empty" id="snaEmpty" hidden>Tidak ada interaksi pada rentang ini</div>
+          <div class="sna-load" id="snaLoad" hidden><span class="spinner"></span></div>
+        </section>
+        <aside class="sna-side">
+          <section class="card"><div class="card-h"><h2>Ringkasan Jaringan</h2></div><div class="sna-stats" id="snaStats"></div></section>
+          <section class="card" id="snaDetailCard" hidden><div class="card-h"><h2>Detail Akun</h2><button class="x" id="snaClose" aria-label="Tutup">×</button></div><div id="snaDetail"></div></section>
+          <section class="card"><div class="card-h"><h2>Akun Berpengaruh</h2>
+            <div class="seg mini" id="snaRank"><button data-v="in" class="on">Paling disebut</button><button data-v="out">Paling aktif</button></div></div>
+            <ol class="acc-list" id="snaTop"></ol></section>
+        </aside>
+      </div>
+    </div>
+
     <footer>© 2026 Garuda Labs Intelligent Media Monitoring</footer>
   </div>
 </main>
-<script src="app.js?v=24"></script>
+<script src="app.js?v=25"></script>
 </body>
 </html>

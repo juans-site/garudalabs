@@ -86,6 +86,7 @@ async function render() {
   applyPreset(dates);
   const from = state.from || minD, to = state.to || maxD;
   const inRange = d => d >= from && d <= to;
+  state.range = { from, to };
   const days = dates.filter(inRange);
   buildPicker(dates, from, to);
 
@@ -93,6 +94,7 @@ async function render() {
 
   const single = from === to, isAll = from <= minD && to >= maxD, D = all.filter(r => inRange(r.tgl));
   $('loading').hidden = true; $('main').hidden = false;
+  if (!$('viewSna').hidden) renderSNA();
   state.rawD = D; state.rawUnitPost = state.src; renderRaw(true); document.querySelector('.raw-wrap').scrollTop = 0;
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
@@ -260,7 +262,7 @@ function setThemeIcon() { $('themeBtn').textContent = document.documentElement.d
 $('themeBtn').onclick = () => {
   const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = t; try { localStorage.setItem('theme', t); } catch (e) {}
-  setThemeIcon(); render();
+  setThemeIcon(); sna.key = ''; render();
 };
 setThemeIcon();
 
@@ -312,7 +314,9 @@ document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b =
 const raw = { q: '', sent: '', pf: '', sort: 'dt', dir: -1, page: 1, size: 50 };
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
-  $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewRaw').hidden = b.dataset.tab !== 'raw';
+  $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
+  $('fSumber').style.visibility = b.dataset.tab === 'sna' ? 'hidden' : ''; // SNA selalu Post + Komentar
+  if (b.dataset.tab === 'sna') renderSNA();
   if (b.dataset.tab === 'dash') Object.values(charts).forEach(c => c.resize());
 });
 function renderRaw(reset) {
@@ -361,3 +365,152 @@ $('rawBody').onclick = e => {
 };
 
 $('fGran').onchange = e => { state.gran = e.target.value; render(); };
+
+/* ---------- SNA (Social Network Analysis) ---------- */
+// Koneksi dibangun dari: (1) @mention di caption/komentar: penulis → akun yang disebut,
+// (2) komentar: pengomentar → pemilik postingan (diambil dari link).
+// Data: Post + Komentar platform terpilih, mengikuti date range. Toggle Post/Komentar/All tidak berlaku di tab ini.
+const sna = { pf: 'Twitter', color: 'sent', rank: 'in', cy: null, key: '', max: 250 };
+const KOM_COLORS = ['#FFBE00', '#38bdf8', '#a78bfa', '#f472b6', '#34d399', '#fb923c', '#60a5fa', '#e879f9', '#2dd4bf', '#facc15'];
+const ownerFromLink = (link, pf) => {
+  const m = pf === 'Twitter' ? link.match(/(?:x|twitter)\.com\/([A-Za-z0-9_]+)\/status/i) : link.match(/threads\.(?:com|net)\/@([A-Za-z0-9_.]+)/i);
+  return m ? m[1] : '';
+};
+const mentionsOf = t => [...new Set((t.match(/@([A-Za-z0-9_.]{2,30})/g) || []).map(x => x.slice(1).replace(/\.+$/, '')))];
+
+async function renderSNA() {
+  $('snaLoad').hidden = false;
+  let rows;
+  try { const [p, k] = await Promise.all([load('post'), load('komentar')]); rows = p.concat(k); }
+  catch (e) { $('snaLoad').hidden = true; $('snaEmpty').hidden = false; $('snaEmpty').textContent = 'Gagal memuat data'; return; }
+  const { from, to } = state.range || {};
+  rows = rows.filter(r => r.platform.toLowerCase() === sna.pf.toLowerCase() && (!from || (r.tgl >= from && r.tgl <= to)));
+
+  // Bangun graf penuh (nama akun disamakan huruf kecil)
+  const nodes = new Map(), edges = new Map();
+  const node = u => { const id = u.toLowerCase(); if (!nodes.has(id)) nodes.set(id, { id, label: u, posts: 0, pos: 0, neg: 0, net: 0, din: 0, dout: 0, resmi: false }); return nodes.get(id); };
+  const link = (a, b) => { if (!a || !b) return; const A = a.toLowerCase(), B = b.toLowerCase(); if (A === B) return; node(a); node(b);
+    const k = A + '→' + B; edges.set(k, (edges.get(k) || 0) + 1); nodes.get(A).dout++; nodes.get(B).din++; };
+  rows.forEach(r => {
+    if (!r.user || /^(-|—|n\/?a)$/i.test(r.user)) return;
+    const n = node(r.user); n.posts++; n[r.sent === 'positif' ? 'pos' : r.sent === 'negatif' ? 'neg' : 'net']++; if (r.resmi) n.resmi = true;
+    mentionsOf(r.text).forEach(m => link(r.user, m));
+    if (r.kind === 'komentar') link(r.user, ownerFromLink(r.link, sna.pf));
+  });
+  const totalNodes = [...nodes.values()].filter(n => n.din + n.dout > 0).length, totalEdges = edges.size;
+  const totalInter = [...edges.values()].reduce((s, v) => s + v, 0);
+
+  // Ambil akun paling terhubung supaya graf tetap terbaca
+  const keep = new Set([...nodes.values()].filter(n => n.din + n.dout > 0).sort((a, b) => (b.din + b.dout) - (a.din + a.dout)).slice(0, sna.max).map(n => n.id));
+  const E = [...edges].map(([k, w]) => { const [s, t] = k.split('→'); return { s, t, w }; }).filter(e => keep.has(e.s) && keep.has(e.t));
+  const used = new Set(E.flatMap(e => [e.s, e.t]));
+  const N = [...nodes.values()].filter(n => used.has(n.id));
+
+  // Komunitas sederhana (label propagation)
+  const adj = new Map(N.map(n => [n.id, []]));
+  E.forEach(e => { adj.get(e.s).push([e.t, e.w]); adj.get(e.t).push([e.s, e.w]); });
+  const lab = new Map(N.map(n => [n.id, n.id]));
+  for (let it = 0; it < 15; it++) {
+    let changed = false;
+    N.slice().sort(() => Math.random() - .5).forEach(n => {
+      const c = {}; adj.get(n.id).forEach(([m, w]) => { const l = lab.get(m); c[l] = (c[l] || 0) + w; });
+      const best = Object.entries(c).sort((a, b) => b[1] - a[1])[0]; if (best && best[0] !== lab.get(n.id)) { lab.set(n.id, best[0]); changed = true; }
+    });
+    if (!changed) break;
+  }
+  const komSize = {}; lab.forEach(l => komSize[l] = (komSize[l] || 0) + 1);
+  const komRank = Object.entries(komSize).sort((a, b) => b[1] - a[1]).map(x => x[0]);
+  const komIdx = l => { const i = komRank.indexOf(l); return i < KOM_COLORS.length ? i : -1; };
+
+  const sentOf = n => n.posts === 0 ? 'unk' : (n.neg > n.pos && n.neg >= n.net) ? 'negatif' : (n.pos > n.neg && n.pos >= n.net) ? 'positif' : 'netral';
+  const maxDeg = Math.max(1, ...N.map(n => n.din + n.dout));
+  const colorOf = n => sna.color === 'kom' ? (komIdx(lab.get(n.id)) >= 0 ? KOM_COLORS[komIdx(lab.get(n.id))] : '#6b7280')
+    : ({ positif: SENT.positif, negatif: SENT.negatif, netral: SENT.netral, unk: '#6b7280' })[sentOf(n)];
+
+  // Statistik
+  const dens = N.length > 1 ? (E.length / (N.length * (N.length - 1)) * 100) : 0;
+  $('snaStats').innerHTML = [['Akun', fmt(totalNodes)], ['Koneksi', fmt(totalEdges)], ['Interaksi', fmt(totalInter)], ['Komunitas', fmt(komRank.filter(l => komSize[l] > 2).length)]]
+    .map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join('') + `<p class="hint">Kepadatan graf ${dens.toFixed(2).replace('.', ',')}% · ${fmt(N.length)} akun teratas ditampilkan</p>`;
+  $('snaHint').textContent = `${sna.pf} · ${state.range ? (state.range.from === state.range.to ? tglLabel(state.range.from) : tglLabel(state.range.from) + ' – ' + tglLabel(state.range.to)) : ''} · Post + Komentar`;
+  $('snaList').innerHTML = N.map(n => `<option value="${esc(n.label)}">`).join('');
+
+  // Peringkat
+  const rankList = () => {
+    const k = sna.rank === 'in' ? 'din' : 'dout', top = [...nodes.values()].filter(n => n[k] > 0).sort((a, b) => b[k] - a[k]).slice(0, 10), mx = top[0]?.[k] || 1;
+    $('snaTop').innerHTML = top.map((n, i) => `<li data-id="${esc(n.id)}" class="clickable"><span class="rank">${i + 1}</span><div class="acc-main"><div class="acc-top"><b>${esc(n.label)}</b><span class="acc-n" style="color:var(--accent)">${fmt(n[k])}×</span></div>
+      <div class="acc-bar"><i style="width:${n[k] / mx * 100}%;background:var(--accent)"></i></div></div></li>`).join('') || '<li class="empty">Belum ada data</li>';
+  };
+  rankList(); sna.rankList = rankList;
+
+  // Legenda
+  $('snaLegend').innerHTML = sna.color === 'sent'
+    ? [['Positif', SENT.positif], ['Negatif', SENT.negatif], ['Netral', SENT.netral], ['Hanya disebut', '#6b7280']].map(([l, c]) => `<span><i style="background:${c}"></i>${l}</span>`).join('') + '<span class="lg-note">Ukuran = jumlah koneksi</span>'
+    : komRank.slice(0, 6).map((l, i) => `<span><i style="background:${KOM_COLORS[i]}"></i>${esc(nodes.get(l)?.label || l)} (${komSize[l]})</span>`).join('') + '<span class="lg-note">Komunitas dinamai dari salah satu anggotanya</span>';
+
+  $('snaEmpty').hidden = N.length > 0; $('snaEmpty').textContent = 'Tidak ada interaksi pada rentang ini';
+  const key = sna.pf + JSON.stringify(state.range) + N.length + E.length;
+  const els = [
+    ...N.map(n => ({ data: { id: n.id, label: n.label, size: 10 + Math.sqrt((n.din + n.dout) / maxDeg) * 36, color: colorOf(n), deg: n.din + n.dout } })),
+    ...E.map(e => ({ data: { id: e.s + '→' + e.t, source: e.s, target: e.t, w: Math.min(6, 0.6 + Math.log2(e.w + 1)) } }))
+  ];
+  sna.nodes = nodes; sna.edgesAll = edges; sna.lab = lab;
+  const ink = css('--ink'), line = css('--line'), bg = css('--card');
+  if (sna.cy && sna.key === key) { // hanya ganti warna
+    sna.cy.batch(() => N.forEach(n => sna.cy.getElementById(n.id).data('color', colorOf(n))));
+    $('snaLoad').hidden = true; return;
+  }
+  sna.key = key; sna.cy?.destroy();
+  sna.cy = cytoscape({
+    container: $('snaGraph'), elements: els, minZoom: .1, maxZoom: 4, wheelSensitivity: .25,
+    style: [
+      { selector: 'node', style: { 'background-color': 'data(color)', width: 'data(size)', height: 'data(size)', label: 'data(label)', color: ink, 'font-size': 10, 'font-family': 'Plus Jakarta Sans, sans-serif', 'text-valign': 'bottom', 'text-margin-y': 4, 'text-outline-color': bg, 'text-outline-width': 2, 'min-zoomed-font-size': 8, 'border-width': 1.5, 'border-color': bg } },
+      { selector: 'node[deg < 4]', style: { label: '' } },
+      { selector: 'edge', style: { width: 'data(w)', 'line-color': line, 'curve-style': 'haystack', opacity: .75 } },
+      { selector: '.faded', style: { opacity: .12 } },
+      { selector: 'node.hl', style: { label: 'data(label)', 'border-color': css('--accent'), 'border-width': 3, 'z-index': 10 } },
+      { selector: 'edge.hl', style: { 'line-color': css('--accent'), opacity: 1, 'z-index': 9 } }
+    ],
+    layout: { name: 'cose', animate: false, nodeRepulsion: () => 9000, idealEdgeLength: () => 70, gravity: .6, numIter: 1200, randomize: true }
+  });
+  const showZoom = () => $('zLvl').textContent = Math.round(sna.cy.zoom() * 100) + '%';
+  sna.cy.on('zoom', showZoom); showZoom();
+  sna.cy.on('tap', 'node', e => focusNode(e.target.id()));
+  sna.cy.on('tap', e => { if (e.target === sna.cy) clearFocus(); });
+  $('snaLoad').hidden = true; $('snaDetailCard').hidden = true;
+}
+function clearFocus() { sna.cy?.elements().removeClass('faded hl'); $('snaDetailCard').hidden = true; }
+function focusNode(id) {
+  const n = sna.nodes?.get(id); if (!n) return;
+  if (sna.cy) {
+    const el = sna.cy.getElementById(id);
+    if (el.length) {
+      const hood = el.closedNeighborhood();
+      sna.cy.elements().addClass('faded').removeClass('hl'); hood.removeClass('faded').addClass('hl');
+      sna.cy.animate({ fit: { eles: hood, padding: 60 } }, { duration: 400 });
+    }
+  }
+  const conn = {}; sna.edgesAll.forEach((w, k) => { const [s, t] = k.split('→'); if (s === id) conn[t] = (conn[t] || 0) + w; if (t === id) conn[s] = (conn[s] || 0) + w; });
+  const top = Object.entries(conn).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const url = sna.pf === 'Twitter' ? `https://x.com/${encodeURIComponent(n.label)}` : `https://www.threads.com/@${encodeURIComponent(n.label)}`;
+  const t = n.posts || 1;
+  $('snaDetail').innerHTML = `<div class="sd-h"><span class="av" style="background:${pColor(sna.pf)}22;color:${pColor(sna.pf)}">${esc(n.label[0].toUpperCase())}</span>
+    <div><b>${esc(n.label)}</b>${n.resmi ? ' <span class="chip sm">akun resmi</span>' : ''}<br><a href="${url}" target="_blank" rel="noopener">Buka profil ↗</a></div></div>
+    <div class="sna-stats sm"><div><small>Disebut</small><b>${fmt(n.din)}</b></div><div><small>Menyebut</small><b>${fmt(n.dout)}</b></div><div><small>Post/komentar</small><b>${fmt(n.posts)}</b></div></div>
+    ${n.posts ? `<div class="ks-bar" style="margin:12px 0 4px"><i style="width:${n.neg / t * 100}%;background:${SENT.negatif}"></i><i style="width:${n.net / t * 100}%;background:${SENT.netral}"></i><i style="width:${n.pos / t * 100}%;background:${SENT.positif}"></i></div>
+    <small class="hint">${n.neg} negatif · ${n.net} netral · ${n.pos} positif</small>` : '<small class="hint">Akun ini hanya disebut, tidak ada post/komentar darinya di data.</small>'}
+    <h3 class="sub">Koneksi teratas</h3><ul class="sd-conn">${top.map(([m, w]) => `<li data-id="${esc(m)}" class="clickable"><span>${esc(sna.nodes.get(m)?.label || m)}</span><b>${w}×</b></li>`).join('')}</ul>`;
+  $('snaDetailCard').hidden = false;
+}
+// Kontrol
+const zoomBy = f => { const cy = sna.cy; if (!cy) return; cy.animate({ zoom: { level: Math.max(cy.minZoom(), Math.min(cy.maxZoom(), cy.zoom() * f)), renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } } }, { duration: 200 }); };
+$('zIn').onclick = () => zoomBy(1.3); $('zOut').onclick = () => zoomBy(1 / 1.3);
+$('zFit').onclick = () => sna.cy?.animate({ fit: { padding: 30 } }, { duration: 300 });
+$('zRe').onclick = () => sna.cy?.layout({ name: 'cose', animate: true, animationDuration: 600, nodeRepulsion: () => 9000, idealEdgeLength: () => 70, gravity: .6, randomize: true }).run();
+const segOn = (id, fn) => $(id).onclick = e => { const b = e.target.closest('button'); if (!b) return; [...$(id).children].forEach(x => x.classList.toggle('on', x === b)); fn(b.dataset.v); };
+segOn('snaPf', v => { sna.pf = v; renderSNA(); });
+segOn('snaColor', v => { sna.color = v; renderSNA(); });
+segOn('snaRank', v => { sna.rank = v; sna.rankList?.(); });
+$('snaTop').onclick = e => { const li = e.target.closest('li[data-id]'); if (li) focusNode(li.dataset.id); };
+$('snaDetail').onclick = e => { const li = e.target.closest('li[data-id]'); if (li) focusNode(li.dataset.id); };
+$('snaClose').onclick = clearFocus;
+$('snaQ').onchange = e => { const id = e.target.value.trim().toLowerCase(); if (sna.nodes?.has(id)) focusNode(id); };
