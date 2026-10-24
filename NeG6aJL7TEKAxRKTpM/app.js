@@ -372,7 +372,7 @@ $('fGran').onchange = e => { state.gran = e.target.value; render(); };
 // Data: Post + Komentar platform terpilih, mengikuti date range. Toggle Post/Komentar/All tidak berlaku di tab ini.
 const sna = { pf: 'Twitter', color: 'sent', rank: 'in', cy: null, key: '', max: 150 };
 // Pengaturan tata letak: angka lebih besar = jaringan lebih longgar
-const SNA_LAYOUT = { name: 'cose', nodeRepulsion: () => 600000, idealEdgeLength: () => 320, edgeElasticity: () => 40, nodeOverlap: 80, gravity: .04, componentSpacing: 260, nodeDimensionsIncludeLabels: true, numIter: 2500, randomize: true, padding: 40 };
+const SNA_LAYOUT = { name: 'cose', nodeRepulsion: () => 600000, idealEdgeLength: () => 320, edgeElasticity: () => 40, nodeOverlap: 80, gravity: .04, componentSpacing: 260, nodeDimensionsIncludeLabels: true, numIter: 1500, randomize: true, padding: 40 };
 const KOM_COLORS = ['#FFBE00', '#38bdf8', '#a78bfa', '#f472b6', '#34d399', '#fb923c', '#60a5fa', '#e879f9', '#2dd4bf', '#facc15'];
 const ownerFromLink = (link, pf) => {
   const m = pf === 'Twitter' ? link.match(/(?:x|twitter)\.com\/([A-Za-z0-9_]+)\/status/i) : link.match(/threads\.(?:com|net)\/@([A-Za-z0-9_.]+)/i);
@@ -480,7 +480,7 @@ async function renderSNA() {
   // Zoom semantik: ukuran titik, teks, dan garis tetap kurang lebih sama di layar,
   // jadi saat zoom in jarak antar titik terlihat makin longgar.
   let raf = 0;
-  const scaleEls = () => { raf = 0; const z = sna.cy.zoom(), k = 1 / Math.pow(z, .85);
+  const scaleEls = () => { raf = 0; const z = sna.cy.zoom(), k = z < 1 ? 1 / Math.pow(z, .35) : 1 / Math.pow(z, .85); // saat zoom out titik tidak membesar berlebihan
     sna.cy.batch(() => {
       sna.cy.nodes().toggleClass('lbl', z > 1.6); // semua nama tampil saat sudah di-zoom
       sna.cy.nodes().forEach(n => { const s = n.data('size') * k; n.style({ width: s, height: s, 'font-size': 11 * k, 'text-outline-width': 2 * k, 'border-width': 1.5 * k, 'text-margin-y': 4 * k }); });
