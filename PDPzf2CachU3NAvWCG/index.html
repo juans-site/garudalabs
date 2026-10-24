@@ -5,9 +5,9 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Karhutla - Garuda Labs Intelligent Media Monitoring</title>
-<link rel="icon" href="favicon.ico?v=40" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=40">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=40">
+<link rel="icon" href="favicon.ico?v=41" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=41">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=41">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Dashboard monitoring percakapan media sosial terkait kebakaran hutan dan lahan (karhutla): sentimen, kanal, isu utama, dan level risiko.">
 <meta property="og:type" content="website">
@@ -20,7 +20,16 @@
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light'}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=40">
+<link rel="stylesheet" href="style.css?v=41">
+<style>
+/* Kartu lokasi */
+.lok .ks-n{display:flex;flex-direction:column;line-height:1.25}.lok .ks-n small{color:var(--mute);font-weight:500;font-size:11px}
+.lok .ks-bar{min-width:6px}.lok .lok-none .ks-n{color:var(--mute);font-style:italic}.lok .lok-none{opacity:.75}
+.lok .ks-h,.lok .ks-r{grid-template-columns:minmax(120px,190px) 1fr 56px 56px 56px}
+.lok .ks-n{white-space:normal}
+@media(max-width:640px){.lok .ks-h,.lok .ks-r{grid-template-columns:96px 1fr 34px 34px 34px;gap:6px}.lok .ks-n{font-size:12px}}
+@media(max-width:640px){.lok .ks-h span{font-size:10px;text-align:center}.lok .ks-r>span:not(.ks-n){font-size:11px;text-align:center}}
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
@@ -28,8 +37,8 @@
 <body>
 <header class="topbar">
   <div class="brand">
-    <img class="logo logo-dark" src="logo-dark.png?v=40" alt="Logo">
-    <img class="logo logo-light" src="logo-light.png?v=40" alt="Logo">
+    <img class="logo logo-dark" src="logo-dark.png?v=41" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png?v=41" alt="Logo">
     <span class="divider"></span>
     <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="beta">Beta</span>
   </div>
@@ -176,6 +185,6 @@
     <footer>© 2026 Garuda Labs Intelligent Media Monitoring</footer>
   </div>
 </main>
-<script src="app.js?v=40"></script>
+<script src="app.js?v=41"></script>
 </body>
 </html>

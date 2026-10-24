@@ -159,7 +159,7 @@ async function render() {
   const area = (label, data, c) => ({ label, data, borderColor: c, borderWidth: 2.5, tension: .4, pointRadius: 0, pointHoverRadius: 5, fill: true,
     backgroundColor: ctx => { const { chart } = ctx, a = chart.chartArea; if (!a) return c + '22'; const g = chart.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, c + '40'); g.addColorStop(1, c + '00'); return g; } });
   mk('cTrend', { type: 'line', data: { labels: labels.map(fmtL), datasets: [area('Negatif', sn, SENT.negatif), area('Netral', sz, SENT.netral), area('Positif', sp, SENT.positif)] },
-    options: baseOpts({ interaction: { mode: 'index', intersect: false }, plugins: { ...baseOpts().plugins, legend: { display: false } } }) });
+    options: baseOpts({ interaction: { mode: 'index', intersect: false }, plugins: { ...baseOpts().plugins, legend: { display: false }, tooltip: { ...baseOpts().plugins.tooltip, footerColor: css('--ink'), footerFont: { weight: 700 }, footerMarginTop: 8, callbacks: { footer: items => 'Total: ' + fmt(items.reduce((s, i) => s + i.raw, 0)) } } } }) });
   const pk = sn.indexOf(Math.max(...sn));
   $('trendNote').textContent = Math.max(...sn) > 0 ? `Puncak negatif: ${state.gran === 'jam' ? 'pukul ' + labels[pk] : fmtL(labels[pk])} (${sn[pk]})` : '';
 
