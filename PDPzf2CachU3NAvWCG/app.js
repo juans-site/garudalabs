@@ -215,7 +215,7 @@ async function render() {
   const base = state.cloud === 'pos' ? SENT.positif : SENT.negatif;
   const lay = []; words.forEach((w, i) => i % 2 ? lay.push(w) : lay.unshift(w));
   $('cloud').innerHTML = lay.map(([w, c]) => { const r = wMax === wMin ? 1 : (c - wMin) / (wMax - wMin);
-    return `<span title="${esc(w)}: ${fmt(c)} kali" style="font-size:${13 + r * 25}px;color:color-mix(in srgb, ${base} ${Math.round(40 + r * 60)}%, var(--mute));font-weight:${r > .5 ? 800 : 600}">${esc(w)}</span>`; }).join('') || '<p class="empty">Belum ada data</p>';
+    return `<span title="${esc(w)}: ${fmt(c)} kali" style="font-size:${13 + r * 25}px;color:${base};opacity:${(.45 + r * .55).toFixed(2)};font-weight:${r > .5 ? 800 : 600}">${esc(w)}</span>`; }).join('') || '<p class="empty">Belum ada data</p>';
   $('cloudTitle').textContent = `Word Cloud ${state.cloud === 'pos' ? 'Positif' : 'Negatif'}`;
 
   /* Top akun */
@@ -269,7 +269,7 @@ async function render() {
 }
 
 /* ---------- UI ---------- */
-function setThemeIcon() { $('themeBtn').textContent = document.documentElement.dataset.theme === 'dark' ? '☀' : '☾'; }
+function setThemeIcon() { $('themeBtn').textContent = document.documentElement.dataset.theme === 'dark' ? '☀\uFE0E' : '☾\uFE0E'; }
 $('themeBtn').onclick = () => {
   const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = t; try { localStorage.setItem('theme', t); } catch (e) {}
