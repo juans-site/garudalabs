@@ -403,3 +403,7 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
 .sna-explain{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;line-height:1.6;color:var(--mute)}
 .sna-explain p{margin:0 0 10px}.sna-explain p:last-child{margin:0}
 .sna-explain b{color:var(--ink)}
+
+.sna-explain .ex{margin-bottom:12px}.sna-explain .ex:last-child{margin-bottom:0}
+.sna-explain h4{margin:0 0 3px;font-size:13px;color:var(--ink)}
+.sna-explain .ex p{margin:0}

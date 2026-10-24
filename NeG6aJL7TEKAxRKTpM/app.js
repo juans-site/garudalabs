@@ -432,18 +432,22 @@ async function renderSNA() {
 
   // Statistik
   const dens = N.length > 1 ? (E.length / (N.length * (N.length - 1)) * 100) : 0;
-  $('snaStats').innerHTML = [['Akun', fmt(totalNodes)], ['Koneksi', fmt(totalEdges)], ['Interaksi', fmt(totalInter)], ['Komunitas', fmt(komRank.filter(l => komSize[l] > 2).length)]]
-    .map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join('') + `<p class="hint">Kepadatan graf ${dens.toFixed(2).replace('.', ',')}% · ${fmt(N.length)} akun teratas ditampilkan</p>`;
+  $('snaStats').innerHTML = [['Akun', fmt(totalNodes)], ['Koneksi', fmt(totalEdges)], ['Interaksi', fmt(totalInter)], ['Lingkaran obrolan', fmt(komRank.filter(l => komSize[l] > 2).length)]]
+    .map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join('') + `<p class="hint">Grafik menampilkan ${fmt(N.length)} akun yang paling banyak berinteraksi</p>`;
   // Penjelasan deskriptif ringkasan jaringan
   const nKom = komRank.filter(l => komSize[l] > 2).length;
   const avgConn = totalNodes ? totalEdges * 2 / totalNodes : 0, avgInt = totalEdges ? totalInter / totalEdges : 0;
   const per = state.range ? (state.range.from === state.range.to ? tglLabel(state.range.from) : `${tglLabel(state.range.from)} – ${tglLabel(state.range.to)}`) : 'periode ini';
   const f1 = x => x.toFixed(1).replace('.', ',');
-  $('snaExplain').innerHTML = !totalInter ? '<p>Belum ada interaksi antar-akun di platform dan rentang tanggal ini, jadi jaringan belum bisa dibaca.</p>' : `
-    <p>Pada <b>${per}</b>, percakapan tentang Bank Mandiri di <b>${sna.pf}</b> melibatkan <b>${fmt(totalNodes)} akun</b> yang saling terhubung lewat <b>${fmt(totalEdges)} koneksi</b> (pasangan akun yang pernah saling menyebut atau berkomentar). Total ada <b>${fmt(totalInter)} interaksi</b>, artinya setiap pasangan akun rata-rata berinteraksi <b>${f1(avgInt)} kali</b>.</p>
-    <p>Rata-rata satu akun terhubung dengan <b>${f1(avgConn)} akun lain</b>. ${avgConn < 3 ? 'Angka ini kecil: kebanyakan akun hanya menyebut satu-dua akun, biasanya akun besar seperti akun resmi atau media, lalu tidak berdiskusi lebih jauh.' : 'Angka ini cukup tinggi: banyak akun saling berdiskusi, tidak hanya menyebut satu akun pusat.'}</p>
-    <p>Akun-akun itu terbagi menjadi <b>${fmt(nKom)} kelompok percakapan</b>, yaitu kelompok akun yang lebih sering berinteraksi di dalam kelompoknya sendiri. ${nKom <= 1 ? 'Hanya ada satu kelompok besar, jadi percakapan berpusat pada topik dan akun yang sama.' : 'Beberapa kelompok bisa berarti ada beberapa isu atau lingkaran pembicara yang berbeda.'}</p>
-    <p>Kepadatan <b>${dens.toFixed(2).replace('.', ',')}%</b> berarti dari semua kemungkinan hubungan antar-${fmt(N.length)} akun yang digambar, sebanyak itulah yang benar-benar terjadi. ${dens < 5 ? 'Untuk jaringan media sosial, ini tergolong <b>longgar</b>: akun cenderung terhubung lewat beberapa akun pusat, bukan saling berinteraksi satu sama lain.' : 'Untuk jaringan media sosial, ini tergolong <b>relatif rapat</b>: cukup banyak akun yang saling berinteraksi langsung, tidak hanya lewat akun pusat.'}</p>`;
+  const topIn = [...nodes.values()].filter(n => n.din > 0).sort((a, b) => b.din - a.din).slice(0, 3);
+  const top3Share = totalInter ? topIn.reduce((s, n) => s + n.din, 0) / totalInter * 100 : 0;
+  const bigGroup = komRank[0], bigHub = N.filter(n => lab.get(n.id) === bigGroup).sort((a, b) => (b.din + b.dout) - (a.din + a.dout))[0];
+  const at = n => `<b>@${esc(n.label)}</b>`;
+  $('snaExplain').innerHTML = !totalInter ? '<p>Belum ada akun yang saling menyebut atau berkomentar di platform dan tanggal ini, jadi belum ada jaringan yang bisa dibaca.</p>' : `
+    <div class="ex"><h4>Seberapa ramai?</h4><p>Pada <b>${per}</b>, ada <b>${fmt(totalNodes)} akun</b> ${sna.pf} yang ikut membicarakan Bank Mandiri sambil menyebut (@) atau membalas akun lain. Totalnya <b>${fmt(totalInter)} kali</b> saling sebut atau balas.</p></div>
+    <div class="ex"><h4>Siapa yang paling banyak dituju?</h4><p>${topIn.map(at).join(', ')}. Sekitar <b>${Math.round(top3Share)} dari setiap 100</b> sebutan dan balasan mengarah ke tiga akun ini. ${top3Share >= 25 ? 'Artinya, percakapan banyak <b>bertumpu pada akun-akun tersebut</b>: orang datang untuk menyapa, bertanya, atau mengeluh ke sana.' : 'Artinya, perhatian orang <b>tersebar</b> ke banyak akun, tidak tertuju pada beberapa akun saja.'}</p></div>
+    <div class="ex"><h4>Apakah orang saling ngobrol?</h4><p>Rata-rata satu akun berinteraksi dengan <b>${f1(avgConn)} akun lain</b>. ${avgConn < 3 ? 'Jadi kebanyakan orang hanya menyebut satu-dua akun (biasanya akun besar seperti di atas) lalu selesai. <b>Jarang terjadi diskusi panjang</b> antar-pengguna.' : 'Jadi cukup banyak orang yang <b>saling membalas dan berdiskusi</b>, tidak hanya menyebut satu akun lalu selesai.'}</p></div>
+    <div class="ex"><h4>Ada berapa "lingkaran obrolan"?</h4><p>Lingkaran obrolan adalah sekumpulan akun yang lebih sering bicara satu sama lain, seperti grup tongkrongan. Di sini ada <b>${fmt(nKom)}</b> lingkaran${bigHub ? `; yang terbesar berkumpul di sekitar ${at(bigHub)}` : ''}. ${nKom <= 1 ? 'Satu lingkaran saja berarti hampir semua orang membicarakan hal yang sama di tempat yang sama.' : 'Beberapa lingkaran biasanya berarti ada beberapa topik atau kubu yang berbeda. Pilih <b>Warna: Komunitas</b> untuk melihatnya di grafik.'}</p></div>`;
   $('snaHint').textContent = `${sna.pf} · ${state.range ? (state.range.from === state.range.to ? tglLabel(state.range.from) : tglLabel(state.range.from) + ' – ' + tglLabel(state.range.to)) : ''} · Post + Komentar`;
   $('snaList').innerHTML = N.map(n => `<option value="${esc(n.label)}">`).join('');
 
@@ -482,11 +486,11 @@ async function renderSNA() {
   const ins = [];
   if (!totalInter) ins.push(['ℹ️', 'Belum ada interaksi antar-akun pada rentang dan platform ini.']);
   else {
-    ins.push(['🎯', `Percakapan paling banyak mengarah ke ${byIn.slice(0, 3).map(nm).join(', ')}. Ketiganya menerima <b>${pct(top3In, totalInter)}</b> dari seluruh interaksi, sehingga jaringan ini <b>${shareTop3 >= 50 ? 'sangat terpusat' : shareTop3 >= 25 ? 'cukup terpusat' : 'tersebar'}</b>${shareTop3 >= 25 ? ' pada beberapa akun kunci' : ' dan tidak didominasi satu akun'}.`]);
+    ins.push(['🎯', `Percakapan paling banyak mengarah ke ${byIn.slice(0, 3).map(nm).join(', ')}. Ketiganya menerima <b>${pct(top3In, totalInter)}</b> dari seluruh interaksi, ${shareTop3 >= 50 ? 'Jadi sebagian besar percakapan <b>tertuju ke akun-akun ini</b>.' : shareTop3 >= 25 ? 'Jadi akun-akun ini <b>menjadi tujuan utama</b> percakapan.' : 'Jadi perhatian orang <b>tersebar</b> ke banyak akun.'}`]);
     if (toResmi) ins.push(['🏦', `<b>${pct(toResmi, totalInter)}</b> interaksi ditujukan ke akun resmi Mandiri, dan <b>${fmt(negToResmi.size)}</b> akun bernada negatif ikut menyebut akun resmi. Ini menunjukkan akun resmi menjadi saluran utama keluhan yang perlu direspons.`]);
     if (byOut[0]) ins.push(['📣', `Akun paling aktif menyebut akun lain adalah ${byOut.slice(0, 2).map(nm).join(' dan ')} (${fmt(byOut[0].dout)}× untuk yang teratas). Akun dengan aktivitas setinggi ini layak dipantau, misalnya untuk mendeteksi keluhan berulang atau akun terkoordinasi.`]);
     if (authors.length) ins.push(['⚖️', `Dari ${fmt(authors.length)} akun yang menulis, <b>${pct(negA.length, authors.length)}</b> cenderung negatif dan <b>${pct(posA.length, authors.length)}</b> cenderung positif.${negA.length > posA.length ? ' Suara negatif lebih banyak daripada suara positif di jaringan ini.' : ' Suara positif masih seimbang atau lebih banyak dari suara negatif.'}`]);
-    if (bigKom.length) ins.push(['🧩', `Terbentuk <b>${fmt(bigKom.length)}</b> kelompok percakapan. Kelompok terbesar (${fmt(komSize[bigKom[0]])} akun) berpusat di ${nm(komHub(bigKom[0]))}${bigKom[1] ? `, disusul kelompok di sekitar ${nm(komHub(bigKom[1]))}` : ''}. Pilih <b>Warna: Komunitas</b> untuk melihat pembagiannya.`]);
+    if (bigKom.length) ins.push(['🧩', `Ada <b>${fmt(bigKom.length)}</b> lingkaran obrolan (kumpulan akun yang sering saling bicara). Yang terbesar (${fmt(komSize[bigKom[0]])} akun) berkumpul di sekitar ${nm(komHub(bigKom[0]))}${bigKom[1] ? `, lalu di sekitar ${nm(komHub(bigKom[1]))}` : ''}. Pilih <b>Warna: Komunitas</b> untuk melihat pembagiannya.`]);
   }
   $('snaInsight').innerHTML = ins.map(([i, t]) => `<li><span class="ii">${i}</span><span>${t}</span></li>`).join('');
   const ink = css('--ink'), line = css('--line'), bg = css('--card');
