@@ -40,7 +40,7 @@ const CHAT_MAX_POSTS = 50; // Workers AI punya batas konteks lebih kecil
   fab.className = 'ai-fab'; fab.setAttribute('aria-label', 'Tanya AI Assistant'); fab.innerHTML = ico + '<span>Tanya AI</span>';
   const panel = document.createElement('div');
   panel.className = 'ai-panel'; panel.hidden = true; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'AI Assistant');
-  panel.innerHTML = `<div class="ai-h"><span class="ai-dot">${ico}</span><div><b>AI Assistant</b><small>Ditenagai Cloudflare Workers AI · menjawab dari data dashboard</small></div><button type="button" aria-label="Tutup">×</button></div>
+  panel.innerHTML = `<div class="ai-h"><span class="ai-dot">${ico}</span><div><b>AI Assistant</b><small>Powered with Cloudflare AI</small></div><button type="button" aria-label="Tutup">×</button></div>
     <div class="ai-log" aria-live="polite"></div>
     <div class="ai-f"><textarea rows="1" maxlength="2000" placeholder="Tanya tentang data karhutla…" aria-label="Pertanyaan"></textarea><button type="button" aria-label="Kirim">➤</button></div>
     <div class="ai-note">Jawaban AI bisa keliru. Cek kembali angka penting di dashboard.</div>`;
