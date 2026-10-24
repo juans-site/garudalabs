@@ -370,7 +370,9 @@ $('fGran').onchange = e => { state.gran = e.target.value; render(); };
 // Koneksi dibangun dari: (1) @mention di caption/komentar: penulis → akun yang disebut,
 // (2) komentar: pengomentar → pemilik postingan (diambil dari link).
 // Data: Post + Komentar platform terpilih, mengikuti date range. Toggle Post/Komentar/All tidak berlaku di tab ini.
-const sna = { pf: 'Twitter', color: 'sent', rank: 'in', cy: null, key: '', max: 250 };
+const sna = { pf: 'Twitter', color: 'sent', rank: 'in', cy: null, key: '', max: 150 };
+// Pengaturan tata letak: angka lebih besar = jaringan lebih longgar
+const SNA_LAYOUT = { name: 'cose', nodeRepulsion: () => 120000, idealEdgeLength: () => 160, edgeElasticity: () => 60, nodeOverlap: 40, gravity: .08, componentSpacing: 140, nodeDimensionsIncludeLabels: true, numIter: 2500, randomize: true, padding: 40 };
 const KOM_COLORS = ['#FFBE00', '#38bdf8', '#a78bfa', '#f472b6', '#34d399', '#fb923c', '#60a5fa', '#e879f9', '#2dd4bf', '#facc15'];
 const ownerFromLink = (link, pf) => {
   const m = pf === 'Twitter' ? link.match(/(?:x|twitter)\.com\/([A-Za-z0-9_]+)\/status/i) : link.match(/threads\.(?:com|net)\/@([A-Za-z0-9_.]+)/i);
@@ -424,6 +426,7 @@ async function renderSNA() {
 
   const sentOf = n => n.posts === 0 ? 'unk' : (n.neg > n.pos && n.neg >= n.net) ? 'negatif' : (n.pos > n.neg && n.pos >= n.net) ? 'positif' : 'netral';
   const maxDeg = Math.max(1, ...N.map(n => n.din + n.dout));
+  const labelMin = N.map(n => n.din + n.dout).sort((a, b) => b - a)[Math.min(29, N.length - 1)] || 0; // label hanya 30 akun teratas
   const colorOf = n => sna.color === 'kom' ? (komIdx(lab.get(n.id)) >= 0 ? KOM_COLORS[komIdx(lab.get(n.id))] : '#6b7280')
     : ({ positif: SENT.positif, negatif: SENT.negatif, netral: SENT.netral, unk: '#6b7280' })[sentOf(n)];
 
@@ -450,7 +453,7 @@ async function renderSNA() {
   $('snaEmpty').hidden = N.length > 0; $('snaEmpty').textContent = 'Tidak ada interaksi pada rentang ini';
   const key = sna.pf + JSON.stringify(state.range) + N.length + E.length;
   const els = [
-    ...N.map(n => ({ data: { id: n.id, label: n.label, size: 10 + Math.sqrt((n.din + n.dout) / maxDeg) * 36, color: colorOf(n), deg: n.din + n.dout } })),
+    ...N.map(n => ({ data: { id: n.id, label: n.label, big: (n.din + n.dout) >= labelMin, size: 10 + Math.sqrt((n.din + n.dout) / maxDeg) * 36, color: colorOf(n), deg: n.din + n.dout } })),
     ...E.map(e => ({ data: { id: e.s + '→' + e.t, source: e.s, target: e.t, w: Math.min(6, 0.6 + Math.log2(e.w + 1)) } }))
   ];
   sna.nodes = nodes; sna.edgesAll = edges; sna.lab = lab;
@@ -463,14 +466,14 @@ async function renderSNA() {
   sna.cy = cytoscape({
     container: $('snaGraph'), elements: els, minZoom: .1, maxZoom: 4, wheelSensitivity: .25,
     style: [
-      { selector: 'node', style: { 'background-color': 'data(color)', width: 'data(size)', height: 'data(size)', label: 'data(label)', color: ink, 'font-size': 10, 'font-family': 'Plus Jakarta Sans, sans-serif', 'text-valign': 'bottom', 'text-margin-y': 4, 'text-outline-color': bg, 'text-outline-width': 2, 'min-zoomed-font-size': 8, 'border-width': 1.5, 'border-color': bg } },
-      { selector: 'node[deg < 4]', style: { label: '' } },
-      { selector: 'edge', style: { width: 'data(w)', 'line-color': line, 'curve-style': 'haystack', opacity: .75 } },
+      { selector: 'node', style: { 'background-color': 'data(color)', width: 'data(size)', height: 'data(size)', label: 'data(label)', color: ink, 'font-size': 10, 'font-family': 'Plus Jakarta Sans, sans-serif', 'text-valign': 'bottom', 'text-margin-y': 4, 'text-outline-color': bg, 'text-outline-width': 2, 'min-zoomed-font-size': 7, 'text-wrap': 'ellipsis', 'text-max-width': 110, 'border-width': 1.5, 'border-color': bg } },
+      { selector: 'node[!big]', style: { label: '' } },
+      { selector: 'edge', style: { width: 'data(w)', 'line-color': line, 'curve-style': 'haystack', opacity: .5 } },
       { selector: '.faded', style: { opacity: .12 } },
       { selector: 'node.hl', style: { label: 'data(label)', 'border-color': css('--accent'), 'border-width': 3, 'z-index': 10 } },
       { selector: 'edge.hl', style: { 'line-color': css('--accent'), opacity: 1, 'z-index': 9 } }
     ],
-    layout: { name: 'cose', animate: false, nodeRepulsion: () => 9000, idealEdgeLength: () => 70, gravity: .6, numIter: 1200, randomize: true }
+    layout: { ...SNA_LAYOUT, animate: false }
   });
   const showZoom = () => $('zLvl').textContent = Math.round(sna.cy.zoom() * 100) + '%';
   sna.cy.on('zoom', showZoom); showZoom();
@@ -505,10 +508,11 @@ function focusNode(id) {
 const zoomBy = f => { const cy = sna.cy; if (!cy) return; cy.animate({ zoom: { level: Math.max(cy.minZoom(), Math.min(cy.maxZoom(), cy.zoom() * f)), renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } } }, { duration: 200 }); };
 $('zIn').onclick = () => zoomBy(1.3); $('zOut').onclick = () => zoomBy(1 / 1.3);
 $('zFit').onclick = () => sna.cy?.animate({ fit: { padding: 30 } }, { duration: 300 });
-$('zRe').onclick = () => sna.cy?.layout({ name: 'cose', animate: true, animationDuration: 600, nodeRepulsion: () => 9000, idealEdgeLength: () => 70, gravity: .6, randomize: true }).run();
+$('zRe').onclick = () => sna.cy?.layout({ ...SNA_LAYOUT, animate: true, animationDuration: 700 }).run();
 const segOn = (id, fn) => $(id).onclick = e => { const b = e.target.closest('button'); if (!b) return; [...$(id).children].forEach(x => x.classList.toggle('on', x === b)); fn(b.dataset.v); };
 segOn('snaPf', v => { sna.pf = v; renderSNA(); });
 segOn('snaColor', v => { sna.color = v; renderSNA(); });
+segOn('snaMax', v => { sna.max = +v; sna.key = ''; renderSNA(); });
 segOn('snaRank', v => { sna.rank = v; sna.rankList?.(); });
 $('snaTop').onclick = e => { const li = e.target.closest('li[data-id]'); if (li) focusNode(li.dataset.id); };
 $('snaDetail').onclick = e => { const li = e.target.closest('li[data-id]'); if (li) focusNode(li.dataset.id); };
