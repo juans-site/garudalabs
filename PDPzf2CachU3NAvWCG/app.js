@@ -99,7 +99,7 @@ async function render() {
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
   const unit = { post: 'post', komentar: 'komentar', all: 'mention' }[state.src];
-  $('periode').textContent = `Percakapan media sosial terkait kebakaran hutan & lahan (karhutla) · ${periode} · ${unit}`;
+  $('periode').textContent = `Percakapan media sosial terkait Kebakaran Hutan & Lahan (KARHUTLA) · ${periode} · ${unit}`;
 
   const S = stats(D), N = D.filter(r => r.sent === 'negatif'), P = D.filter(r => r.sent === 'positif');
 
@@ -372,7 +372,7 @@ $('fGran').onchange = e => { state.gran = e.target.value; render(); };
 // Data: Post + Komentar platform terpilih, mengikuti date range. Toggle Post/Komentar/All tidak berlaku di tab ini.
 const sna = { pf: 'X', color: 'sent', rank: 'in', cy: null, key: '', max: 150 };
 // Pengaturan tata letak: angka lebih besar = jaringan lebih longgar
-const SNA_LAYOUT = { name: 'cose', nodeRepulsion: () => 600000, idealEdgeLength: () => 320, edgeElasticity: () => 40, nodeOverlap: 80, gravity: .04, componentSpacing: 260, nodeDimensionsIncludeLabels: true, numIter: 1500, randomize: true, padding: 40 };
+const SNA_LAYOUT = { name: 'cose', nodeRepulsion: () => 90000, idealEdgeLength: () => 70, edgeElasticity: () => 100, nodeOverlap: 20, gravity: .9, nestingFactor: 1.2, componentSpacing: 40, nodeDimensionsIncludeLabels: true, numIter: 1500, randomize: true, padding: 40 };
 const KOM_COLORS = ['#FFBE00', '#38bdf8', '#a78bfa', '#f472b6', '#34d399', '#fb923c', '#60a5fa', '#e879f9', '#2dd4bf', '#facc15'];
 const ownerFromLink = (link, pf) => {
   const m = /^(x|twitter)$/i.test(pf) ? link.match(/(?:x|twitter)\.com\/([A-Za-z0-9_]+)\/status/i) : link.match(/threads\.(?:com|net)\/@([A-Za-z0-9_.]+)/i);
@@ -405,6 +405,11 @@ async function renderSNA() {
   // Ambil akun paling terhubung supaya graf tetap terbaca
   const keep = new Set([...nodes.values()].filter(n => n.din + n.dout > 0).sort((a, b) => (b.din + b.dout) - (a.din + a.dout)).slice(0, sna.max).map(n => n.id));
   const E = [...edges].map(([k, w]) => { const [s, t] = k.split('→'); return { s, t, w }; }).filter(e => keep.has(e.s) && keep.has(e.t));
+  // Buang pasangan/kelompok kecil yang terisolasi (< 3 akun) supaya grafik fokus pada percakapan yang benar-benar berjejaring
+  { const par = new Map(); const f = x => { while (par.get(x) !== x) { par.set(x, par.get(par.get(x))); x = par.get(x); } return x; };
+    E.forEach(e => { [e.s, e.t].forEach(v => par.has(v) || par.set(v, v)); par.set(f(e.s), f(e.t)); });
+    const sz = {}; par.forEach((_, v) => { const r = f(v); sz[r] = (sz[r] || 0) + 1; });
+    const big = E.filter(e => sz[f(e.s)] >= 3); if (big.length) E.splice(0, E.length, ...big); }
   const used = new Set(E.flatMap(e => [e.s, e.t]));
   const N = [...nodes.values()].filter(n => used.has(n.id));
 
@@ -511,7 +516,7 @@ async function renderSNA() {
       { selector: 'node', style: { 'background-color': 'data(color)', width: 'data(size)', height: 'data(size)', label: 'data(label)', color: ink, 'font-size': 10, 'font-family': 'Plus Jakarta Sans, sans-serif', 'text-valign': 'bottom', 'text-margin-y': 4, 'text-outline-color': bg, 'text-outline-width': 2, 'min-zoomed-font-size': 7, 'text-wrap': 'ellipsis', 'text-max-width': 110, 'border-width': 1.5, 'border-color': bg } },
       { selector: 'node[!big]', style: { label: '' } },
       { selector: 'node.lbl', style: { label: 'data(label)' } },
-      { selector: 'edge', style: { width: 'data(w)', 'line-color': line, 'curve-style': 'haystack', opacity: .5 } },
+      { selector: 'edge', style: { width: 'data(w)', 'line-color': css('--mute'), 'curve-style': 'bezier', opacity: .55, 'target-arrow-shape': 'triangle', 'target-arrow-color': css('--mute'), 'arrow-scale': .6 } },
       { selector: '.faded', style: { opacity: .12 } },
       { selector: 'node.hl', style: { label: 'data(label)', 'border-color': css('--accent'), 'border-width': 3, 'z-index': 10 } },
       { selector: 'edge.hl', style: { 'line-color': css('--accent'), opacity: 1, 'z-index': 9 } }
