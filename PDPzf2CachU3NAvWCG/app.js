@@ -458,7 +458,7 @@ async function renderSNA() {
       return ao.length ? `${ao.map(n => `${at(n)} (${fmt(n.dout)}×)`).join(', ')}. Akun-akun ini paling sering menyapa atau menandai akun lain. Bisa jadi mereka pelanggan yang mengeluh berulang kali, akun yang sedang mengampanyekan sesuatu, atau akun penyebar informasi. Klik namanya di grafik untuk melihat isinya.` : '-'; })()}</p></div>
     <div class="ex"><h4>Ada berapa "lingkaran obrolan"?</h4><p>Lingkaran obrolan adalah sekumpulan akun yang lebih sering bicara satu sama lain, seperti grup tongkrongan. Di sini ada <b>${fmt(nKom)}</b> lingkaran${bigHub ? `; yang terbesar berkumpul di sekitar ${at(bigHub)}` : ''}. ${nKom <= 1 ? 'Satu lingkaran saja berarti hampir semua orang membicarakan hal yang sama di tempat yang sama.' : 'Beberapa lingkaran biasanya berarti ada beberapa topik atau kubu yang berbeda. Pilih <b>Warna: Komunitas</b> untuk melihatnya di grafik.'}</p></div>`;
   $('snaReadHint').textContent = `${sna.pf} · ${per}`;
-  $('snaHint').textContent = `${sna.pf} · ${state.range ? (state.range.from === state.range.to ? tglLabel(state.range.from) : tglLabel(state.range.from) + ' – ' + tglLabel(state.range.to)) : ''} · Post + Komentar`;
+  $('snaHint').textContent = `${sna.pf} · ${state.range ? (state.range.from === state.range.to ? tglLabel(state.range.from) : tglLabel(state.range.from) + ' – ' + tglLabel(state.range.to)) : ''} · Post`;
   $('snaList').innerHTML = N.map(n => `<option value="${esc(n.label)}">`).join('');
 
   // Peringkat
@@ -558,9 +558,9 @@ function focusNode(id) {
   const t = n.posts || 1;
   $('snaDetail').innerHTML = `<div class="sd-h"><span class="av" style="background:${pColor(sna.pf)}22;color:${pColor(sna.pf)}">${esc(n.label[0].toUpperCase())}</span>
     <div><b>${esc(n.label)}</b>${n.resmi ? ' <span class="chip sm">akun resmi</span>' : ''}<br><a href="${url}" target="_blank" rel="noopener">Buka profil ↗</a></div></div>
-    <div class="sna-stats sm"><div><small>Disebut</small><b>${fmt(n.din)}</b></div><div><small>Menyebut</small><b>${fmt(n.dout)}</b></div><div><small>Post/komentar</small><b>${fmt(n.posts)}</b></div></div>
+    <div class="sna-stats sm"><div><small>Disebut</small><b>${fmt(n.din)}</b></div><div><small>Menyebut</small><b>${fmt(n.dout)}</b></div><div><small>Post</small><b>${fmt(n.posts)}</b></div></div>
     ${n.posts ? `<div class="ks-bar" style="margin:12px 0 4px"><i style="width:${n.neg / t * 100}%;background:${SENT.negatif}"></i><i style="width:${n.net / t * 100}%;background:${SENT.netral}"></i><i style="width:${n.pos / t * 100}%;background:${SENT.positif}"></i></div>
-    <small class="hint">${n.neg} negatif · ${n.net} netral · ${n.pos} positif</small>` : '<small class="hint">Akun ini hanya disebut, tidak ada post/komentar darinya di data.</small>'}
+    <small class="hint">${n.neg} negatif · ${n.net} netral · ${n.pos} positif</small>` : '<small class="hint">Akun ini hanya disebut, tidak ada post darinya di data.</small>'}
     <h3 class="sub">Koneksi teratas</h3><ul class="sd-conn">${top.map(([m, w]) => `<li data-id="${esc(m)}" class="clickable"><span>${esc(sna.nodes.get(m)?.label || m)}</span><b>${w}×</b></li>`).join('')}</ul>`;
   $('snaDetailCard').hidden = false;
 }
