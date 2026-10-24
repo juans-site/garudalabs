@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monitor Karhutla</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root{--font-anthropic-sans:"Source Sans 3",system-ui,sans-serif;--font-anthropic-serif:"Source Serif 4",Georgia,serif;
+--color-bg:#f6f7f5;--color-fg:#1d2420;--color-fg-muted:#5f6a64;--color-panel:#fff;--color-border-line:#e1e5e2;--color-ok:#2f7d4f;--color-bad:#c0392b;
+--cds-chart-status-critical:#d9534a;--cds-chart-muted:#b8c0bb;--cds-chart-grid:#eceeec;--cds-surface-popover:#fff;--cds-border:#e1e5e2;--cds-shadow-popover:0 4px 14px rgba(0,0,0,.12);--cds-text-secondary:#5f6a64;
+--c1:#2f7d6b;--cds-font-size-caption:12.5px;--cds-font-size-body:15px;--cds-font-size-heading:16px;--cds-font-size-title:30px;--cds-font-weight-medium:600;
+--cds-gap-xs:4px;--cds-gap-sm:8px;--cds-gap-md:16px;--cds-gap-lg:24px;--cds-pad-xs:4px;--cds-pad-sm:8px;--cds-pad-lg:20px;--cds-radius:10px;--cds-dur-slow:.3s}
+@media (prefers-color-scheme:dark){:root{--color-bg:#141816;--color-fg:#e8ece9;--color-fg-muted:#9aa49e;--color-panel:#1c211e;--color-border-line:#2c332f;--color-ok:#5fc38a;--color-bad:#ef7b6f;--cds-chart-muted:#4b544f;--cds-chart-grid:#262c29;--cds-surface-popover:#232925;--cds-border:#2c332f;--cds-text-secondary:#9aa49e;--c1:#4fb39b;color-scheme:dark}}
+body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(--cds-font-size-body)}
+#dash-root{max-width:1200px;margin:0 auto;padding:24px max(16px,env(safe-area-inset-left,0px))}
+.dash-skeleton{color:transparent;background:var(--color-border-line);border-radius:6px;min-height:1em}
+.kh-src{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);margin-top:var(--cds-gap-lg)}
+</style>
+<script>
+(function(){
+  const SHEET='17TKTfowFucPllDf5fE1TTw6GizCWg5B1axB90xuzd2Q';
+  const URL_='https://docs.google.com/spreadsheets/d/'+SHEET+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('Data Postingan');
+  const calcs={}, store={posts:{status:'loading',data:[]}}, fns=[]; let params={platform:'Semua'};
+  const run=()=>fns.forEach(f=>{try{f()}catch(e){console.error(e)}});
+  window.dash={
+    colors:[getComputedStyle(document.documentElement).getPropertyValue('--c1').trim()||'#2f7d6b'],
+    loader(){}, calc(id,o){calcs[id]=o},
+    data(id){ if(id in store) return store[id]; const c=calcs[id]; if(!c) return {status:'missing',data:[]};
+      const ins=c.inputs.map(i=>dash.data(i)); if(ins.some(i=>i.status!=='ok')) return {status:ins.find(i=>i.status!=='ok').status,data:[]};
+      try{ return store[id]={status:'ok',data:c.fn(...ins.map(i=>i.data))}; }catch(e){ console.error(e); return {status:'error',data:[]}; } },
+    onData(f){fns.push(f); f();}, params:()=>params, setParams(p){params={...params,...p}; run();}
+  };
+  const num=s=>{const n=Number(String(s??'').replace(/,/g,''));return isFinite(n)?n:0};
+  function load(){
+    fetch(URL_).then(r=>{if(!r.ok) throw new Error(r.status); return r.text()}).then(t=>{
+      const nums=['Likes/Reaksi','Komentar','Share/Repost','Views/Plays'];
+      const rows=d3.csvParse(t).filter(r=>r.No).map(r=>{nums.forEach(k=>r[k]=num(r[k]));return r});
+      Object.keys(store).forEach(k=>delete store[k]); store.posts={status:'ok',data:rows};
+      const s=document.getElementById('kh-upd'); if(s) s.textContent='Diperbarui '+new Date().toLocaleString('id-ID');
+      run();
+    }).catch(e=>{console.error(e); store.posts={status:'error',data:[]}; run();});
+  }
+  document.addEventListener('DOMContentLoaded',()=>{load(); setInterval(load,5*60*1000); let w=innerWidth; addEventListener('resize',()=>{if(innerWidth!==w){w=innerWidth;run();}});});
+})();
+</script>
+</head><body><div id="dash-root">
+<style>
+.kh{display:grid;gap:var(--cds-gap-lg);font-family:var(--font-anthropic-sans);font-variant-numeric:tabular-nums}
+.kh-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--cds-gap-md);align-items:end}
+.kh-top h1{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);margin:0}
+.kh-top p{margin:var(--cds-gap-xs) 0 0;color:var(--color-fg-muted)}
+.kh-chips{display:flex;flex-wrap:wrap;gap:var(--cds-gap-xs)}
+.kh-chips button{font:inherit;padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);background:var(--color-panel);color:var(--color-fg);border-radius:999px;cursor:pointer}
+.kh-chips button[aria-pressed=true]{background:var(--color-fg);color:var(--color-bg)}
+.kh-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr));gap:var(--cds-gap-md)}
+.kh-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);min-width:0;position:relative}
+.kh-card h2{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0}
+.kh-note{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);margin:2px 0 var(--cds-gap-md)}
+.kh-lab{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.kh-big{font-family:var(--font-anthropic-serif);font-size:var(--cds-font-size-title);font-weight:400;margin-top:var(--cds-gap-xs)}
+.kh-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:var(--cds-gap-md)}
+.kh-chart{min-height:240px}
+.kh-tbl{width:100%;border-collapse:collapse;font-size:var(--cds-font-size-caption)}
+.kh-tbl th,.kh-tbl td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--color-border-line);vertical-align:top}
+.kh-tbl td.n,.kh-tbl th.n{text-align:right}
+.kh-scroll{overflow:auto;max-height:440px}
+.kh-scroll th{position:sticky;top:0;background:var(--color-panel)}
+.kh-txt{max-width:46ch;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.kh-tbl a{color:inherit}
+.kh-leg{display:flex;gap:var(--cds-gap-md);flex-wrap:wrap;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-bottom:var(--cds-gap-sm)}
+.kh-leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.kh-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);white-space:nowrap}
+.kh-tip b{display:block;color:var(--cds-text-secondary);font-weight:400}
+[data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
+.kh-fail{display:flex;align-items:center;justify-content:center;gap:6px;min-height:200px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.kh-fail:before{content:"";width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad)}
+</style>
+<div class="kh">
+  <div class="kh-top" id="ringkasan">
+    <div><h1>Monitor Karhutla</h1><p id="kh-take" class="dash-skeleton" data-source="c_kpi">—</p></div>
+    <div class="kh-chips" id="kh-plat" role="group" aria-label="Platform"></div>
+  </div>
+  <div class="kh-kpis">
+    <div class="kh-card"><div class="kh-lab">Total postingan</div><div class="kh-big" id="k-posts">—</div></div>
+    <div class="kh-card"><div class="kh-lab">Total engagement</div><div class="kh-big" id="k-eng">—</div><div class="kh-lab">likes + komentar + share</div></div>
+    <div class="kh-card"><div class="kh-lab">Sentimen negatif</div><div class="kh-big" id="k-neg">—</div></div>
+    <div class="kh-card"><div class="kh-lab">Sentimen positif</div><div class="kh-big" id="k-pos">—</div></div>
+    <div class="kh-card"><div class="kh-lab">Skor bersih (pos − neg)</div><div class="kh-big" id="k-net">—</div></div>
+  </div>
+  <div class="kh-card" id="tren"><h2>Tren sentimen harian</h2><div class="kh-note">Jumlah postingan per hari menurut sentimen</div>
+    <div class="kh-leg" id="leg-daily"></div><div class="kh-chart" id="ch-daily" data-source="c_daily"></div></div>
+  <div class="kh-grid">
+    <div class="kh-card" id="platform"><h2>Volume per platform</h2><div class="kh-note">Semua postingan, tidak terpengaruh filter</div><div class="kh-chart" id="ch-plat" data-source="c_platform"></div></div>
+    <div class="kh-card" id="lokasi"><h2>Lokasi kebakaran</h2><div class="kh-note">Pulau yang disebut dalam postingan, menurut sentimen</div><div class="kh-chart" id="ch-isl" data-source="c_island"></div></div>
+  </div>
+  <div class="kh-grid">
+    <div class="kh-card" id="topik"><h2>Top 10 topik</h2><div class="kh-note">Jumlah postingan dan sentimen per topik</div>
+      <table class="kh-tbl" data-source="c_topic" data-row-key="platform,topik"><thead><tr><th data-field="topik">Topik</th><th class="n" data-field="posts">Post</th><th class="n" data-field="neg">Negatif</th><th class="n" data-field="pos">Positif</th></tr></thead><tbody id="tb-topic"></tbody></table></div>
+    <div class="kh-card" id="hashtag"><h2>Top 10 hashtag</h2><div class="kh-note">Jumlah postingan yang memakai hashtag</div><div class="kh-chart" id="ch-tag" data-source="c_tag"></div></div>
+  </div>
+  <div class="kh-card" id="teratas"><h2>Postingan dengan engagement tertinggi</h2><div class="kh-note">10 teratas menurut likes + komentar + share</div>
+    <div class="kh-scroll"><table class="kh-tbl" data-source="c_top" data-row-key="platform,no"><thead><tr><th data-field="nama">Akun</th><th data-field="teks">Postingan</th><th data-field="sentimen">Sentimen</th><th class="n" data-field="engagement">Engagement</th></tr></thead><tbody id="tb-top"></tbody></table></div></div>
+</div>
+<script>document.addEventListener("DOMContentLoaded",()=>{
+const num = (s) => { const n = Number(String(s ?? '').replace(/,/g, '')); return isFinite(n) ? n : 0; };
+const PL = ['Semua', 'X', 'Instagram', 'Facebook', 'Threads', 'TikTok', 'YouTube'];
+const eng = (r) => r['Likes/Reaksi'] + r['Komentar'] + r['Share/Repost'];
+const byPlat = (posts) => { const s = new Set(posts.map((r) => r.Platform)); return ['Semua', ...PL.slice(1).filter((p) => s.has(p)), ...[...s].filter((p) => !PL.includes(p))].map((p) => [p, p === 'Semua' ? posts : posts.filter((r) => r.Platform === p)]); };
+window.khByPlat = byPlat;
+dash.calc('c_kpi', { title: 'Ringkasan per platform', description: 'Jumlah postingan, engagement, dan pangsa sentimen untuk tiap platform dan semua.', inputs: ['posts'],
+  fn: (posts) => { const eng = (r) => r['Likes/Reaksi'] + r['Komentar'] + r['Share/Repost']; const g = new Map([['Semua', posts]]); posts.forEach((r) => { if (!g.has(r.Platform)) g.set(r.Platform, []); g.get(r.Platform).push(r); });
+    return [...g].map(([platform, rs]) => { const n = rs.length, neg = rs.filter((r) => r.Sentimen === 'Negatif').length, pos = rs.filter((r) => r.Sentimen === 'Positif').length;
+      return { platform, posts: n, engagement: rs.reduce((s, r) => s + eng(r), 0), neg_pct: n ? neg / n : 0, pos_pct: n ? pos / n : 0, net: n ? (pos - neg) / n : 0 }; }); } });
+dash.calc('c_daily', { title: 'Sentimen harian', description: 'Postingan per hari per sentimen, untuk tiap platform dan semua.', inputs: ['posts'],
+  fn: (posts) => { const m = new Map(); posts.forEach((r) => { for (const p of ['Semua', r.Platform]) { const k = p + '|' + r['Tanggal (WIB)']; if (!m.has(k)) m.set(k, { platform: p, day: r['Tanggal (WIB)'], Positif: 0, Negatif: 0, Netral: 0 }); const o = m.get(k); if (r.Sentimen in o) o[r.Sentimen]++; } }); return [...m.values()].sort((a, b) => a.day < b.day ? -1 : 1); } });
+dash.calc('c_platform', { title: 'Volume per platform', description: 'Jumlah postingan dan engagement per platform.', inputs: ['posts'],
+  fn: (posts) => { const m = new Map(); posts.forEach((r) => { const o = m.get(r.Platform) || { platform: r.Platform, posts: 0, engagement: 0 }; o.posts++; o.engagement += r['Likes/Reaksi'] + r['Komentar'] + r['Share/Repost']; m.set(r.Platform, o); }); return [...m.values()].sort((a, b) => b.posts - a.posts); } });
+dash.calc('c_island', { title: 'Lokasi per pulau', description: 'Postingan per pulau yang disebut, per sentimen, untuk tiap platform dan semua.', inputs: ['posts'],
+  fn: (posts) => { const m = new Map(); posts.forEach((r) => { for (const p of ['Semua', r.Platform]) { const k = p + '|' + r['Lokasi (Pulau)']; if (!m.has(k)) m.set(k, { platform: p, pulau: r['Lokasi (Pulau)'] || 'Lainnya', posts: 0, Positif: 0, Negatif: 0, Netral: 0 }); const o = m.get(k); o.posts++; if (r.Sentimen in o) o[r.Sentimen]++; } }); return [...m.values()].sort((a, b) => b.posts - a.posts); } });
+dash.calc('c_topic', { title: 'Top 10 topik', description: '10 topik terbanyak dengan jumlah postingan negatif dan positif, untuk tiap platform dan semua.', inputs: ['posts'],
+  fn: (posts) => { const m = new Map(); posts.forEach((r) => { if (!r.Topik || r.Topik === 'Lainnya') return; for (const p of ['Semua', r.Platform]) { const k = p + '|' + r.Topik; if (!m.has(k)) m.set(k, { platform: p, topik: r.Topik, posts: 0, neg: 0, pos: 0 }); const o = m.get(k); o.posts++; if (r.Sentimen === 'Negatif') o.neg++; if (r.Sentimen === 'Positif') o.pos++; } });
+    const out = []; d3.group([...m.values()], (o) => o.platform).forEach((rs) => out.push(...rs.sort((a, b) => b.posts - a.posts).slice(0, 10))); return out; } });
+dash.calc('c_tag', { title: 'Top 10 hashtag', description: '10 hashtag yang paling banyak dipakai, untuk tiap platform dan semua.', inputs: ['posts'],
+  fn: (posts) => { const m = new Map(); posts.forEach((r) => { const tags = new Set(String(r.Hashtag).toLowerCase().split(/\s+/).filter((t) => t.startsWith('#'))); tags.forEach((t) => { for (const p of ['Semua', r.Platform]) { const k = p + '|' + t; if (!m.has(k)) m.set(k, { platform: p, hashtag: t, posts: 0 }); m.get(k).posts++; } }); });
+    const out = []; d3.group([...m.values()], (o) => o.platform).forEach((rs) => out.push(...rs.sort((a, b) => b.posts - a.posts).slice(0, 10))); return out; } });
+dash.calc('c_top', { title: 'Postingan teratas', description: '10 postingan dengan likes + komentar + share tertinggi, untuk tiap platform dan semua.', inputs: ['posts'],
+  fn: (posts) => { const eng = (r) => r['Likes/Reaksi'] + r['Komentar'] + r['Share/Repost']; const out = []; const g = new Map([['Semua', posts]]); posts.forEach((r) => { if (!g.has(r.Platform)) g.set(r.Platform, []); g.get(r.Platform).push(r); });
+    g.forEach((rs, platform) => [...rs].sort((a, b) => eng(b) - eng(a)).slice(0, 10).forEach((r) => out.push({ platform, no: r.No, nama: r['Nama Akun'], username: r.Username, plat: r.Platform, teks: r['Teks Postingan'], url: r.URL, sentimen: r.Sentimen, engagement: eng(r) }))); return out; } });
+});</script>
+<script>document.addEventListener("DOMContentLoaded",()=>{
+const SENT = ['Negatif', 'Positif', 'Netral'];
+const scol = { Negatif: 'var(--cds-chart-status-critical)', Positif: dash.colors[0], Netral: 'var(--cds-chart-muted)' };
+const fmt = d3.format(','), pct = d3.format('.1%'), cmp = (n) => n >= 10000 ? new Intl.NumberFormat('id', { notation: 'compact', maximumFractionDigits: 1 }).format(n) : fmt(n);
+const P = () => dash.params().platform || 'Semua';
+const plat = document.getElementById('kh-plat');
+plat.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) dash.setParams({ platform: b.dataset.p }); });
+function mark(el, src, field, where) { el.dataset.source = src; el.dataset.field = field; el.dataset.where = where; }
+function fail(box, st) { box.replaceChildren(); if (st === 'error') { const d = document.createElement('div'); d.className = 'kh-fail'; d.textContent = 'Failed to load'; box.append(d); } }
+function tipOn(card) { let t = card.querySelector('.kh-tip'); if (!t) { t = document.createElement('div'); t.className = 'kh-tip'; t.hidden = true; card.append(t); } return t; }
+function showTip(card, t, ev, title, lines) { t.replaceChildren(); const b = document.createElement('b'); b.textContent = title; t.append(b); lines.forEach((l) => { const d = document.createElement('div'); d.textContent = l; t.append(d); }); t.hidden = false; const r = card.getBoundingClientRect(); let x = ev.clientX - r.left + 12; if (x + t.offsetWidth > r.width) x = ev.clientX - r.left - t.offsetWidth - 12; t.style.left = Math.max(0, x) + 'px'; t.style.top = (ev.clientY - r.top + 12) + 'px'; }
+function hbar(box, rows, key, val, stack) {
+  const W = box.clientWidth || 320, bh = 22, gap = 8;
+  const svg = d3.select(box).append('svg').attr('width', '100%');
+  const tmp = svg.append('text').attr('font-size', 12);
+  let lw = 0; rows.forEach((r) => { tmp.text(r[key]); lw = Math.max(lw, tmp.node().getComputedTextLength()); }); tmp.remove(); lw = Math.min(lw + 8, W * 0.45);
+  const H = rows.length * (bh + gap); svg.attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+  const x = d3.scaleLinear([0, d3.max(rows, (r) => r[val]) || 1], [0, W - lw - 50]);
+  const card = box.closest('.kh-card'), tip = tipOn(card);
+  rows.forEach((r, i) => { const g = svg.append('g').attr('transform', `translate(0,${i * (bh + gap)})`);
+    g.append('text').attr('x', lw - 8).attr('y', bh / 2).attr('dy', '.35em').attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'var(--color-fg)').text(r[key].length > 28 ? r[key].slice(0, 27) + '…' : r[key]);
+    let x0 = lw; (stack || [val]).forEach((s) => { const w = x(r[s]); g.append('rect').attr('x', x0).attr('width', Math.max(0, w)).attr('height', bh).attr('rx', 3).attr('fill', stack ? scol[s] : dash.colors[0]); x0 += w; });
+    g.append('text').attr('x', x0 + 6).attr('y', bh / 2).attr('dy', '.35em').attr('font-size', 12).attr('fill', 'var(--color-fg-muted)').text(fmt(r[val]));
+    g.append('rect').attr('width', W).attr('height', bh + gap).attr('fill', 'transparent').on('mousemove', (ev) => showTip(card, tip, ev, r[key], stack ? stack.map((s) => `${s}: ${fmt(r[s])}`) : [`${fmt(r[val])} postingan`])).on('mouseleave', () => tip.hidden = true); });
+}
+function daily(box, rows) {
+  const W = box.clientWidth || 320, H = 240, m = { t: 8, r: 8, b: 24, l: 36 };
+  const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+  const days = rows.map((r) => r.day), x = d3.scaleBand(days, [m.l, W - m.r]).padding(0.2);
+  const y = d3.scaleLinear([0, d3.max(rows, (r) => r.Negatif + r.Positif + r.Netral) || 1], [H - m.b, m.t]).nice();
+  svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', m.l - 6).attr('y', y).attr('dy', '.35em').attr('text-anchor', 'end').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text(fmt);
+  const step = Math.ceil(days.length / Math.max(1, Math.floor((W - m.l) / 52)));
+  svg.append('g').selectAll('text').data(days.filter((d, i) => i % step === 0)).join('text').attr('x', (d) => x(d) + x.bandwidth() / 2).attr('y', H - 6).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text((d) => d3.utcFormat('%-d %b')(new Date(d)));
+  const card = box.closest('.kh-card'), tip = tipOn(card);
+  rows.forEach((r) => { let y0 = 0; SENT.forEach((s) => { svg.append('rect').attr('x', x(r.day)).attr('width', x.bandwidth()).attr('y', y(y0 + r[s])).attr('height', y(y0) - y(y0 + r[s])).attr('fill', scol[s]); y0 += r[s]; });
+    svg.append('rect').attr('x', x(r.day)).attr('width', x.bandwidth()).attr('y', m.t).attr('height', H - m.b - m.t).attr('fill', 'transparent').on('mousemove', (ev) => showTip(card, tip, ev, d3.utcFormat('%-d %b %Y')(new Date(r.day)), SENT.map((s) => `${s}: ${fmt(r[s])}`))).on('mouseleave', () => tip.hidden = true); });
+}
+const leg = document.getElementById('leg-daily'); leg.replaceChildren(...SENT.map((s) => { const sp = document.createElement('span'); const i = document.createElement('i'); i.style.background = scol[s]; sp.append(i, s); return sp; }));
+const key = (...a) => a.map(encodeURIComponent).join(',');
+dash.onData(() => {
+  const p = P(), w = 'platform=' + encodeURIComponent(p);
+  const k = dash.data('c_kpi'), kr = k.status === 'ok' ? k.data : [];
+  plat.replaceChildren(...kr.map((r) => { const b = document.createElement('button'); b.dataset.p = r.platform; b.textContent = r.platform; b.setAttribute('aria-pressed', r.platform === p); return b; }));
+  const row = kr.find((r) => r.platform === p);
+  [['k-posts', 'posts', (v) => fmt(v)], ['k-eng', 'engagement', cmp], ['k-neg', 'neg_pct', pct], ['k-pos', 'pos_pct', pct], ['k-net', 'net', (v) => (v > 0 ? '+' : '') + pct(v)]].forEach(([id, f, fm]) => { const el = document.getElementById(id); mark(el, 'c_kpi', f, w); el.textContent = row ? fm(row[f]) : '—'; });
+  document.getElementById('k-net').style.color = row ? (row.net < 0 ? 'var(--color-bad)' : 'var(--color-ok)') : '';
+  const tk = document.getElementById('kh-take'); tk.classList.toggle('dash-skeleton', k.status === 'loading');
+  tk.textContent = row ? `${p === 'Semua' ? 'Di semua platform' : 'Di ' + p}, ${pct(row.neg_pct)} percakapan karhutla bernada negatif dan hanya ${pct(row.pos_pct)} positif.` : '—';
+  const draw = (id, src, fn) => { const box = document.getElementById(id), d = dash.data(src); box.classList.toggle('dash-skeleton', d.status === 'loading'); box.replaceChildren(); if (d.status !== 'ok') return fail(box, d.status); fn(box, d.data); };
+  draw('ch-daily', 'c_daily', (b, d) => daily(b, d.filter((r) => r.platform === p)));
+  draw('ch-plat', 'c_platform', (b, d) => hbar(b, d, 'platform', 'posts'));
+  draw('ch-isl', 'c_island', (b, d) => hbar(b, d.filter((r) => r.platform === p), 'pulau', 'posts', SENT));
+  draw('ch-tag', 'c_tag', (b, d) => hbar(b, d.filter((r) => r.platform === p), 'hashtag', 'posts'));
+  const t = dash.data('c_topic'), tb = document.getElementById('tb-topic');
+  tb.replaceChildren(...(t.status === 'ok' ? t.data.filter((r) => r.platform === p) : []).map((r) => { const tr = document.createElement('tr'); tr.dataset.key = key(r.platform, r.topik); [r.topik, fmt(r.posts), fmt(r.neg), fmt(r.pos)].forEach((v, i) => { const td = document.createElement('td'); td.textContent = v; if (i) td.className = 'n'; tr.append(td); }); return tr; }));
+  const tp = dash.data('c_top'), tt = document.getElementById('tb-top');
+  tt.replaceChildren(...(tp.status === 'ok' ? tp.data.filter((r) => r.platform === p) : []).map((r) => { const tr = document.createElement('tr'); tr.dataset.key = key(r.platform, r.no);
+    const a = document.createElement('td'); const an = document.createElement('a'); an.href = r.url; an.target = '_blank'; an.rel = 'noopener'; an.textContent = r.nama; const sm = document.createElement('div'); sm.className = 'kh-lab'; sm.textContent = r.plat + ' · @' + r.username; a.append(an, sm);
+    const tx = document.createElement('td'); const dv = document.createElement('div'); dv.className = 'kh-txt'; dv.textContent = r.teks; tx.append(dv);
+    const s = document.createElement('td'); s.textContent = r.sentimen; s.style.color = r.sentimen === 'Negatif' ? 'var(--color-bad)' : r.sentimen === 'Positif' ? 'var(--color-ok)' : '';
+    const e = document.createElement('td'); e.className = 'n'; e.textContent = fmt(r.engagement); tr.append(a, tx, s, e); return tr; }));
+});
+});</script>
+<p class="kh-src">Sumber: <a href="https://docs.google.com/spreadsheets/d/17TKTfowFucPllDf5fE1TTw6GizCWg5B1axB90xuzd2Q/edit" target="_blank" rel="noopener" style="color:inherit">Google Sheet Data Postingan</a> · <span id="kh-upd">Memuat…</span> · otomatis diperbarui tiap 5 menit</p>
+</div></body></html>
