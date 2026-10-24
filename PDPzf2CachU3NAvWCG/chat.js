@@ -1,5 +1,5 @@
 /* ===== Asisten AI (Claude) — floating chat, teks saja ===== */
-const CHAT_ENDPOINT = 'https://karhutla-chat.GANTI-SUBDOMAIN.workers.dev'; // ganti dengan URL Worker kamu
+const CHAT_ENDPOINT = 'https://karhutla-chat.abrahms-juan.workers.dev'; // ganti dengan URL Worker kamu
 const CHAT_MAX_POSTS = 60; // Workers AI punya batas konteks lebih kecil
 
 (() => {
