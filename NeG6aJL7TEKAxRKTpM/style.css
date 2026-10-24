@@ -399,3 +399,7 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
   .sna-bar .hint{grid-column:span 2;margin:2px 0 0;font-size:12px}
   .sna-side .card{padding:16px}
 }
+
+.sna-explain{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;line-height:1.6;color:var(--mute)}
+.sna-explain p{margin:0 0 10px}.sna-explain p:last-child{margin:0}
+.sna-explain b{color:var(--ink)}

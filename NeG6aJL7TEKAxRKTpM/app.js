@@ -434,6 +434,16 @@ async function renderSNA() {
   const dens = N.length > 1 ? (E.length / (N.length * (N.length - 1)) * 100) : 0;
   $('snaStats').innerHTML = [['Akun', fmt(totalNodes)], ['Koneksi', fmt(totalEdges)], ['Interaksi', fmt(totalInter)], ['Komunitas', fmt(komRank.filter(l => komSize[l] > 2).length)]]
     .map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join('') + `<p class="hint">Kepadatan graf ${dens.toFixed(2).replace('.', ',')}% · ${fmt(N.length)} akun teratas ditampilkan</p>`;
+  // Penjelasan deskriptif ringkasan jaringan
+  const nKom = komRank.filter(l => komSize[l] > 2).length;
+  const avgConn = totalNodes ? totalEdges * 2 / totalNodes : 0, avgInt = totalEdges ? totalInter / totalEdges : 0;
+  const per = state.range ? (state.range.from === state.range.to ? tglLabel(state.range.from) : `${tglLabel(state.range.from)} – ${tglLabel(state.range.to)}`) : 'periode ini';
+  const f1 = x => x.toFixed(1).replace('.', ',');
+  $('snaExplain').innerHTML = !totalInter ? '<p>Belum ada interaksi antar-akun di platform dan rentang tanggal ini, jadi jaringan belum bisa dibaca.</p>' : `
+    <p>Pada <b>${per}</b>, percakapan tentang Bank Mandiri di <b>${sna.pf}</b> melibatkan <b>${fmt(totalNodes)} akun</b> yang saling terhubung lewat <b>${fmt(totalEdges)} koneksi</b> (pasangan akun yang pernah saling menyebut atau berkomentar). Total ada <b>${fmt(totalInter)} interaksi</b>, artinya setiap pasangan akun rata-rata berinteraksi <b>${f1(avgInt)} kali</b>.</p>
+    <p>Rata-rata satu akun terhubung dengan <b>${f1(avgConn)} akun lain</b>. ${avgConn < 3 ? 'Angka ini kecil: kebanyakan akun hanya menyebut satu-dua akun, biasanya akun besar seperti akun resmi atau media, lalu tidak berdiskusi lebih jauh.' : 'Angka ini cukup tinggi: banyak akun saling berdiskusi, tidak hanya menyebut satu akun pusat.'}</p>
+    <p>Akun-akun itu terbagi menjadi <b>${fmt(nKom)} kelompok percakapan</b>, yaitu kelompok akun yang lebih sering berinteraksi di dalam kelompoknya sendiri. ${nKom <= 1 ? 'Hanya ada satu kelompok besar, jadi percakapan berpusat pada topik dan akun yang sama.' : 'Beberapa kelompok bisa berarti ada beberapa isu atau lingkaran pembicara yang berbeda.'}</p>
+    <p>Kepadatan <b>${dens.toFixed(2).replace('.', ',')}%</b> berarti dari semua kemungkinan hubungan antar-${fmt(N.length)} akun yang digambar, sebanyak itulah yang benar-benar terjadi. ${dens < 5 ? 'Untuk jaringan media sosial, ini tergolong <b>longgar</b>: akun cenderung terhubung lewat beberapa akun pusat, bukan saling berinteraksi satu sama lain.' : 'Untuk jaringan media sosial, ini tergolong <b>relatif rapat</b>: cukup banyak akun yang saling berinteraksi langsung, tidak hanya lewat akun pusat.'}</p>`;
   $('snaHint').textContent = `${sna.pf} · ${state.range ? (state.range.from === state.range.to ? tglLabel(state.range.from) : tglLabel(state.range.from) + ' – ' + tglLabel(state.range.to)) : ''} · Post + Komentar`;
   $('snaList').innerHTML = N.map(n => `<option value="${esc(n.label)}">`).join('');
 
