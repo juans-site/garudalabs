@@ -269,7 +269,7 @@ async function render() {
 }
 
 /* ---------- UI ---------- */
-function setThemeIcon() { $('themeBtn').textContent = document.documentElement.dataset.theme === 'dark' ? '☀\uFE0E' : '☾\uFE0E'; }
+function setThemeIcon() { $('themeBtn').textContent = document.documentElement.dataset.theme === 'dark' ? '☀️' : '🌙'; }
 $('themeBtn').onclick = () => {
   const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = t; try { localStorage.setItem('theme', t); } catch (e) {}
