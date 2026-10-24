@@ -52,7 +52,7 @@ function norm(r, kind) {
   const user = (r['Username'] || '').trim();
   const resmi = /resmi/i.test(r['Tipe'] || '') || AKUN_RESMI.includes(user.toLowerCase());
   return {
-    platform: (r['Platform'] || 'Lainnya').trim(), user: r['Username'] || '', tgl, jam,
+    platform: (r['Platform'] || 'Lainnya').trim(), user: r['Username'] || '', nama: (r['Nama Akun'] || '').trim(), tgl, jam,
     text: r['Caption'] || r['Teks Postingan'] || r['Text Komentar'] || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
     sent: !s ? '' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,

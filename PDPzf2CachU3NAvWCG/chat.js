@@ -1,6 +1,6 @@
 /* ===== Asisten AI (Claude) — floating chat, teks saja ===== */
 const CHAT_ENDPOINT = 'https://karhutla-chat.abrahms-juan.workers.dev'; // ganti dengan URL Worker kamu
-const CHAT_MAX_POSTS = 60; // Workers AI punya batas konteks lebih kecil
+const CHAT_MAX_POSTS = 50; // Workers AI punya batas konteks lebih kecil
 
 (() => {
   const SUGGEST = ['Apa isu negatif terbesar minggu ini?', 'Kenapa sentimen negatif melonjak di hari puncak?', 'Pulau mana yang paling banyak disebut dan bagaimana sentimennya?', 'Siapa akun paling berpengaruh?'];
@@ -19,6 +19,7 @@ const CHAT_MAX_POSTS = 60; // Workers AI punya batas konteks lebih kecil
 .ai-m.u{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:4px}
 .ai-m.a{align-self:flex-start;background:var(--card2,rgba(127,127,127,.12));border-bottom-left-radius:4px}
 .ai-m.a ul{margin:4px 0;padding-left:18px}.ai-m.a p{margin:0 0 6px}.ai-m.a p:last-child{margin:0}
+.ai-m.a a{color:var(--accent);font-weight:600;text-decoration:none;word-break:break-all}.ai-m.a a:hover{text-decoration:underline}
 .ai-m.err{background:transparent;border:1px solid var(--neg,#F05252);color:var(--neg,#F05252)}
 .ai-typing span{display:inline-block;width:6px;height:6px;margin-right:3px;border-radius:50%;background:var(--mute);animation:aiB 1s infinite}
 .ai-typing span:nth-child(2){animation-delay:.15s}.ai-typing span:nth-child(3){animation-delay:.3s}
@@ -49,7 +50,7 @@ const CHAT_MAX_POSTS = 60; // Workers AI punya batas konteks lebih kecil
 
   const e = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const md = t => { // markdown ringan: **tebal**, bullet, paragraf
-    const lines = e(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').split('\n'); let out = '', ul = false;
+    const lines = e(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener nofollow">$1 ↗</a>').replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, (m, p, u) => `${p}<a href="${u}" target="_blank" rel="noopener nofollow">Lihat postingan ↗</a>`).split('\n'); let out = '', ul = false;
     lines.forEach(l => { const m = l.match(/^\s*(?:[-*•]|\d+\.)\s+(.*)/);
       if (m) { if (!ul) { out += '<ul>'; ul = true; } out += `<li>${m[1]}</li>`; }
       else { if (ul) { out += '</ul>'; ul = false; } if (l.trim()) out += `<p>${l}</p>`; } });
@@ -84,7 +85,8 @@ const CHAT_MAX_POSTS = 60; // Workers AI punya batas konteks lebih kecil
     const score = r => { const h = (r.text + ' ' + r.topik + ' ' + r.user + ' ' + (r.lokasi || '') + ' ' + r.platform + ' ' + r.sent).toLowerCase();
       return words.reduce((s, w) => s + (h.includes(w) ? 3 : 0), 0) + Math.log10(1 + r.eng); };
     const posts = [...D].sort((a, b) => score(b) - score(a)).slice(0, CHAT_MAX_POSTS)
-      .map(r => `[${r.tgl} ${r.jamStr || ''}] ${r.platform} @${r.user} | ${r.sent} | topik: ${r.topik} | lokasi: ${r.lokasi || '-'} | eng ${r.eng}\n  "${r.text.replace(/\s+/g, ' ').slice(0, 200)}"`).join('\n');
+      .map(r => { const akun = /profile\.php|^\d+$/.test(r.user) ? (r.nama || r.user) : '@' + r.user;
+        return `[${r.tgl} ${r.jamStr || ''}] ${r.platform} ${akun} | ${r.sent} | topik: ${r.topik} | lokasi: ${r.lokasi || '-'} | eng ${r.eng} | link: ${r.link || '-'}\n  "${r.text.replace(/\s+/g, ' ').slice(0, 180)}"`; }).join('\n');
     return `Periode: ${rg.from || D[0].tgl} s/d ${rg.to || ''} | Total ${T} postingan
 Sentimen: positif ${sent('positif')} (${p(sent('positif'))}), negatif ${sent('negatif')} (${p(sent('negatif'))}), netral ${sent('netral')} (${p(sent('netral'))})
 Engagement = likes + komentar + share.
