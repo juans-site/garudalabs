@@ -80,13 +80,24 @@ const CHAT_MAX_POSTS = 50; // Workers AI punya batas konteks lebih kecil
     const acc = cnt(D.filter(r => r.user), r => r.user + ' (' + r.platform + ')').slice(0, 15).map(([k, v]) => `- ${k}: ${v} post`).join('\n');
     const tags = {}; D.forEach(r => (r.text.match(/#[\p{L}\d_]+/gu) || []).forEach(t => { t = t.toLowerCase(); tags[t] = (tags[t] || 0) + 1; }));
     const tagTop = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 15).map(([k, v]) => `${k} (${v})`).join(', ');
-    // skor relevansi sederhana: kata pertanyaan yang muncul di teks/topik/akun/lokasi + engagement
-    const words = q.toLowerCase().split(/[^\p{L}\d]+/u).filter(w => w.length > 3);
-    const score = r => { const h = (r.text + ' ' + r.topik + ' ' + r.user + ' ' + (r.lokasi || '') + ' ' + r.platform + ' ' + r.sent).toLowerCase();
-      return words.reduce((s, w) => s + (h.includes(w) ? 3 : 0), 0) + Math.log10(1 + r.eng); };
-    const posts = [...D].sort((a, b) => score(b) - score(a)).slice(0, CHAT_MAX_POSTS)
-      .map(r => { const akun = /profile\.php|^\d+$/.test(r.user) ? (r.nama || r.user) : '@' + r.user;
-        return `[${r.tgl} ${r.jamStr || ''}] ${r.platform} ${akun} | ${r.sent} | topik: ${r.topik} | lokasi: ${r.lokasi || '-'} | eng ${r.eng} | link: ${r.link || '-'}\n  "${r.text.replace(/\s+/g, ' ').slice(0, 180)}"`; }).join('\n');
+    // --- Relevansi: topik yang cocok dengan pertanyaan + kata kunci (dengan sinonim sederhana) ---
+    const SYN = { penanganan: ['pemadaman', 'petugas', 'relawan', 'penegakan', 'hukum', 'pemerintah', 'status bencana'], pemerintah: ['pemerintah', 'presiden', 'menteri', 'prabowo', 'gubernur', 'pemda', 'bnpb', 'klhk'],
+      perusahaan: ['perusahaan', 'korporasi', 'sawit', 'konsesi', 'sinar mas', 'sinarmas'], kesehatan: ['kesehatan', 'ispa', 'batuk', 'sesak', 'ispu'], asap: ['asap', 'kabut', 'haze', 'udara', 'ispu'],
+      malaysia: ['malaysia', 'singapura', 'singapore', 'lintas negara', 'jiran'], satwa: ['satwa', 'orangutan', 'hewan', 'lingkungan'], hukum: ['hukum', 'usut', 'penyelidikan', 'tersangka', 'polisi', 'sanksi'] };
+    const words = [...new Set(q.toLowerCase().split(/[^\p{L}\d]+/u).filter(w => w.length > 3))];
+    const terms = [...new Set(words.flatMap(w => [w, ...(SYN[w] || [])]))];
+    const topics = cnt(D, r => r.topik).map(([k]) => k);
+    const topicHit = t => { const tl = t.toLowerCase(); return terms.reduce((s, w) => s + (tl.includes(w) ? 1 : 0), 0); };
+    const relTopics = topics.filter(t => topicHit(t) > 0).sort((a, b) => topicHit(b) - topicHit(a)).slice(0, 4);
+    const fmtPost = r => { const akun = /profile\.php|^\d+$/.test(r.user) ? (r.nama || r.user) : '@' + r.user;
+      return `[${r.tgl}] ${r.platform} ${akun} | ${r.sent} | topik: ${r.topik} | lokasi: ${r.lokasi || '-'} | eng ${r.eng} | link: ${r.link || '-'}\n  "${r.text.replace(/\s+/g, ' ').slice(0, 170)}"`; };
+    const byEng = (a, b) => b.eng - a.eng;
+    // Ringkasan topik relevan + contoh positif & negatif dari topik itu sendiri
+    const relBlock = relTopics.map(t => { const R = D.filter(r => r.topik === t), n = R.filter(r => r.sent === 'negatif'), z = R.filter(r => r.sent === 'netral'), ps = R.filter(r => r.sent === 'positif');
+      return `### Topik "${t}": ${R.length} postingan (${p(R.length)} dari total) | negatif ${n.length}, netral ${z.length}, positif ${ps.length}\nContoh dari topik ini:\n${[...n.sort(byEng).slice(0, 3), ...ps.sort(byEng).slice(0, 3)].map(fmtPost).join('\n')}`; }).join('\n\n');
+    const score = r => { const h = (r.text + ' ' + r.topik).toLowerCase();
+      return (relTopics.includes(r.topik) ? 6 : 0) + terms.reduce((s, w) => s + (h.includes(w) ? 2 : 0), 0) + Math.log10(1 + r.eng) * .5; };
+    const posts = [...D].sort((a, b) => score(b) - score(a)).slice(0, CHAT_MAX_POSTS - relTopics.length * 6).map(fmtPost).join('\n');
     return `Periode: ${rg.from || D[0].tgl} s/d ${rg.to || ''} | Total ${T} postingan
 Sentimen: positif ${sent('positif')} (${p(sent('positif'))}), negatif ${sent('negatif')} (${p(sent('negatif'))}), netral ${sent('netral')} (${p(sent('netral'))})
 Engagement = likes + komentar + share.
@@ -97,7 +108,7 @@ PER PLATFORM:\n${bySent(r => r.platform)}
 \nTREN HARIAN:\n${days}
 \nAKUN PALING AKTIF:\n${acc}
 \nHASHTAG TERATAS: ${tagTop}
-\nPOSTINGAN PALING RELEVAN DENGAN PERTANYAAN (maks ${CHAT_MAX_POSTS}, dari ${T}):\n${posts}`;
+\nTOPIK YANG PALING RELEVAN DENGAN PERTANYAAN:\n${relBlock || '(tidak ada topik yang cocok langsung; gunakan PER TOPIK di atas)'}\n\nPOSTINGAN LAIN YANG RELEVAN:\n${posts}`;
   }
 
   let busy = false;
