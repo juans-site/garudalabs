@@ -378,3 +378,24 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
 /* Logo Garuda Labs */
 .logo{height:38px}
 @media(max-width:640px){.logo{height:30px}}
+
+/* Insight SNA */
+.sna-insight{list-style:none;margin:0;padding:0}
+.sna-insight li{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.55}
+.sna-insight li:last-child{border-bottom:0}
+.sna-insight .ii{flex:none;width:28px;height:28px;border-radius:8px;background:var(--card2);display:grid;place-items:center;font-size:14px}
+.sna-help{margin-top:10px;font-size:12.5px;color:var(--mute)}
+.sna-help summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.sna-help p{margin:8px 0 0;line-height:1.6}
+
+/* SNA versi HP */
+@media(max-width:640px){
+  .sna-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .sna-bar .seg{width:100%;display:flex}
+  .sna-bar .seg button{flex:1;padding:8px 6px;white-space:nowrap}
+  #snaPf,#snaColor{grid-column:span 2}
+  #snaMax{grid-column:1}
+  .sna-bar input{grid-column:2;width:100%;min-width:0;height:auto}
+  .sna-bar .hint{grid-column:span 2;margin:2px 0 0;font-size:12px}
+  .sna-side .card{padding:16px}
+}

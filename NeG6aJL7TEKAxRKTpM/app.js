@@ -457,6 +457,28 @@ async function renderSNA() {
     ...E.map(e => ({ data: { id: e.s + '→' + e.t, source: e.s, target: e.t, w: Math.min(6, 0.6 + Math.log2(e.w + 1)) } }))
   ];
   sna.nodes = nodes; sna.edgesAll = edges; sna.lab = lab;
+
+  /* Insight otomatis: menerjemahkan grafik ke bahasa sehari-hari */
+  const all = [...nodes.values()];
+  const nm = n => `<b>${esc(n.label)}</b>`;
+  const byIn = all.filter(n => n.din > 0).sort((a, b) => b.din - a.din), byOut = all.filter(n => n.dout > 0).sort((a, b) => b.dout - a.dout);
+  const top3In = byIn.slice(0, 3).reduce((s, n) => s + n.din, 0), shareTop3 = totalInter ? top3In / totalInter * 100 : 0;
+  const authors = all.filter(n => n.posts > 0), negA = authors.filter(n => sentOf(n) === 'negatif'), posA = authors.filter(n => sentOf(n) === 'positif');
+  const resmiIds = new Set(all.filter(n => n.resmi || AKUN_RESMI.includes(n.id)).map(n => n.id));
+  let toResmi = 0, negToResmi = new Set();
+  edges.forEach((w, k) => { const [s, t] = k.split('→'); if (resmiIds.has(t)) { toResmi += w; if (nodes.get(s) && sentOf(nodes.get(s)) === 'negatif') negToResmi.add(s); } });
+  const bigKom = komRank.filter(l => komSize[l] > 2);
+  const komHub = l => N.filter(n => lab.get(n.id) === l).sort((a, b) => (b.din + b.dout) - (a.din + a.dout))[0];
+  const ins = [];
+  if (!totalInter) ins.push(['ℹ️', 'Belum ada interaksi antar-akun pada rentang dan platform ini.']);
+  else {
+    ins.push(['🎯', `Percakapan paling banyak mengarah ke ${byIn.slice(0, 3).map(nm).join(', ')}. Ketiganya menerima <b>${pct(top3In, totalInter)}</b> dari seluruh interaksi, sehingga jaringan ini <b>${shareTop3 >= 50 ? 'sangat terpusat' : shareTop3 >= 25 ? 'cukup terpusat' : 'tersebar'}</b>${shareTop3 >= 25 ? ' pada beberapa akun kunci' : ' dan tidak didominasi satu akun'}.`]);
+    if (toResmi) ins.push(['🏦', `<b>${pct(toResmi, totalInter)}</b> interaksi ditujukan ke akun resmi Mandiri, dan <b>${fmt(negToResmi.size)}</b> akun bernada negatif ikut menyebut akun resmi. Ini menunjukkan akun resmi menjadi saluran utama keluhan yang perlu direspons.`]);
+    if (byOut[0]) ins.push(['📣', `Akun paling aktif menyebut akun lain adalah ${byOut.slice(0, 2).map(nm).join(' dan ')} (${fmt(byOut[0].dout)}× untuk yang teratas). Akun dengan aktivitas setinggi ini layak dipantau, misalnya untuk mendeteksi keluhan berulang atau akun terkoordinasi.`]);
+    if (authors.length) ins.push(['⚖️', `Dari ${fmt(authors.length)} akun yang menulis, <b>${pct(negA.length, authors.length)}</b> cenderung negatif dan <b>${pct(posA.length, authors.length)}</b> cenderung positif.${negA.length > posA.length ? ' Suara negatif lebih banyak daripada suara positif di jaringan ini.' : ' Suara positif masih seimbang atau lebih banyak dari suara negatif.'}`]);
+    if (bigKom.length) ins.push(['🧩', `Terbentuk <b>${fmt(bigKom.length)}</b> kelompok percakapan. Kelompok terbesar (${fmt(komSize[bigKom[0]])} akun) berpusat di ${nm(komHub(bigKom[0]))}${bigKom[1] ? `, disusul kelompok di sekitar ${nm(komHub(bigKom[1]))}` : ''}. Pilih <b>Warna: Komunitas</b> untuk melihat pembagiannya.`]);
+  }
+  $('snaInsight').innerHTML = ins.map(([i, t]) => `<li><span class="ii">${i}</span><span>${t}</span></li>`).join('');
   const ink = css('--ink'), line = css('--line'), bg = css('--card');
   if (sna.cy && sna.key === key) { // hanya ganti warna
     sna.cy.batch(() => N.forEach(n => sna.cy.getElementById(n.id).data('color', colorOf(n))));
