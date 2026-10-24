@@ -372,7 +372,7 @@ $('fGran').onchange = e => { state.gran = e.target.value; render(); };
 // Data: Post + Komentar platform terpilih, mengikuti date range. Toggle Post/Komentar/All tidak berlaku di tab ini.
 const sna = { pf: 'Twitter', color: 'sent', rank: 'in', cy: null, key: '', max: 150 };
 // Pengaturan tata letak: angka lebih besar = jaringan lebih longgar
-const SNA_LAYOUT = { name: 'cose', nodeRepulsion: () => 120000, idealEdgeLength: () => 160, edgeElasticity: () => 60, nodeOverlap: 40, gravity: .08, componentSpacing: 140, nodeDimensionsIncludeLabels: true, numIter: 2500, randomize: true, padding: 40 };
+const SNA_LAYOUT = { name: 'cose', nodeRepulsion: () => 600000, idealEdgeLength: () => 320, edgeElasticity: () => 40, nodeOverlap: 80, gravity: .04, componentSpacing: 260, nodeDimensionsIncludeLabels: true, numIter: 2500, randomize: true, padding: 40 };
 const KOM_COLORS = ['#FFBE00', '#38bdf8', '#a78bfa', '#f472b6', '#34d399', '#fb923c', '#60a5fa', '#e879f9', '#2dd4bf', '#facc15'];
 const ownerFromLink = (link, pf) => {
   const m = pf === 'Twitter' ? link.match(/(?:x|twitter)\.com\/([A-Za-z0-9_]+)\/status/i) : link.match(/threads\.(?:com|net)\/@([A-Za-z0-9_.]+)/i);
@@ -468,6 +468,7 @@ async function renderSNA() {
     style: [
       { selector: 'node', style: { 'background-color': 'data(color)', width: 'data(size)', height: 'data(size)', label: 'data(label)', color: ink, 'font-size': 10, 'font-family': 'Plus Jakarta Sans, sans-serif', 'text-valign': 'bottom', 'text-margin-y': 4, 'text-outline-color': bg, 'text-outline-width': 2, 'min-zoomed-font-size': 7, 'text-wrap': 'ellipsis', 'text-max-width': 110, 'border-width': 1.5, 'border-color': bg } },
       { selector: 'node[!big]', style: { label: '' } },
+      { selector: 'node.lbl', style: { label: 'data(label)' } },
       { selector: 'edge', style: { width: 'data(w)', 'line-color': line, 'curve-style': 'haystack', opacity: .5 } },
       { selector: '.faded', style: { opacity: .12 } },
       { selector: 'node.hl', style: { label: 'data(label)', 'border-color': css('--accent'), 'border-width': 3, 'z-index': 10 } },
@@ -476,7 +477,17 @@ async function renderSNA() {
     layout: { ...SNA_LAYOUT, animate: false }
   });
   const showZoom = () => $('zLvl').textContent = Math.round(sna.cy.zoom() * 100) + '%';
-  sna.cy.on('zoom', showZoom); showZoom();
+  // Zoom semantik: ukuran titik, teks, dan garis tetap kurang lebih sama di layar,
+  // jadi saat zoom in jarak antar titik terlihat makin longgar.
+  let raf = 0;
+  const scaleEls = () => { raf = 0; const z = sna.cy.zoom(), k = 1 / Math.pow(z, .85);
+    sna.cy.batch(() => {
+      sna.cy.nodes().toggleClass('lbl', z > 1.6); // semua nama tampil saat sudah di-zoom
+      sna.cy.nodes().forEach(n => { const s = n.data('size') * k; n.style({ width: s, height: s, 'font-size': 11 * k, 'text-outline-width': 2 * k, 'border-width': 1.5 * k, 'text-margin-y': 4 * k }); });
+      sna.cy.edges().forEach(e => e.style('width', e.data('w') * k));
+    }); };
+  sna.cy.on('zoom', () => { showZoom(); if (!raf) raf = requestAnimationFrame(scaleEls); });
+  showZoom(); scaleEls();
   sna.cy.on('tap', 'node', e => focusNode(e.target.id()));
   sna.cy.on('tap', e => { if (e.target === sna.cy) clearFocus(); });
   $('snaLoad').hidden = true; $('snaDetailCard').hidden = true;
