@@ -375,3 +375,6 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
 .x{border:0;background:none;color:var(--mute);font-size:20px;line-height:1}
 @media(max-width:1100px){.sna-grid{grid-template-columns:1fr}.sna-canvas{height:520px}}
 @media(max-width:640px){.sna-canvas{height:440px;min-height:0}.sna-bar input{flex:1;min-width:0}.sna-bar .hint{margin-left:0;width:100%}.sna-legend{max-width:calc(100% - 28px);bottom:10px;left:10px;font-size:11px}}
+/* Logo Garuda Labs */
+.logo{height:38px}
+@media(max-width:640px){.logo{height:30px}}
