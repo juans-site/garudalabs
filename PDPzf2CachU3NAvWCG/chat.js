@@ -92,9 +92,33 @@ const CHAT_MAX_POSTS = 50; // Workers AI punya batas konteks lebih kecil
     const fmtPost = r => { const akun = /profile\.php|^\d+$/.test(r.user) ? (r.nama || r.user) : '@' + r.user;
       return `[${r.tgl}] ${r.platform} ${akun} | ${r.sent} | topik: ${r.topik} | lokasi: ${r.lokasi || '-'} | eng ${r.eng} | link: ${r.link || '-'}\n  "${r.text.replace(/\s+/g, ' ').slice(0, 170)}"`; };
     const byEng = (a, b) => b.eng - a.eng;
+    // Arti tiap topik agar AI tidak salah menafsirkan
+    const TOPIC_NOTE = t => /pemadaman|petugas|relawan/i.test(t) ? 'ARTI: apresiasi/doa untuk petugas lapangan & relawan, BUKAN penilaian terhadap pemerintah'
+      : /kritik pemerintah/i.test(t) ? 'ARTI: kritik langsung terhadap pemerintah/kebijakan'
+      : /usut perusahaan/i.test(t) ? 'ARTI: desakan menindak perusahaan/korporasi, bukan penilaian pemerintah'
+      : /penegakan hukum/i.test(t) ? 'ARTI: proses hukum/penyelidikan (aparat)' : '';
+    // Penilaian khusus terhadap pemerintah (hanya bila pertanyaan menyangkut pemerintah/penanganan)
+    const GOV = /\b(pemerintah|pemerintahan|presiden|prabowo|menteri|menko|gubernur|bupati|walikota|pemda|pemprov|bnpb|klhk|kemenhut|pejabat|negara|istana|dpr)\b/i;
+    let govBlock = '';
+    if (/pemerintah|penanganan|presiden|menteri|negara|kebijakan|pejabat/i.test(q)) {
+      const G = D.filter(r => GOV.test(r.text) || /kritik pemerintah/i.test(r.topik));
+      const gNeg = G.filter(r => r.sent === 'negatif'), gPos = G.filter(r => r.sent === 'positif'), gNet = G.filter(r => r.sent === 'netral');
+      const app = D.filter(r => /pemadaman|petugas|relawan/i.test(r.topik));
+      const g = x => (x / (G.length || 1) * 100).toFixed(1) + '%';
+      govBlock = `PENILAIAN TERHADAP PEMERINTAH (postingan yang menyebut pemerintah/pejabat/lembaga negara atau bertopik kritik pemerintah): ${G.length} postingan (${p(G.length)} dari total)
+- Negatif/mengkritik pemerintah: ${gNeg.length} (${g(gNeg.length)} dari postingan tentang pemerintah)
+- Positif/memuji pemerintah: ${gPos.length} (${g(gPos.length)})
+- Netral: ${gNet.length} (${g(gNet.length)})
+- KESIMPULAN ANGKA: ${gNeg.length > gPos.length ? 'kritik terhadap pemerintah LEBIH DOMINAN' : gPos.length > gNeg.length ? 'pujian terhadap pemerintah lebih dominan' : 'seimbang'}.
+- Terpisah: ${app.length} postingan (${p(app.length)}) berisi apresiasi untuk petugas lapangan & relawan — ini dukungan kepada petugas, bukan penilaian terhadap pemerintah.
+Contoh memuji pemerintah:\n${gPos.filter(r => !/usut perusahaan/i.test(r.topik)).sort(byEng).slice(0, 2).map(fmtPost).join('\n') || '(tidak ada)'}
+Contoh mengkritik pemerintah:\n${gNeg.sort(byEng).slice(0, 3).map(fmtPost).join('\n') || '(tidak ada)'}
+
+`;
+    }
     // Ringkasan topik relevan + contoh positif & negatif dari topik itu sendiri
     const relBlock = relTopics.map(t => { const R = D.filter(r => r.topik === t), n = R.filter(r => r.sent === 'negatif'), z = R.filter(r => r.sent === 'netral'), ps = R.filter(r => r.sent === 'positif');
-      return `### Topik "${t}": ${R.length} postingan (${p(R.length)} dari total) | negatif ${n.length}, netral ${z.length}, positif ${ps.length}\nContoh dari topik ini:\n${[...n.sort(byEng).slice(0, 3), ...ps.sort(byEng).slice(0, 3)].map(fmtPost).join('\n')}`; }).join('\n\n');
+      return `### Topik "${t}": ${R.length} postingan (${p(R.length)} dari total) | negatif ${n.length}, netral ${z.length}, positif ${ps.length}${TOPIC_NOTE(t) ? '\n' + TOPIC_NOTE(t) : ''}\nContoh dari topik ini:\n${[...n.sort(byEng).slice(0, 3), ...ps.sort(byEng).slice(0, 3)].map(fmtPost).join('\n')}`; }).join('\n\n');
     const score = r => { const h = (r.text + ' ' + r.topik).toLowerCase();
       return (relTopics.includes(r.topik) ? 6 : 0) + terms.reduce((s, w) => s + (h.includes(w) ? 2 : 0), 0) + Math.log10(1 + r.eng) * .5; };
     const posts = [...D].sort((a, b) => score(b) - score(a)).slice(0, CHAT_MAX_POSTS - relTopics.length * 6).map(fmtPost).join('\n');
@@ -108,7 +132,7 @@ PER PLATFORM:\n${bySent(r => r.platform)}
 \nTREN HARIAN:\n${days}
 \nAKUN PALING AKTIF:\n${acc}
 \nHASHTAG TERATAS: ${tagTop}
-\nTOPIK YANG PALING RELEVAN DENGAN PERTANYAAN:\n${relBlock || '(tidak ada topik yang cocok langsung; gunakan PER TOPIK di atas)'}\n\nPOSTINGAN LAIN YANG RELEVAN:\n${posts}`;
+\n${govBlock}TOPIK YANG PALING RELEVAN DENGAN PERTANYAAN:\n${relBlock || '(tidak ada topik yang cocok langsung; gunakan PER TOPIK di atas)'}\n\nPOSTINGAN LAIN YANG RELEVAN:\n${posts}`;
   }
 
   let busy = false;
