@@ -56,7 +56,7 @@ function norm(r, kind) {
     text: r['Caption'] || r['Teks Postingan'] || r['Text Komentar'] || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
     sent: !s ? '' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
-    link: r['Link'] || r['URL'] || '', jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), eng: ['Likes/Reaksi', 'Komentar', 'Share/Repost'].reduce((s, k) => s + (parseInt(String(r[k] || '0').replace(/[.,]/g, '')) || 0), 0), kind
+    link: r['Link'] || r['URL'] || '', lokasi: (() => { const l = (r['Lokasi (Pulau)'] || '').trim(); return !l || /^(lainnya|-|tidak ada|n\/?a)$/i.test(l) ? 'Tidak menyebutkan lokasi' : l; })(), jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), eng: ['Likes/Reaksi', 'Komentar', 'Share/Repost'].reduce((s, k) => s + (parseInt(String(r[k] || '0').replace(/[.,]/g, '')) || 0), 0), kind
   };
 }
 const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
@@ -181,6 +181,15 @@ async function render() {
   const negK = count(N, 'platform');
   $('negNote').textContent = negK[0] ? `${negK[0][0]}: ${pct(negK[0][1], N.length)} dari negatif` : '';
 
+  /* Lokasi yang paling disebut (pulau besar) */
+  const lok = count(D, 'lokasi'), lokNamed = lok.filter(l => l[0] !== 'Tidak menyebutkan lokasi'), lokNone = lok.find(l => l[0] === 'Tidak menyebutkan lokasi');
+  const lokList = [...lokNamed, ...(lokNone ? [lokNone] : [])], lokMax = Math.max(1, ...lokList.map(l => l[1]));
+  $('lokasi').innerHTML = `<div class="ks-h"><span></span><span></span><span>Negatif</span><span>Netral</span><span>Positif</span></div>` + lokList.map(([k, v]) => {
+    const R = D.filter(r => r.lokasi === k), n = R.filter(r => r.sent === 'negatif').length, z = R.filter(r => r.sent === 'netral').length, q = v - n - z, none = k === 'Tidak menyebutkan lokasi';
+    return `<div class="ks-r${none ? ' lok-none' : ''}"><span class="ks-n" title="${esc(k)}">${esc(k)}<small>${fmt(v)} · ${pct(v, S.T)}</small></span><div class="ks-bar" style="width:${v / lokMax * 100}%"><i style="width:${n / v * 100}%;background:${SENT.negatif}"></i><i style="width:${z / v * 100}%;background:${SENT.netral}"></i><i style="width:${q / v * 100}%;background:${SENT.positif}"></i></div><span>${Math.round(n / v * 100)}%</span><span>${Math.round(z / v * 100)}%</span><span>${Math.round(q / v * 100)}%</span></div>`;
+  }).join('') || '<p class="empty">Belum ada data</p>';
+  $('lokNote').textContent = lokNamed[0] ? `${lokNamed[0][0]} paling banyak disebut (${pct(lokNamed[0][1], S.T)})` : 'Belum ada lokasi yang disebut';
+
   /* Penyebab */
   const bars = (arr, c) => { const mx = arr[0]?.[1] || 1; return arr.slice(0, 6).map(([k, v], x) => `<li><span class="num">${x + 1}</span><div class="cb"><div class="t"><span>${esc(k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${v / mx * 100}%;background:${c}"></i></div></div></li>`).join('') || '<li>–</li>'; };
   const negTop = count(N, 'topik');
@@ -198,13 +207,15 @@ async function render() {
     <div class="meta"><span>💬 ${fmt(p.eng)} engagement · ${tglShort(p.tgl)}</span>${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">Lihat ↗</a>` : ''}</div></div>`).join('') || '<p>Tidak ada postingan negatif.</p>';
 
   /* Word cloud */
-  const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue gw lu kamu dia mereka nya ya ga gak nggak enggak tapi karena jadi lagi mau buat sama oleh dalam bank karhutla kebakaran hutan lahan the https http www com co id dll yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu min admin mohon terima kasih halo sahabat apa siapa udah udh sdh tdk gimana bagaimana akibat belum dapat hari jangan kena usai terlihat milik khusus berbeda kapan setelah sedang hingga sampai menjadi tersebut karna emang memang banget sangat orang'.split(' '));
+  const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue gw lu kamu dia mereka nya ya ga gak nggak enggak tapi karena jadi lagi mau buat sama oleh dalam bank karhutla kebakaran hutan lahan terjadi kembali saat tengah selatan utara barat timur indonesia sejumlah kondisi kawasan wilayah sekitar terus video bukan harus kota lokasi kabupaten provinsi oktober september november tahun bulan minggu pagi siang sore malam juga masih baru dari menurut ujar kata katanya disebut melalui antara lain the https http www com co id dll yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu min admin mohon terima kasih halo sahabat apa siapa udah udh sdh tdk gimana bagaimana akibat belum dapat hari jangan kena usai terlihat milik khusus berbeda kapan setelah sedang hingga sampai menjadi tersebut karna emang memang banget sangat orang'.split(' '));
   const cloudSrc = state.cloud === 'pos' ? P : N;
   const wc = {}; cloudSrc.forEach(r => r.text.toLowerCase().replace(/https?:\S+|[@#]\S+/g, ' ').split(/[^a-z0-9]+/).forEach(w => { if (w.length > 3 && !STOP.has(w) && !/^\d+$/.test(w)) wc[w] = (wc[w] || 0) + 1; }));
-  const words = Object.entries(wc).sort((a, b) => b[1] - a[1]).slice(0, 30), wMax = words[0]?.[1] || 1;
-  const wcc = state.cloud === 'pos' ? ['#22c55e', '#38bdf8', '#FFBE00', '#a78bfa', '#14b8a6', css('--ink')] : ['#F05252', '#FFBE00', '#f97316', '#a78bfa', '#38bdf8', css('--ink')];
-  words.sort((a, b) => a[0].localeCompare(b[0]));
-  $('cloud').innerHTML = words.map((w, i) => `<span title="${w[1]}x" style="font-size:${12 + w[1] / wMax * 26}px;color:${wcc[i % wcc.length]}">${esc(w[0])}</span>`).join('') || '<p class="empty">Belum ada data</p>';
+  // 30 kata terbanyak. Ukuran & warna = frekuensi; urutan = terbanyak di tengah.
+  const words = Object.entries(wc).sort((a, b) => b[1] - a[1]).slice(0, 30), wMax = words[0]?.[1] || 1, wMin = words.at(-1)?.[1] || 0;
+  const base = state.cloud === 'pos' ? SENT.positif : SENT.negatif;
+  const lay = []; words.forEach((w, i) => i % 2 ? lay.push(w) : lay.unshift(w));
+  $('cloud').innerHTML = lay.map(([w, c]) => { const r = wMax === wMin ? 1 : (c - wMin) / (wMax - wMin);
+    return `<span title="${esc(w)}: ${fmt(c)} kali" style="font-size:${13 + r * 25}px;color:color-mix(in srgb, ${base} ${Math.round(40 + r * 60)}%, var(--mute));font-weight:${r > .5 ? 800 : 600}">${esc(w)}</span>`; }).join('') || '<p class="empty">Belum ada data</p>';
   $('cloudTitle').textContent = `Word Cloud ${state.cloud === 'pos' ? 'Positif' : 'Negatif'}`;
 
   /* Top akun */
