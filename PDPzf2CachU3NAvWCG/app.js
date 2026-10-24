@@ -316,7 +316,7 @@ document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
   $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
   $('fSumber').style.visibility = b.dataset.tab === 'sna' ? 'hidden' : ''; // SNA selalu Post + Komentar
-  if (b.dataset.tab === 'sna') renderSNA();
+  if (b.dataset.tab === 'sna') { renderSNA(); requestAnimationFrame(() => sna.fitAll?.()); }
   if (b.dataset.tab === 'dash') Object.values(charts).forEach(c => c.resize());
 });
 function renderRaw(reset) {
@@ -372,7 +372,7 @@ $('fGran').onchange = e => { state.gran = e.target.value; render(); };
 // Data: Post + Komentar platform terpilih, mengikuti date range. Toggle Post/Komentar/All tidak berlaku di tab ini.
 const sna = { pf: 'X', color: 'sent', rank: 'in', cy: null, key: '', max: 150 };
 // Pengaturan tata letak: angka lebih besar = jaringan lebih longgar
-const SNA_LAYOUT = { name: 'cose', nodeRepulsion: () => 90000, idealEdgeLength: () => 70, edgeElasticity: () => 100, nodeOverlap: 20, gravity: .9, nestingFactor: 1.2, componentSpacing: 40, nodeDimensionsIncludeLabels: true, numIter: 1500, randomize: true, padding: 40 };
+const SNA_LAYOUT = { name: 'cose', nodeRepulsion: () => 6000, idealEdgeLength: () => 45, edgeElasticity: () => 120, nodeOverlap: 10, gravity: 1.2, nestingFactor: 1.2, componentSpacing: 18, nodeDimensionsIncludeLabels: false, numIter: 2500, randomize: true, fit: true, padding: 30 };
 const KOM_COLORS = ['#FFBE00', '#38bdf8', '#a78bfa', '#f472b6', '#34d399', '#fb923c', '#60a5fa', '#e879f9', '#2dd4bf', '#facc15'];
 const ownerFromLink = (link, pf) => {
   const m = /^(x|twitter)$/i.test(pf) ? link.match(/(?:x|twitter)\.com\/([A-Za-z0-9_]+)\/status/i) : link.match(/threads\.(?:com|net)\/@([A-Za-z0-9_.]+)/i);
@@ -431,7 +431,7 @@ async function renderSNA() {
 
   const sentOf = n => n.posts === 0 ? 'unk' : (n.neg > n.pos && n.neg >= n.net) ? 'negatif' : (n.pos > n.neg && n.pos >= n.net) ? 'positif' : 'netral';
   const maxDeg = Math.max(1, ...N.map(n => n.din + n.dout));
-  const labelMin = N.map(n => n.din + n.dout).sort((a, b) => b - a)[Math.min(29, N.length - 1)] || 0; // label hanya 30 akun teratas
+  const labelMin = N.map(n => n.din + n.dout).sort((a, b) => b - a)[Math.min(($('snaGraph').clientWidth < 640 ? 10 : 30) - 1, N.length - 1)] || 0; // label hanya akun teratas (10 di HP, 30 di desktop)
   const colorOf = n => sna.color === 'kom' ? (komIdx(lab.get(n.id)) >= 0 ? KOM_COLORS[komIdx(lab.get(n.id))] : '#6b7280')
     : ({ positif: SENT.positif, negatif: SENT.negatif, netral: SENT.netral, unk: '#6b7280' })[sentOf(n)];
 
@@ -477,7 +477,7 @@ async function renderSNA() {
   $('snaEmpty').hidden = N.length > 0; $('snaEmpty').textContent = 'Tidak ada interaksi pada rentang ini';
   const key = sna.pf + JSON.stringify(state.range) + N.length + E.length;
   const els = [
-    ...N.map(n => ({ data: { id: n.id, label: n.label, big: (n.din + n.dout) >= labelMin, size: 10 + Math.sqrt((n.din + n.dout) / maxDeg) * 36, color: colorOf(n), deg: n.din + n.dout } })),
+    ...N.map(n => ({ data: { id: n.id, label: n.label, big: (n.din + n.dout) >= labelMin, size: 9 + Math.sqrt((n.din + n.dout) / maxDeg) * 22, color: colorOf(n), deg: n.din + n.dout } })),
     ...E.map(e => ({ data: { id: e.s + '→' + e.t, source: e.s, target: e.t, w: Math.min(6, 0.6 + Math.log2(e.w + 1)) } }))
   ];
   sna.nodes = nodes; sna.edgesAll = edges; sna.lab = lab;
@@ -516,7 +516,7 @@ async function renderSNA() {
       { selector: 'node', style: { 'background-color': 'data(color)', width: 'data(size)', height: 'data(size)', label: 'data(label)', color: ink, 'font-size': 10, 'font-family': 'Plus Jakarta Sans, sans-serif', 'text-valign': 'bottom', 'text-margin-y': 4, 'text-outline-color': bg, 'text-outline-width': 2, 'min-zoomed-font-size': 7, 'text-wrap': 'ellipsis', 'text-max-width': 110, 'border-width': 1.5, 'border-color': bg } },
       { selector: 'node[!big]', style: { label: '' } },
       { selector: 'node.lbl', style: { label: 'data(label)' } },
-      { selector: 'edge', style: { width: 'data(w)', 'line-color': css('--mute'), 'curve-style': 'bezier', opacity: .55, 'target-arrow-shape': 'triangle', 'target-arrow-color': css('--mute'), 'arrow-scale': .6 } },
+      { selector: 'edge', style: { width: 1.2, 'line-color': css('--mute'), 'curve-style': 'bezier', opacity: .8, 'target-arrow-shape': 'triangle', 'target-arrow-color': css('--mute'), 'arrow-scale': .6 } },
       { selector: '.faded', style: { opacity: .12 } },
       { selector: 'node.hl', style: { label: 'data(label)', 'border-color': css('--accent'), 'border-width': 3, 'z-index': 10 } },
       { selector: 'edge.hl', style: { 'line-color': css('--accent'), opacity: 1, 'z-index': 9 } }
@@ -527,14 +527,16 @@ async function renderSNA() {
   // Zoom semantik: ukuran titik, teks, dan garis tetap kurang lebih sama di layar,
   // jadi saat zoom in jarak antar titik terlihat makin longgar.
   let raf = 0;
-  const scaleEls = () => { raf = 0; const z = sna.cy.zoom(), k = z < 1 ? 1 / Math.pow(z, .35) : 1 / Math.pow(z, .85); // saat zoom out titik tidak membesar berlebihan
+  // Ukuran di layar dibuat tetap (px) apa pun level zoom-nya: titik, nama akun, dan garis selalu terbaca
+  const scaleEls = () => { raf = 0; const z = sna.cy.zoom(), m = Math.min(1, Math.max(.55, $('snaGraph').clientWidth / 900)), k = m / Math.max(z, .05);
     sna.cy.batch(() => {
-      sna.cy.nodes().toggleClass('lbl', z > 1.6); // semua nama tampil saat sudah di-zoom
-      sna.cy.nodes().forEach(n => { const s = n.data('size') * k; n.style({ width: s, height: s, 'font-size': 11 * k, 'text-outline-width': 2 * k, 'border-width': 1.5 * k, 'text-margin-y': 4 * k }); });
-      sna.cy.edges().forEach(e => e.style('width', e.data('w') * k));
+      sna.cy.nodes().toggleClass('lbl', z > 1.1);
+      sna.cy.nodes().forEach(n => { const s = n.data('size') * k; n.style({ width: s, height: s, 'font-size': 11 * k / m * Math.max(m, .85), 'text-outline-width': 2.5 * k, 'border-width': 1.5 * k, 'text-margin-y': 3 * k }); });
+      sna.cy.edges().forEach(e => e.style({ width: Math.max(1.2, e.data('w')) * k, 'arrow-scale': .7 }));
     }); };
+  sna.fitAll = () => { if (!sna.cy) return; sna.cy.resize(); sna.cy.fit(undefined, 30); };
   sna.cy.on('zoom', () => { showZoom(); if (!raf) raf = requestAnimationFrame(scaleEls); });
-  showZoom(); scaleEls();
+  sna.fitAll(); showZoom(); scaleEls();
   sna.cy.on('tap', 'node', e => focusNode(e.target.id()));
   sna.cy.on('tap', e => { if (e.target === sna.cy) clearFocus(); });
   $('snaLoad').hidden = true; $('snaDetailCard').hidden = true;
@@ -576,3 +578,5 @@ $('snaTop').onclick = e => { const li = e.target.closest('li[data-id]'); if (li)
 $('snaDetail').onclick = e => { const li = e.target.closest('li[data-id]'); if (li) focusNode(li.dataset.id); };
 $('snaClose').onclick = clearFocus;
 $('snaQ').onchange = e => { const id = e.target.value.trim().toLowerCase(); if (sna.nodes?.has(id)) focusNode(id); };
+
+let snaRT; addEventListener('resize', () => { clearTimeout(snaRT); snaRT = setTimeout(() => { if (!$('viewSna').hidden) sna.fitAll?.(); }, 200); });
