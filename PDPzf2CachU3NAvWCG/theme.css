@@ -137,3 +137,7 @@ footer{color:var(--mute);letter-spacing:.04em}
 select,#rawPf,.gran{color-scheme:dark;background-color:#0E151A!important;color:var(--ink)!important}
 select option,#rawPf option,.gran option{background:#0E151A;color:#EAF2F4}
 select option:checked{background:#2FB3A6;color:#04201D}
+/* Dropdown: teks & panah sejajar tengah vertikal */
+#rawPf,.gran{-webkit-appearance:none;appearance:none;height:40px;line-height:normal;padding:0 38px 0 16px!important;display:inline-flex;align-items:center;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23EAF2F4' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;background-position:right 14px center!important;background-size:12px!important;cursor:pointer}
