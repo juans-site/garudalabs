@@ -188,6 +188,8 @@ async function render() {
     const R = D.filter(r => r.lokasi === k), n = R.filter(r => r.sent === 'negatif').length, z = R.filter(r => r.sent === 'netral').length, q = v - n - z, none = k === 'Tidak menyebutkan lokasi';
     return `<div class="ks-r${none ? ' lok-none' : ''}"><span class="ks-n" title="${esc(k)}">${esc(k)}<small>${fmt(v)} · ${pct(v, S.T)}</small></span><div class="ks-bar" style="width:${v / lokMax * 100}%"><i style="width:${n / v * 100}%;background:${SENT.negatif}"></i><i style="width:${z / v * 100}%;background:${SENT.netral}"></i><i style="width:${q / v * 100}%;background:${SENT.positif}"></i></div><span>${Math.round(n / v * 100)}%</span><span>${Math.round(z / v * 100)}%</span><span>${Math.round(q / v * 100)}%</span></div>`;
   }).join('') || '<p class="empty">Belum ada data</p>';
+  window.__lok = { T: S.T, rows: lokList.map(([k, v]) => { const R = D.filter(r => r.lokasi === k), n = R.filter(r => r.sent === 'negatif').length, z = R.filter(r => r.sent === 'netral').length; return { k, v, n, z, q: v - n - z }; }) };
+  window.dispatchEvent(new CustomEvent('lok:update', { detail: window.__lok }));
   $('lokNote').textContent = lokNamed[0] ? `${lokNamed[0][0]} paling banyak disebut (${pct(lokNamed[0][1], S.T)})` : 'Belum ada lokasi yang disebut';
 
   /* Penyebab */
