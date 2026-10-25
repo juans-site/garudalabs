@@ -199,7 +199,7 @@
 .g-pins{z-index:2}
 .g-int,.g-ctrl{z-index:3}
 .g-grid4,.g-grid2{position:relative;z-index:2}
-@media(min-width:1101px){.g-stage{height:clamp(620px,52vw,820px)!important}.g-grid4{margin-top:-170px}.g-ctrl{bottom:186px!important}}
+@media(min-width:1101px){.g-stage{height:clamp(480px,44vw,670px)!important}.g-grid4{margin-top:-170px}.g-ctrl{bottom:186px!important}}
 .g-grid4 .g-card{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.01) 45%),rgba(8,13,18,.55)!important;
   -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border-color:rgba(160,220,215,.16)!important}
 [data-theme=light] .g-earth:before{background:linear-gradient(90deg,var(--bg) 0%,transparent 14%,transparent 90%,var(--bg) 100%),linear-gradient(180deg,var(--bg) 0%,transparent 10%,transparent 70%,var(--bg) 100%)}
@@ -219,6 +219,16 @@
 [data-theme=light] .g-stage,[data-theme=light] .g-stage.g-stage{background:none!important}
 [data-theme=light] .g-pin .lab{text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 8px rgba(0,0,0,.35)}
 [data-theme=light] .g-grid4 .g-card{background:rgba(255,255,255,.62)!important;border-color:rgba(4,7,10,.08)!important}
+/* Globe utuh di belakang judul & KPI: tepi dipudarkan dengan mask (benar-benar transparan) */
+@media(min-width:1101px){
+.g-earth:before{display:none!important}
+.g-earth img{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,transparent 100%),linear-gradient(90deg,transparent 0,#000 12%,#000 92%,transparent 100%);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,transparent 100%),linear-gradient(90deg,transparent 0,#000 12%,#000 92%,transparent 100%);mask-composite:intersect}
+.g-hero{position:relative;z-index:3}
+.g-stage{z-index:1}
+}
+.g-kpi{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.01) 45%),rgba(8,13,18,.5)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border-color:rgba(160,220,215,.16)!important}
 @keyframes gPulse{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 7px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
 @keyframes gDash{to{stroke-dashoffset:-40}}
 @media (prefers-reduced-motion:no-preference){.g-arc{animation:gDash 2.4s linear infinite}}

@@ -96,7 +96,7 @@
     const fit = () => { const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
       if (!wide) { earth.style.cssText = ''; return; }
       const left = 300, right = 16, sc = (W - left - right) / (1640 - 150), w = IW * sc, h = IH * sc;
-      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${left - 150 * sc}px;top:${(H - 70) / 2 - 460 * sc}px`;
+      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${left - 150 * sc}px;top:${(H + 80) / 2 - 460 * sc - 150}px`;
       const below = Math.max(0, (H - 70) / 2 - 460 * sc + h - H); stage.style.setProperty('--below', below + 'px'); };
     fit(); if (!buildConsole.fitBound) { buildConsole.fitBound = 1; addEventListener('resize', () => { const f = document.querySelector('#gConsole')?._fit; f && f(); }); }
     root._fit = fit;
