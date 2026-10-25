@@ -110,9 +110,9 @@
     const earth = root.querySelector('.g-earth'), stage = root.querySelector('.g-stage');
     const fit = () => { const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
       if (!wide) { earth.style.cssText = ''; return; }
-      const left = 300, right = 16, sc = Math.min(1.25, (W - left - right) / (1640 - 150)), w = IW * sc, h = IH * sc, gx = left - 150 * sc + Math.max(0, (W - left - right) - 1490 * sc) / 2;
-      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${gx}px;top:${24 - 62 * sc}px`;
-      stage.style.setProperty('height', Math.round(24 - 62 * sc + h * .86) + 'px', 'important');
+      // ukuran globe dibatasi seperti tata letak awal (lebar konten 1500px), lalu diletakkan di tengah area kanan
+      const left = 300, right = 16, avail = W - left - right, sc = Math.min(avail, 1128) / (1640 - 150), w = IW * sc, h = IH * sc, gx = left - 150 * sc + (avail - 1490 * sc) / 2;
+      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${gx}px;top:${(H - 20) / 2 - 570 * sc + 20}px`;
       const below = Math.max(0, (H - 70) / 2 - 460 * sc + h - H); stage.style.setProperty('--below', below + 'px'); };
     fit(); if (!buildConsole.fitBound) { buildConsole.fitBound = 1; addEventListener('resize', () => { const f = document.querySelector('#gConsole')?._fit; f && f(); }); }
     root._fit = fit;
