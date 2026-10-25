@@ -196,7 +196,7 @@
   }
   // Ikon emoji di judul & tab diganti gaya bersih (tanpa emoji)
   const strip = () => document.querySelectorAll('#main h2, .tabs [role=tab]').forEach(h => { if (h.children.length === 0) h.textContent = h.textContent.replace(/^[\p{Extended_Pictographic}\uFE0F\s]+/u, ''); });
-  window.addEventListener('lok:update', () => requestAnimationFrame(strip));
+  window.addEventListener('lok:update', () => setTimeout(strip, 0));
   // ---- Tab "Analitik": kartu metrik dipindah dari Dashboard ke tab sendiri ----
   function setupTabs() {
     const dash = document.getElementById('viewDash'), tabs = document.querySelector('.tabs');
