@@ -1,0 +1,115 @@
+/* ===== Tema "Ops Console": dark glassmorphism, aksen teal, status kuning/oranye =====
+   Dimuat setelah style.css — hanya menimpa tampilan, tidak mengubah fungsi. */
+:root{
+  --teal:#46D6C8;--amber:#FFC46B;--orange:#FF7F3B;--black:#04070A;
+  --pos:#46D6C8;--neg:#FF7F3B;--neu:#8A97A6;
+  --radius:22px;
+  --f-display:"Michroma","Orbitron",system-ui,sans-serif;
+  --f-body:"Outfit","Plus Jakarta Sans",system-ui,sans-serif;
+}
+[data-theme=dark]{
+  --bg:#04070A;--nav:rgba(8,13,17,.72);--card:rgba(22,30,36,.62);--card2:rgba(255,255,255,.045);--line:rgba(160,200,210,.12);
+  --ink:#EAF2F4;--mute:#8A97A6;--accent:#46D6C8;--accent-ink:#04201D;--hover:rgba(70,214,200,.08);--active:rgba(70,214,200,.14);
+  --glass-hi:rgba(255,255,255,.07);--glow:0 0 0 1px rgba(70,214,200,.25),0 8px 30px rgba(70,214,200,.18);
+}
+[data-theme=light]{
+  --bg:#EEF3F4;--nav:rgba(255,255,255,.75);--card:rgba(255,255,255,.72);--card2:rgba(4,7,10,.035);--line:rgba(4,7,10,.08);
+  --ink:#0B1418;--mute:#5B6873;--accent:#13A99B;--accent-ink:#fff;--hover:rgba(19,169,155,.07);--active:rgba(19,169,155,.12);
+  --glass-hi:rgba(255,255,255,.9);--glow:0 0 0 1px rgba(19,169,155,.25),0 8px 24px rgba(19,169,155,.15);
+}
+
+/* Latar: gelap pekat + cahaya teal/oranye samar + grid titik halus */
+body{font-family:var(--f-body);letter-spacing:.005em;background:var(--bg)}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60% 45% at 85% -5%,rgba(70,214,200,.13),transparent 70%),
+    radial-gradient(45% 40% at 0% 100%,rgba(255,127,59,.08),transparent 70%),
+    radial-gradient(circle at 1px 1px,rgba(160,200,210,.09) 1px,transparent 1.4px) 0 0/22px 22px}
+[data-theme=light] body:before{background:
+    radial-gradient(60% 45% at 85% -5%,rgba(70,214,200,.18),transparent 70%),
+    radial-gradient(45% 40% at 0% 100%,rgba(255,127,59,.10),transparent 70%),
+    radial-gradient(circle at 1px 1px,rgba(4,7,10,.07) 1px,transparent 1.4px) 0 0/22px 22px}
+
+/* Kaca: kartu, topbar, popover */
+.card,.kpi,.post,.dr-pop,.ai-panel,.lokmap .tip{
+  background:linear-gradient(180deg,var(--glass-hi),transparent 38%),var(--card)!important;
+  border:1px solid var(--line)!important;border-radius:var(--radius)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 40px rgba(0,0,0,.25)}
+[data-theme=light] .card,[data-theme=light] .kpi,[data-theme=light] .post{box-shadow:inset 0 1px 0 #fff,0 10px 30px rgba(10,30,40,.06)}
+.topbar{background:var(--nav)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)!important}
+.card:hover,.kpi:hover{border-color:rgba(70,214,200,.28)!important;transition:border-color .25s}
+
+/* Tipografi */
+h1,.hero h1{font-family:var(--f-display)!important;font-weight:400!important;letter-spacing:.04em!important;text-transform:uppercase;font-size:30px!important;line-height:1.25}
+h2{font-family:var(--f-body);font-weight:500;font-size:18px;letter-spacing:.01em}
+.kpi .v{font-family:var(--f-body);font-weight:500;letter-spacing:-.01em}
+.kpi .l,.hint,.lbl{letter-spacing:.02em}
+@media(max-width:640px){h1,.hero h1{font-size:19px!important}}
+
+/* Hero: kaca di atas gambar */
+.hero{border:1px solid var(--line);border-radius:var(--radius)!important;overflow:hidden}
+.hero p{color:var(--mute)}
+
+/* Tab: pil kaca, yang aktif teal berpendar */
+.tabs [role=tab]{border-radius:999px!important;padding:9px 18px!important;border:1px solid var(--line)!important;background:var(--card2)!important;margin-right:6px}
+.tabs [role=tab].on{background:linear-gradient(180deg,rgba(70,214,200,.32),rgba(70,214,200,.14))!important;color:var(--ink)!important;border-color:rgba(70,214,200,.55)!important;box-shadow:var(--glow)}
+.tabs [role=tab].on:after{display:none!important}
+
+/* Segmented & tombol */
+.seg{background:var(--card2)!important;border:1px solid var(--line)!important;border-radius:999px!important;padding:3px!important}
+.seg button{border-radius:999px!important}
+.seg button.on{background:linear-gradient(180deg,rgba(70,214,200,.95),rgba(41,176,163,.95))!important;color:var(--accent-ink)!important;box-shadow:0 0 14px rgba(70,214,200,.35)}
+.btn{background:linear-gradient(180deg,#5EE3D6,#2FB3A6)!important;color:#04201D!important;border-radius:999px!important;box-shadow:0 0 16px rgba(70,214,200,.3)}
+.btn.ghost{background:var(--card2)!important;color:var(--ink)!important;box-shadow:none}
+.icon-btn,.dr-btn{background:var(--card2)!important;border:1px solid var(--line)!important;border-radius:14px!important}
+.beta{background:rgba(255,196,107,.12)!important;color:var(--amber)!important;border:1px solid rgba(255,196,107,.35)!important}
+[data-theme=light] .beta{color:#B7791F!important}
+.presets button.on{background:var(--active)!important;color:var(--ink)!important}
+
+/* Chip status (High/Moderate) gaya referensi */
+.chip{border-radius:999px!important;background:var(--card2)!important;border:1px solid var(--line)}
+.risk-lv{font-family:var(--f-display);letter-spacing:.06em}
+.badge.negatif{background:rgba(255,127,59,.14)!important;color:var(--orange)!important}
+.badge.positif{background:rgba(70,214,200,.14)!important;color:var(--teal)!important}
+[data-theme=light] .badge.positif{color:#13897E!important}
+.up{color:var(--teal)!important}.down{color:var(--orange)!important}
+h3.pos,.pos{color:var(--teal)!important}h3.neg,.neg{color:var(--orange)!important}
+[data-theme=light] h3.pos,[data-theme=light] .pos{color:#13897E!important}
+
+/* Bar & daftar */
+.ks-bar,.acc-bar,.cause li .bar{border-radius:999px!important;background:var(--card2)!important}
+.rank{border-radius:10px!important;background:var(--card2)!important}
+
+/* Raw data & SNA */
+.raw th{background:transparent!important;color:var(--mute)!important;font-weight:500;letter-spacing:.03em}
+.raw tr:hover td{background:var(--hover)}
+.raw-bar input,.sna-bar input,#rawPf,.gran{background:var(--card2)!important;border:1px solid var(--line)!important;border-radius:12px!important;color:var(--ink)!important}
+.sna-zoom{background:var(--card)!important;border:1px solid var(--line)!important;border-radius:16px!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.sna-legend{background:var(--card)!important;border:1px solid var(--line)!important;border-radius:14px!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.pager button.on{background:var(--accent)!important;color:var(--accent-ink)!important}
+
+/* Peta lokasi: nuansa konsol */
+.lokmap{border-radius:18px!important;background:radial-gradient(120% 140% at 50% 0%,rgba(70,214,200,.10),transparent 60%),rgba(0,0,0,.25)!important}
+[data-theme=light] .lokmap{background:radial-gradient(120% 140% at 50% 0%,rgba(70,214,200,.14),transparent 60%),rgba(4,7,10,.03)!important}
+.lokmap .badge{color:var(--teal)!important}
+[data-theme=light] .lokmap .badge{color:#13897E!important}
+
+/* AI Assistant: panel teal seperti referensi */
+.ai-fab{background:linear-gradient(180deg,#5EE3D6,#2FB3A6)!important;color:#04201D!important;box-shadow:0 0 0 1px rgba(70,214,200,.4),0 10px 30px rgba(70,214,200,.35)!important}
+.ai-panel{background:linear-gradient(180deg,rgba(70,214,200,.10),transparent 30%),var(--card)!important}
+.ai-h .ai-dot{background:linear-gradient(180deg,#5EE3D6,#2FB3A6)!important;color:#04201D!important}
+.ai-m.u{background:linear-gradient(180deg,rgba(70,214,200,.95),rgba(41,176,163,.95))!important;color:#04201D!important}
+.ai-f button{background:linear-gradient(180deg,#5EE3D6,#2FB3A6)!important;color:#04201D!important}
+.ai-m.a a{color:var(--amber)!important}
+[data-theme=light] .ai-m.a a{color:#B7791F!important}
+
+footer{color:var(--mute);letter-spacing:.04em}
+
+@media (prefers-reduced-motion:no-preference){
+  .card,.kpi{animation:tcIn .5s cubic-bezier(.2,.7,.3,1) both}
+  .tabs [role=tab].on{animation:tcGlow 3.2s ease-in-out infinite}
+}
+@keyframes tcIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes tcGlow{0%,100%{box-shadow:0 0 0 1px rgba(70,214,200,.25),0 6px 22px rgba(70,214,200,.12)}50%{box-shadow:0 0 0 1px rgba(70,214,200,.45),0 6px 28px rgba(70,214,200,.28)}}
+@media(max-width:640px){.tabs{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tabs [role=tab]{flex:none;padding:8px 14px!important}}

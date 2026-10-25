@@ -74,7 +74,7 @@
       if (!r) { tip.innerHTML = `<b>${esc(k)}</b><div class="tr" style="margin-top:6px"><span>Tidak disebut pada periode ini</span></div>`; }
       else { const w = x => (x / r.v * 100).toFixed(1);
         tip.innerHTML = `<b>${esc(k)}</b><div class="tr" style="margin-top:4px"><span>${f(r.v)} postingan</span><span>${pc(r.v, T)} dari total</span></div>
-          <div class="tb"><i style="width:${w(r.n)}%;background:#F05252"></i><i style="width:${w(r.z)}%;background:#94A3B8"></i><i style="width:${w(r.q)}%;background:#22C55E"></i></div>
+          <div class="tb"><i style="width:${w(r.n)}%;background:#FF7F3B"></i><i style="width:${w(r.z)}%;background:#8A97A6"></i><i style="width:${w(r.q)}%;background:#46D6C8"></i></div>
           <div class="tr"><span>Negatif</span><span>${f(r.n)} (${pc(r.n, r.v)})</span></div><div class="tr"><span>Netral</span><span>${f(r.z)} (${pc(r.z, r.v)})</span></div><div class="tr"><span>Positif</span><span>${f(r.q)} (${pc(r.q, r.v)})</span></div>`; }
       const b = box.getBoundingClientRect(); let x = ev.clientX - b.left + 14, y = ev.clientY - b.top + 14;
       tip.classList.add('show'); if (x + tip.offsetWidth > b.width) x = ev.clientX - b.left - tip.offsetWidth - 14; if (y + tip.offsetHeight > b.height) y = Math.max(4, b.height - tip.offsetHeight - 4);

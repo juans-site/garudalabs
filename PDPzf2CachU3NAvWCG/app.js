@@ -19,7 +19,7 @@ const tglLabel = t => { const [y, m, d] = t.split('-'); return `${+d} ${BULAN[m 
 const tglShort = t => { const [, m, d] = t.split('-'); return `${+d} ${BULAN[m - 1]}`; };
 const PLATFORM_COLOR = { twitter: '#1d9bf0', x: '#1d9bf0', facebook: '#1877f2', instagram: '#e1306c', tiktok: '#25d5e4', youtube: '#ff3b30', threads: '#9b8cff', linkedin: '#0a66c2', news: '#f59e0b', media: '#f59e0b' };
 const pColor = p => PLATFORM_COLOR[p.toLowerCase().split(/[ /]/)[0]] || '#94a3b8';
-const SENT = { positif: '#22C55E', negatif: '#F05252', netral: '#94A3B8' };
+const SENT = { positif: '#46D6C8', negatif: '#FF7F3B', netral: '#8A97A6' }; // palet Ops Console
 
 const state = { gran: 'harian', cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'all' }; // from/to = 'yyyy-mm-dd', null = semua
 const cache = {}, charts = {};
