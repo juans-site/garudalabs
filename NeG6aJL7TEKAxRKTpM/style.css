@@ -418,3 +418,7 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
 .sna-read .sna-explain p{font-size:13.5px}
 .sna-read h3.sub{margin-top:22px}
 @media(max-width:900px){.sna-read .sna-explain{grid-template-columns:1fr}}
+
+.raw-bar .dl{height:36px;padding:0 14px;white-space:nowrap}
+.raw-bar .dl:disabled{opacity:.6}
+@media(max-width:640px){.raw-bar .dl{width:100%}}

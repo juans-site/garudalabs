@@ -159,7 +159,7 @@ async function render() {
   const area = (label, data, c) => ({ label, data, borderColor: c, borderWidth: 2.5, tension: .4, pointRadius: 0, pointHoverRadius: 5, fill: true,
     backgroundColor: ctx => { const { chart } = ctx, a = chart.chartArea; if (!a) return c + '22'; const g = chart.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, c + '40'); g.addColorStop(1, c + '00'); return g; } });
   mk('cTrend', { type: 'line', data: { labels: labels.map(fmtL), datasets: [area('Negatif', sn, SENT.negatif), area('Netral', sz, SENT.netral), area('Positif', sp, SENT.positif)] },
-    options: baseOpts({ interaction: { mode: 'index', intersect: false }, plugins: { ...baseOpts().plugins, legend: { display: false } } }) });
+    options: baseOpts({ interaction: { mode: 'index', intersect: false }, plugins: { ...baseOpts().plugins, legend: { display: false }, tooltip: { ...baseOpts().plugins.tooltip, footerColor: css('--ink'), footerFont: { weight: 700 }, footerMarginTop: 8, callbacks: { footer: it => `Total: ${fmt(it.reduce((s, x) => s + x.raw, 0))} ${unit}` } } } }) });
   const pk = sn.indexOf(Math.max(...sn));
   $('trendNote').textContent = Math.max(...sn) > 0 ? `Puncak negatif: ${state.gran === 'jam' ? 'pukul ' + labels[pk] : fmtL(labels[pk])} (${sn[pk]})` : '';
 
@@ -332,6 +332,7 @@ function renderRaw(reset) {
     (!q || (r.text + ' ' + r.user + ' ' + r.topik).toLowerCase().includes(q)));
   const key = r => raw.sort === 'eng' ? r.eng : r.tgl + ' ' + (r.jamStr || '');
   rows.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : 0) * raw.dir);
+  raw.rows = rows;
   const pages = Math.max(1, Math.ceil(rows.length / raw.size)); raw.page = Math.min(raw.page, pages);
   const start = (raw.page - 1) * raw.size, view = rows.slice(start, start + raw.size);
   const engHead = state.src === 'post' ? 'Komentar' : state.src === 'komentar' ? 'Likes' : 'Komentar / Likes';
@@ -571,3 +572,24 @@ $('snaTop').onclick = e => { const li = e.target.closest('li[data-id]'); if (li)
 $('snaDetail').onclick = e => { const li = e.target.closest('li[data-id]'); if (li) focusNode(li.dataset.id); };
 $('snaClose').onclick = clearFocus;
 $('snaQ').onchange = e => { const id = e.target.value.trim().toLowerCase(); if (sna.nodes?.has(id)) focusNode(id); };
+
+/* ---------- Download Raw Data sebagai .xlsx ---------- */
+let xlsxLoading;
+const loadXLSX = () => window.XLSX ? Promise.resolve() : (xlsxLoading ||= new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s); }));
+$('rawXlsx').onclick = async () => {
+  const btn = $('rawXlsx'), rows = raw.rows || [];
+  if (!rows.length) return;
+  btn.disabled = true; const old = btn.innerHTML; btn.textContent = 'Menyiapkan…';
+  try {
+    await loadXLSX();
+    const data = rows.map(r => ({ 'Tanggal': r.tgl, 'Jam': r.jamStr || '', 'Platform': r.platform, 'Akun': r.user, 'Jenis': r.kind === 'post' ? 'Post' : 'Komentar',
+      'Caption': r.text, 'Topik': r.topik, 'Sentimen': r.sent[0].toUpperCase() + r.sent.slice(1), 'Akun resmi': r.resmi ? 'Ya' : '',
+      'Jumlah komentar/likes': r.eng, 'Link': r.link }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws['!cols'] = [12, 7, 11, 22, 10, 70, 30, 10, 10, 12, 50].map(w => ({ wch: w }));
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Raw Data');
+    const { from, to } = state.range || {};
+    XLSX.writeFile(wb, `raw-data-bmri_${state.src}_${from || 'semua'}_${to || ''}.xlsx`.replace(/_\.xlsx$/, '.xlsx'));
+  btn.disabled = false; btn.innerHTML = old;
+  } catch (e) { btn.disabled = false; btn.textContent = 'Gagal, coba lagi'; setTimeout(() => btn.innerHTML = old, 2500); }
+};
