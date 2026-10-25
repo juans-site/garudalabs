@@ -234,6 +234,7 @@
 .g-grid-wh{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
 .g-wc{position:relative;width:100%;overflow:hidden}.g-wc span{position:absolute;white-space:nowrap;line-height:1;cursor:default;transition:transform .15s}.g-wc span:hover{transform:scale(1.08)}
 @media(max-width:1100px){.g-grid-tt,.g-grid-wh{grid-template-columns:1fr}}
+.g-ctrl{display:none!important}
 @keyframes gPulse{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 7px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
 @keyframes gDash{to{stroke-dashoffset:-40}}
 @media (prefers-reduced-motion:no-preference){.g-arc{animation:gDash 2.4s linear infinite}}
