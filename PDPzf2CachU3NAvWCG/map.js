@@ -53,10 +53,12 @@
     const host = document.getElementById('lokasi'); if (!host) return;
     let wrap = host.closest('.lokmap-wrap'); // sudah dibungkus sebelumnya? pakai ulang (jangan bersarang)
     if (!wrap) { wrap = document.createElement('div'); wrap.className = 'lokmap-wrap'; host.before(wrap); const m = document.createElement('div'); m.className = 'lokmap'; wrap.append(m, host); }
-    const box = wrap.querySelector('.lokmap');
+    renderMap(wrap.querySelector('.lokmap'), { rows, T });
+  }
+  function renderMap(box, { rows, T }, opt = {}) {
     const by = Object.fromEntries(rows.map(r => [r.k, r]));
     const named = rows.filter(r => r.k !== NONE), max = Math.max(1, ...named.map(r => r.v));
-    const H = 400, oy = (H - MAP.H) / 2;
+    const H = opt.H || 400, oy = opt.oy ?? (H - MAP.H) / 2;
     const isl = Object.entries(MAP.paths).map(([k, d], i) => { const r = by[k];
       const fill = r ? ramp(.15 + .85 * Math.sqrt(r.v / max)) : 'color-mix(in srgb,var(--mute) 22%,transparent)';
       return `<path class="isl" data-k="${esc(k)}" d="${d}" fill="${fill}" style="animation-delay:${i * 90}ms"/>`; }).join('');
@@ -83,6 +85,7 @@
     svg.addEventListener('pointermove', ev => { const t = ev.target.closest('[data-k]'); t ? show(t.dataset.k, ev) : hide(); });
     svg.addEventListener('pointerleave', hide);
   }
+  window.renderIdMap = renderMap;
   window.addEventListener('lok:update', e => draw(e.detail));
   if (window.__lok) draw(window.__lok);
 })();
