@@ -48,7 +48,7 @@
       </div>
 
       <div class="g-stage">
-        <div class="g-earth"><img src="earth.jpg?v=2" srcset="earth-sm.jpg?v=2 836w, earth.jpg?v=2 1672w" sizes="(max-width:700px) 100vw, 1400px" alt="Peta sebaran percakapan karhutla di Indonesia" decoding="async" fetchpriority="high"><canvas class="g-smoke" aria-hidden="true"></canvas><div class="g-pins"></div></div>
+        <div class="g-earth"><img src="earth.jpg?v=3" srcset="earth-sm.jpg?v=3 836w, earth.jpg?v=3 1672w" sizes="(max-width:700px) 100vw, 1400px" alt="Peta sebaran percakapan karhutla di Indonesia" decoding="async" fetchpriority="high"><canvas class="g-smoke" aria-hidden="true"></canvas><div class="g-pins"></div></div>
         <div class="g-glass g-int">
           <div class="g-h"><h3>Intensitas Percakapan</h3><span class="g-live">Live</span></div>
           <div class="g-scale"></div><div class="g-scale-l"><span>Rendah</span><span>Tinggi</span></div>
