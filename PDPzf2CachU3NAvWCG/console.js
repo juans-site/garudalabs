@@ -1,241 +1,443 @@
-/* ===== KARHUTLA OPS CONSOLE — tampilan utama bergaya command center =====
-   Membaca data yang sama dengan dashboard (cache.post + state.range) dan menggambar ulang setiap kali data berubah. */
+/* ===== GARUDA · KARHUTLA INDONESIA — Ops Console & Analitik (v2) =====
+   Semua angka dihitung dari data sheet (cache.post) sesuai periode terpilih (state.range).
+   Elemen tanpa data (satelit, cuaca, provinsi, dll.) sengaja tidak ditampilkan. */
 (() => {
-  const ICON = {
+  const P = {
     spark: '<path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
-    alert: '<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.5v.01"/>',
+    chat: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+    heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
     pin: '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.4"/>',
-    user: '<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>',
-    wave: '<path d="M3 12h3l2-6 4 12 3-9 2 3h4"/>',
-    gauge: '<path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/>',
+    alert: '<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.5v.01"/>',
     flame: '<path d="M12 21c-4 0-6.5-2.6-6.5-6 0-3.6 3-5.3 3.5-9 2.5 1.5 4 3.5 4 6 1-.8 1.6-2 1.7-3.3 2 1.6 3.8 4 3.8 6.3 0 3.4-2.5 6-6.5 6z"/>',
-    layers: '<path d="M12 4l9 5-9 5-9-5z"/><path d="M3 14l9 5 9-5"/>',
-    arrow: '<path d="M7 17L17 7M9 7h8v8"/>',
-    link: '<path d="M7 17L17 7M9 7h8v8"/>'
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    ext: '<path d="M7 17L17 7M9 7h8v8"/>',
+    up: '<path d="M12 19V5M6 11l6-6 6 6"/>', down: '<path d="M12 5v14M6 13l6 6 6-6"/>',
+    x: '<path d="M5 4l14 16M19 4L5 20"/>',
+    fb: '<path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8z"/>',
+    ig: '<rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.6"/><circle cx="17" cy="7" r=".9" fill="currentColor"/>',
+    th: '<path d="M16.5 11.2c-.3-3-2-4.6-4.6-4.6-3 0-5 2.4-5 5.6 0 3.4 2 5.6 5.2 5.6 2.6 0 4.6-1.5 4.6-3.6 0-2.4-2.3-3.3-4.4-3-1.8.2-2.7 1.2-2.6 2.3.1 1.1 1.2 1.8 2.6 1.6 2.2-.3 3-2.6 2.8-5.4"/>',
+    tt: '<path d="M14 4c.4 2.4 2 4 4.5 4.2v3.2c-1.7 0-3.2-.5-4.5-1.4V15a5 5 0 1 1-5-5v3.2a1.8 1.8 0 1 0 1.8 1.8V4z"/>',
+    web: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.5 2.5 14.5 0 17M12 3.5c-2.5 2.5-2.5 14.5 0 17"/>'
   };
-  const ic = (n, s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
+  const ic = (n, s = 18, sw = 1.7) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+  const PF = { x: ['x', '#E7E9EA'], twitter: ['x', '#E7E9EA'], facebook: ['fb', '#1877F2'], instagram: ['ig', '#E1306C'], threads: ['th', '#C9CDD2'], tiktok: ['tt', '#25F4EE'] };
+  const pfIco = (p, s = 15) => { const k = PF[String(p).toLowerCase()] || ['web', '#8A97A6']; return `<span class="g-pf" style="--pc:${k[1]}">${ic(k[0], s, 1.9)}</span>`; };
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const f = n => Number(n).toLocaleString('id-ID');
+  const k = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace('.', ',') + 'K' : f(n);
   const pc = (a, b, d = 1) => b ? (a / b * 100).toFixed(d).replace('.', ',') + '%' : '0%';
-  const BLN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-  const tg = t => { const [, m, d] = t.split('-'); return `${+d} ${BLN[m - 1]}`; };
-  const TEAL = '#46D6C8', AMBER = '#FFC46B', ORANGE = '#FF7F3B', GREY = '#8A97A6';
+  const BL = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const tg = t => { const [, m, d] = t.split('-'); return `${+d} ${BL[m - 1]}`; };
+  const tgY = t => { const [y, m, d] = t.split('-'); return `${+d} ${BL[m - 1]} ${y}`; };
+  const TEAL = '#46D6C8', AMBER = '#FFC46B', ORANGE = '#FF7F3B', RED = '#F0524F', GREY = '#8A97A6';
+  const NONE = 'Tidak menyebutkan lokasi';
+  const cnt = (a, key) => { const m = {}; a.forEach(x => { const v = typeof key === 'function' ? key(x) : x[key]; if (v == null || v === '') return; m[v] = (m[v] || 0) + 1; }); return Object.entries(m).sort((x, y) => y[1] - x[1]); };
+  const akun = r => /profile\.php|^\d+$/.test(r.user) ? (r.nama || r.user) : '@' + r.user;
+  const delta = (cur, prev) => prev ? Math.round((cur - prev) / prev * 100) : null;
+  const dChip = (d, invert, unit = '%') => d == null ? '' : `<span class="g-d ${(invert ? d < 0 : d > 0) ? 'good' : d === 0 ? '' : 'bad'}">${ic(d >= 0 ? 'up' : 'down', 11, 2.4)}${Math.abs(d)}${unit}</span>`;
 
+  /* ---------------- CSS ---------------- */
   const css = document.createElement('style');
   css.textContent = `
-.oc{position:relative;margin:0 0 22px;font-family:var(--f-body)}
-.oc-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:6px 2px 16px}
-.oc-head h1{margin:0}
-.oc-sub{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:13px;margin-top:8px}
-.oc-dot{width:7px;height:7px;border-radius:50%;background:${TEAL};box-shadow:0 0 0 0 rgba(70,214,200,.6);animation:ocLive 1.8s infinite}
-.oc-pills{display:flex;gap:8px;flex-wrap:wrap}
-.oc-pill{display:flex;align-items:center;gap:10px;height:40px;padding:0 16px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;color:var(--ink);white-space:nowrap}
-.oc-pill small{color:var(--mute);font-size:12.5px}.oc-pill i{width:1px;height:16px;background:var(--line)}
-.oc-stage{position:relative;height:640px;border-radius:28px;overflow:hidden;border:1px solid var(--line);
-  background:radial-gradient(70% 60% at 50% 35%,rgba(70,214,200,.08),transparent 70%),radial-gradient(circle at 1px 1px,rgba(160,200,210,.10) 1px,transparent 1.5px) 0 0/26px 26px,rgba(0,0,0,.35)}
-[data-theme=light] .oc-stage{background:radial-gradient(70% 60% at 50% 35%,rgba(70,214,200,.12),transparent 70%),radial-gradient(circle at 1px 1px,rgba(4,7,10,.08) 1px,transparent 1.5px) 0 0/26px 26px,rgba(255,255,255,.5)}
-.oc-map{position:absolute;left:296px;right:336px;top:20px;bottom:165px}
-.oc-map .lokmap{position:absolute!important;inset:0;aspect-ratio:auto!important;background:none!important;border:0!important;border-radius:0!important}
-.oc-map .lokmap .badge,.oc-map .lokmap .legend,.oc-map .lokmap .grid,.oc-map .lokmap .scan{display:none}
-.oc-map .lokmap .isl{stroke:rgba(70,214,200,.35)!important;stroke-width:.8!important;stroke-opacity:1!important}
-.oc-sweep{position:absolute;top:0;bottom:0;left:0;width:160px;pointer-events:none;opacity:.55;background:linear-gradient(90deg,transparent,rgba(70,214,200,.05) 80%,rgba(70,214,200,.16));will-change:transform;transform:translateX(-240px)}
-.oc-p{position:absolute;border-radius:24px;padding:18px 18px 16px;background:linear-gradient(180deg,var(--glass-hi),transparent 40%),var(--card);border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 18px 50px rgba(0,0,0,.35)}
-[data-theme=light] .oc-p{box-shadow:inset 0 1px 0 #fff,0 14px 40px rgba(10,30,40,.10)}
-/* Kaca transparan + blur khusus Ops Console (peta terlihat samar di balik panel) */
-.oc-p,.oc-pill{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.015) 45%),rgba(10,16,20,.42)!important;
-  -webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);border-color:rgba(160,220,215,.16)!important}
-[data-theme=light] .oc-p,[data-theme=light] .oc-pill{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.4) 45%),rgba(255,255,255,.35)!important;border-color:rgba(4,7,10,.08)!important}
-.oc-pt,.oc-item{background:rgba(255,255,255,.035)!important;border-color:rgba(160,220,215,.12)!important}
-[data-theme=light] .oc-pt,[data-theme=light] .oc-item{background:rgba(255,255,255,.45)!important;border-color:rgba(4,7,10,.07)!important}
-/* Keterbacaan: panel berisi teks dibuat lebih pekat */
-.oc-alerts{background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 40%),rgba(9,14,18,.86)!important}
-.oc-brief{background:linear-gradient(180deg,rgba(255,255,255,.07),transparent 40%),rgba(9,14,18,.74)!important}
-[data-theme=light] .oc-alerts{background:rgba(255,255,255,.92)!important}[data-theme=light] .oc-brief{background:rgba(255,255,255,.85)!important}
-.oc-item{background:rgba(255,255,255,.045)!important}
-.oc-item h4{font-size:13.5px}.oc-item p{color:rgba(234,242,244,.86)!important;font-size:12.5px}
-.oc-item .oc-meta{color:rgba(234,242,244,.62)!important}
-[data-theme=light] .oc-item p{color:#24323a!important}[data-theme=light] .oc-item .oc-meta{color:#5B6873!important}
-.oc-desc{color:rgba(234,242,244,.72)}[data-theme=light] .oc-desc{color:#3d4a53}
-.oc-p:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;background:linear-gradient(140deg,rgba(70,214,200,.45),transparent 35%,transparent 70%,rgba(255,196,107,.25));
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
-.oc-brief{left:18px;top:18px;width:270px}
-.oc-alerts{right:18px;top:18px;width:310px;bottom:200px;display:flex;flex-direction:column}
-.oc-pulse{left:18px;right:18px;bottom:18px;height:166px;display:grid;grid-template-columns:200px repeat(4,minmax(0,1fr));gap:12px;padding:14px}
-.oc-t{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.oc-t h3,.oc-intro h3{margin:0;font-size:16px;font-weight:500;letter-spacing:.01em;color:var(--ink);text-transform:none!important;font-family:var(--f-body)!important}
-.oc-upd{display:flex;align-items:center;gap:6px;color:var(--mute);font-size:11.5px;margin-top:4px}
-.oc-upd:before{content:"";width:6px;height:6px;border-radius:50%;background:${TEAL}}
-.chipx{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:8px;font-size:11.5px;font-weight:500;border:1px solid transparent;white-space:nowrap}
-.chipx.hi{color:${ORANGE};background:rgba(255,127,59,.12);border-color:rgba(255,127,59,.25)}
-.chipx.md{color:${AMBER};background:rgba(255,196,107,.12);border-color:rgba(255,196,107,.25)}
-.chipx.lo{color:${TEAL};background:rgba(70,214,200,.12);border-color:rgba(70,214,200,.25)}
-[data-theme=light] .chipx.md{color:#B7791F}[data-theme=light] .chipx.lo{color:#13897E}
-.oc-big{display:flex;align-items:baseline;gap:8px;margin:14px 0 2px}
-.oc-big b{font-size:34px;font-weight:500;letter-spacing:-.02em;color:var(--ink)}
-.oc-big small{color:${ORANGE};font-size:12.5px;font-weight:500}
-.oc-desc{font-size:12.5px;line-height:1.5;color:var(--mute);margin:10px 0 12px}.oc-desc b{color:var(--ink);font-weight:500}
-.oc-kv{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
-.oc-kv div{font-size:11px;color:var(--mute)}.oc-kv b{display:block;margin-top:3px;font-size:13px;color:var(--ink);font-weight:500}
-.oc-cta{width:100%;height:44px;border:0;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:8px;font:600 13.5px var(--f-body);color:#04201D;
-  background:linear-gradient(180deg,#5EE3D6,#2FB3A6);box-shadow:0 0 0 1px rgba(70,214,200,.45),0 8px 26px rgba(70,214,200,.3);cursor:pointer}
-.oc-cta:hover{filter:brightness(1.06)}
-.oc-tabs{display:flex;gap:6px;margin:14px 0 12px}
-.oc-tabs button{flex:1;height:34px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--mute);font:500 12.5px var(--f-body);cursor:pointer}
-.oc-tabs button.on{color:#04201D;background:linear-gradient(180deg,#5EE3D6,#2FB3A6);border-color:transparent;box-shadow:0 0 16px rgba(70,214,200,.35)}
-.oc-list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;padding-right:2px;scrollbar-width:thin}
-.oc-item{display:grid;grid-template-columns:38px 1fr;gap:10px;padding:12px;border-radius:16px;background:var(--card2);border:1px solid var(--line)}
-.oc-ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:${ORANGE};background:rgba(255,127,59,.10);border:1px solid rgba(255,127,59,.2)}
-.oc-ico.t{color:${TEAL};background:rgba(70,214,200,.1);border-color:rgba(70,214,200,.22)}
-.oc-ico.a{color:${AMBER};background:rgba(255,196,107,.1);border-color:rgba(255,196,107,.22)}
-.oc-item h4{margin:0 0 3px;font-size:13px;font-weight:500;color:var(--ink);display:flex;justify-content:space-between;gap:6px}
-.oc-item p{margin:0;font-size:12px;line-height:1.45;color:var(--mute);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.oc-item .oc-meta{display:flex;align-items:center;gap:8px;margin-top:7px;font-size:11px;color:var(--mute)}
-.oc-item a{color:${AMBER};text-decoration:none;display:inline-flex;align-items:center;gap:2px}
-[data-theme=light] .oc-item a{color:#B7791F}
-.oc-pt{border-radius:18px;background:var(--card2);border:1px solid var(--line);padding:12px 14px;display:flex;flex-direction:column;min-width:0;position:relative;overflow:hidden}
-.oc-pt .oc-t h3{font-size:13.5px}
-.oc-pt .v{font-size:24px;font-weight:500;color:var(--ink);margin-top:8px;letter-spacing:-.01em}.oc-pt .v small{font-size:12px;color:var(--mute);font-weight:400;margin-left:4px}
-.oc-pt svg.sp{position:absolute;left:0;right:0;bottom:0;width:100%;height:58px}
-.oc-intro h3{font-size:18px!important}.oc-intro p{margin:6px 0 0;font-size:12px;color:var(--mute);line-height:1.45}
-.oc-intro{background:none;border:0;padding:6px 6px}
-@keyframes ocLive{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 9px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
-@keyframes ocSweep{from{transform:translateX(-240px)}to{transform:translateX(1500px)}}
-@keyframes ocBar{from{transform:scaleY(0)}to{transform:scaleY(1)}}
-@keyframes ocDraw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
-@media (prefers-reduced-motion:no-preference){
-  .oc-sweep{animation:ocSweep 9s linear infinite}
-  .oc-pt .bar{transform-origin:bottom;animation:ocBar .9s cubic-bezier(.2,.7,.3,1) both}
-  .oc-pt path.ln{stroke-dasharray:var(--len);animation:ocDraw 1.4s ease-out both}
-}
-/* sembunyikan hero & KPI lama: diganti console */
-#viewDash>.kpis,.content>.page-head.hero{display:none!important}
-@media(max-width:1180px){
-  .oc-stage{height:auto;padding:14px;display:grid;gap:12px;grid-template-columns:1fr 1fr}
-  .oc-map{position:relative;left:auto;right:auto;top:auto;bottom:auto;height:300px;grid-column:1/-1}
-  .oc-p{position:relative;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:auto!important;height:auto!important}
-  .oc-alerts{max-height:520px}
-  .oc-pulse{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr))}
-  .oc-intro{grid-column:1/-1}
-  .oc-pt{min-height:140px}
-}
-@media(max-width:640px){
-  .oc-stage{grid-template-columns:1fr;padding:10px;border-radius:22px}
-  .oc-map{height:200px}
-  .oc-pills{width:100%}.oc-pill{height:36px;padding:0 12px;font-size:12px}
-}`;
+.g-wrap{font-family:var(--f-body);color:var(--ink)}
+.g-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;margin:4px 0 18px}
+.g-eyebrow{font:500 11.5px var(--f-body);letter-spacing:.32em;color:var(--mute);text-transform:uppercase}
+.g-title{margin:6px 0 6px;font-family:var(--f-display)!important;font-size:44px!important;line-height:1.05;letter-spacing:.02em!important;text-transform:uppercase}
+.g-title b{font-weight:400}.g-title span{font-family:var(--f-body);font-weight:300;letter-spacing:.04em}
+.g-sub{color:var(--mute);font-size:14px;max-width:560px;line-height:1.5;margin:0}
+.g-kpis{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:12px}
+.g-kpi{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid var(--line);position:relative;overflow:hidden}
+.g-kpi:after{content:"";position:absolute;inset:auto -30% -60% auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c) 22%,transparent),transparent 70%)}
+.g-kpi .gi{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 35%,transparent);box-shadow:0 0 18px color-mix(in srgb,var(--c) 22%,transparent)}
+.g-kpi b{display:block;font-size:22px;font-weight:600;letter-spacing:-.01em}.g-kpi small{color:var(--mute);font-size:12px}
+.g-kpi{padding-right:58px!important}.g-kpi .g-d{position:absolute;top:12px;right:12px}
+.g-d{display:inline-flex;align-items:center;gap:2px;font-size:11.5px;font-weight:600;color:var(--mute)}
+.g-d.bad{color:${ORANGE}}.g-d.good{color:${TEAL}}
+.g-stage{position:relative;height:560px;border-radius:26px;overflow:hidden;border:1px solid var(--line);margin-bottom:16px;
+  background:radial-gradient(60% 70% at 55% 45%,rgba(255,127,59,.10),transparent 65%),radial-gradient(80% 80% at 50% 120%,rgba(70,214,200,.10),transparent 60%),radial-gradient(circle at 1px 1px,rgba(160,200,210,.09) 1px,transparent 1.5px) 0 0/24px 24px,#05090C}
+[data-theme=light] .g-stage{background:radial-gradient(60% 70% at 55% 45%,rgba(255,127,59,.10),transparent 65%),radial-gradient(circle at 1px 1px,rgba(4,7,10,.07) 1px,transparent 1.5px) 0 0/24px 24px,#F4F8F9}
+.g-stage .g-map{position:absolute;left:300px;right:20px;top:24px;bottom:84px}
+.g-map .lokmap{position:absolute!important;inset:0;aspect-ratio:auto!important;background:none!important;border:0!important;border-radius:0!important}
+.g-map .lokmap .badge,.g-map .lokmap .legend,.g-map .lokmap .grid,.g-map .lokmap .scan{display:none}
+.g-map .lokmap .isl{stroke:rgba(255,190,120,.35)!important;stroke-width:.7!important;stroke-opacity:1!important;filter:drop-shadow(0 0 6px rgba(255,110,50,.35))}
+.g-map .lokmap .hs-lbl{font-size:15px;font-weight:600}.g-map .lokmap .hs-sub{font-size:12.5px;fill:var(--ink)}
+.g-arc{fill:none;stroke:url(#gArc);stroke-width:1.3;stroke-dasharray:4 6;opacity:.8}
+.g-glass{border-radius:22px;padding:16px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.01) 45%),rgba(9,14,18,.62);border:1px solid rgba(160,220,215,.16);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%);box-shadow:0 18px 50px rgba(0,0,0,.35)}
+[data-theme=light] .g-glass{background:rgba(255,255,255,.78);border-color:rgba(4,7,10,.08);box-shadow:0 14px 40px rgba(10,30,40,.10)}
+.g-int{position:absolute;left:18px;top:18px;width:270px}
+.g-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.g-h h3{margin:0;font:600 15px var(--f-body)!important;text-transform:none!important;letter-spacing:.01em;color:var(--ink)}
+.g-live{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:999px;font-size:11px;font-weight:600;color:${TEAL};background:rgba(70,214,200,.12);border:1px solid rgba(70,214,200,.3)}
+.g-live:before{content:"";width:6px;height:6px;border-radius:50%;background:${TEAL};animation:gPulse 1.8s infinite}
+.g-scale{height:6px;border-radius:9px;background:linear-gradient(90deg,${TEAL},${AMBER},${ORANGE},${RED})}
+.g-scale-l{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);margin:5px 0 10px}
+.g-rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.g-rank li{display:grid;grid-template-columns:24px 1fr auto auto;gap:8px;align-items:center;font-size:13px}
+.g-rank .n{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:11.5px;color:var(--mute);background:var(--card2);border:1px solid var(--line)}
+.g-rank .bar{grid-column:2/-1;height:4px;border-radius:9px;background:var(--line);overflow:hidden;margin-top:-3px}
+.g-rank .bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,${AMBER},${ORANGE})}
+.g-rank .v{font-weight:600}.g-rank .g-d{min-width:46px;justify-content:flex-end}
+.g-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--ink);font:500 12.5px var(--f-body);cursor:pointer}
+.g-btn:hover{border-color:rgba(70,214,200,.45)}
+.g-btn.pri{border:0;color:#04201D;background:linear-gradient(180deg,#5EE3D6,#2FB3A6);box-shadow:0 0 18px rgba(70,214,200,.3)}
+.g-int .g-btn{width:100%;margin-top:14px}
+.g-ctrl{position:absolute;left:310px;right:20px;bottom:16px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.g-seg{display:inline-flex;padding:4px;border-radius:14px;gap:2px}
+.g-seg button{height:32px;padding:0 14px;border:0;border-radius:10px;background:none;color:var(--mute);font:500 12.5px var(--f-body);cursor:pointer}
+.g-seg button.on{color:#04201D;background:linear-gradient(180deg,#5EE3D6,#2FB3A6)}
+.g-cap{font-size:12px;color:var(--mute);padding:8px 14px;border-radius:12px}
+.g-cap b{color:var(--ink);font-weight:500}
+.g-grid4{display:grid;grid-template-columns:1.2fr 1.2fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.g-grid2{display:grid;grid-template-columns:1.7fr 1fr;gap:14px;margin-bottom:14px}
+.g-grid3{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.g-card{border-radius:22px;padding:16px 18px;background:linear-gradient(180deg,var(--glass-hi),transparent 40%),var(--card);border:1px solid var(--line);min-width:0;position:relative}
+.g-card .g-h h3{font-size:15.5px!important}
+.g-tag{font-size:11.5px;color:var(--mute);padding:4px 10px;border-radius:9px;border:1px solid var(--line);background:var(--card2);white-space:nowrap}
+.g-tag.hot{color:${ORANGE};border-color:rgba(255,127,59,.35);background:rgba(255,127,59,.10)}
+.g-vol{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}
+.g-vol .big{font-size:30px;font-weight:600;line-height:1}.g-vol small{display:block;color:var(--mute);font-size:11.5px;margin-top:4px}
+.g-svg{width:100%;display:block}
+.g-legend{display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--mute)}
+.g-legend b{display:block;font-size:17px;color:var(--ink);font-weight:600}
+.g-dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+.g-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px}
+.g-list li{display:grid;grid-template-columns:22px minmax(0,1fr) 70px 44px;gap:8px;align-items:center;font-size:12.5px}
+.g-list li .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-list .n{color:var(--mute);font-size:11.5px;text-align:center}
+.g-list .bar{height:5px;border-radius:9px;background:var(--line);overflow:hidden}.g-list .bar i{display:block;height:100%;border-radius:9px}
+.g-list .p{text-align:right;font-weight:600}
+.g-src li{grid-template-columns:22px minmax(0,1fr) 90px 40px}
+.g-pf{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;color:var(--pc);background:color-mix(in srgb,var(--pc) 14%,transparent)}
+.g-feed-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.g-feed-tabs button{height:30px;padding:0 13px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--mute);font:500 12px var(--f-body);cursor:pointer}
+.g-feed-tabs button.on{color:#04201D;border-color:transparent;background:linear-gradient(180deg,#5EE3D6,#2FB3A6)}
+.g-feed{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.g-post{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:16px;background:var(--card2);border:1px solid var(--line);min-width:0}
+.g-post .top{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--mute)}
+.g-post .top .sn{margin-left:auto;font-size:10.5px;padding:2px 8px;border-radius:7px}
+.g-post p{margin:0;font-size:12.5px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.g-post .ft{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--mute);margin-top:auto}
+.g-post a{color:${AMBER};text-decoration:none;display:inline-flex;align-items:center;gap:2px}
+[data-theme=light] .g-post a{color:#B7791F}
+.sn.neg{color:${ORANGE};background:rgba(255,127,59,.12)}.sn.pos{color:${TEAL};background:rgba(70,214,200,.12)}.sn.net{color:${GREY};background:rgba(138,151,166,.14)}
+.g-warn{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.g-warn li{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 10px;border-radius:14px;background:var(--card2);border:1px solid var(--line)}
+.g-warn .wi{width:34px;height:34px;border-radius:11px;display:grid;place-items:center}
+.g-warn b{display:block;font-size:13px;font-weight:600}.g-warn small{color:var(--mute);font-size:11.5px}
+.g-lv{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:8px}
+.g-lv.hi{color:${RED};background:rgba(240,82,79,.12)}.g-lv.md{color:${AMBER};background:rgba(255,196,107,.12)}.g-lv.lo{color:${TEAL};background:rgba(70,214,200,.12)}
+[data-theme=light] .g-lv.md{color:#B7791F}
+.g-donut{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center}
+.g-peak{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.g-peak li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:11px 12px;border-radius:16px;background:var(--card2);border:1px solid var(--line)}
+.g-peak .n{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-weight:600;color:${ORANGE};background:rgba(255,127,59,.12)}
+.g-peak .meta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mute)}
+.g-peak b{font-size:17px}.g-peak p{margin:3px 0 0;font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-cmp{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:center}
+.g-cmp .lokmap{position:relative!important;aspect-ratio:1000/400!important;background:none!important;border:0!important}
+.g-cmp .lokmap .badge,.g-cmp .lokmap .scan,.g-cmp .lokmap .grid,.g-cmp .lokmap .hs-sub,.g-cmp .lokmap .legend{display:none}.g-cmp .lokmap .hs-lbl{font-size:22px}
+.g-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.g-tbl th{font-weight:500;color:var(--mute);text-align:left;padding:6px 6px;font-size:11.5px}
+.g-tbl td{padding:7px 6px;border-top:1px solid var(--line)}.g-tbl .r{text-align:right}
+.g-tbl .n{color:var(--mute)}
+.g-sub-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.g-sub-tabs button{height:30px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--mute);font:500 12px var(--f-body);cursor:pointer}
+.g-sub-tabs button.on{color:#04201D;border-color:transparent;background:linear-gradient(180deg,#5EE3D6,#2FB3A6)}
+.g-cloud{display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;align-items:center;min-height:170px;line-height:1.1}
+.g-stack{display:flex;flex-direction:column;gap:12px}
+.g-stack .row{display:grid;grid-template-columns:150px minmax(0,1fr) 42px;gap:10px;align-items:center;font-size:12.5px}
+.g-stack .row .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-stack .sb{display:flex;height:10px;border-radius:9px;overflow:hidden;background:var(--line)}
+.g-cv{position:relative;height:250px}
+.g-section-t{display:flex;align-items:center;gap:10px;margin:22px 2px 12px;font:500 12px var(--f-body);letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+.g-section-t:after{content:"";flex:1;height:1px;background:var(--line)}
+@keyframes gPulse{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 7px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
+@keyframes gDash{to{stroke-dashoffset:-40}}
+@media (prefers-reduced-motion:no-preference){.g-arc{animation:gDash 2.4s linear infinite}}
+/* Navigasi atas: tab dipindah ke topbar (layar lebar) */
+.topbar .tabs.g-topnav{margin:0!important;padding:4px!important;border-radius:16px;background:var(--card2);border:1px solid var(--line)!important;gap:2px!important;flex-wrap:nowrap}
+.topbar .tabs.g-topnav [role=tab]{border:0!important;background:none!important;padding:8px 16px!important;border-radius:12px!important;box-shadow:none!important;white-space:nowrap}
+.topbar .tabs.g-topnav [role=tab].on{background:linear-gradient(180deg,rgba(70,214,200,.30),rgba(70,214,200,.12))!important;color:var(--ink)!important;box-shadow:inset 0 0 0 1px rgba(70,214,200,.5),0 0 16px rgba(70,214,200,.2)!important}
+.g-ai-tab{color:${TEAL}!important;display:inline-flex!important;align-items:center;gap:6px}
+.content>.tabs:empty{display:none}
+/* sembunyikan yang digantikan */
+.content>.page-head.hero,#viewDash>.kpis{display:none!important}
+.g-hide{display:none!important}
+/* Responsif */
+@media(max-width:1280px){.g-kpis{grid-template-columns:repeat(2,minmax(160px,1fr))}.g-grid4{grid-template-columns:1fr 1fr}.g-feed{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1100px){.g-hero{grid-template-columns:1fr}.g-grid2,.g-grid3{grid-template-columns:1fr}
+  .g-stage{height:auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+  .g-stage .g-map{position:relative;left:auto;right:auto;top:auto;bottom:auto;height:320px}
+  .g-int,.g-ctrl{position:relative;left:auto;right:auto;top:auto;bottom:auto;width:auto}}
+@media(max-width:640px){.g-title{font-size:26px!important}.g-kpis{grid-template-columns:1fr 1fr;gap:8px}.g-kpi{padding:12px}.g-kpi .gi{width:36px;height:36px}.g-kpi b{font-size:18px}
+  .g-grid4,.g-feed{grid-template-columns:1fr}.g-stage .g-map{height:210px}.g-donut{grid-template-columns:120px 1fr}.g-cmp{grid-template-columns:1fr}.g-stack .row{grid-template-columns:110px 1fr 38px}}`;
   document.head.append(css);
 
-  let tab = 'neg';
-  function build() {
+  /* ---------------- Data ---------------- */
+  function data() {
     const all = (typeof cache !== 'undefined' && cache.post) || [];
     const rg = (typeof state !== 'undefined' && state.range) || {};
     const D = all.filter(r => !rg.from || (r.tgl >= rg.from && r.tgl <= rg.to));
-    const view = document.getElementById('viewDash'); if (!view || !D.length) return;
-    let root = document.getElementById('opsConsole');
-    if (!root) { root = document.createElement('section'); root.id = 'opsConsole'; root.className = 'oc'; view.prepend(root); }
-    const T = D.length, neg = D.filter(r => r.sent === 'negatif'), pos = D.filter(r => r.sent === 'positif');
-    const negP = neg.length / T * 100, nsi = Math.round((pos.length - neg.length) / T * 100);
-    const cnt = (a, k) => { const m = {}; a.forEach(x => { const v = typeof k === 'function' ? k(x) : x[k]; m[v] = (m[v] || 0) + 1; }); return Object.entries(m).sort((x, y) => y[1] - x[1]); };
     const days = [...new Set(D.map(r => r.tgl))].sort();
-    const perDay = days.map(d => { const R = D.filter(r => r.tgl === d); return { d, t: R.length, n: R.filter(r => r.sent === 'negatif').length, p: R.filter(r => r.sent === 'positif').length }; });
-    const last = perDay.at(-1) || { t: 0 }, prev7 = perDay.slice(-8, -1), avg7 = prev7.length ? prev7.reduce((s, x) => s + x.t, 0) / prev7.length : 0;
-    const chg = avg7 ? Math.round((last.t - avg7) / avg7 * 100) : 0;
-    const peak = perDay.reduce((a, b) => b.n > a.n ? b : a, perDay[0]);
-    const lvl = negP >= 35 ? ['Tinggi', 'hi'] : negP >= 20 ? ['Sedang', 'md'] : ['Rendah', 'lo'];
-    const negTop = cnt(neg.filter(r => r.topik && r.topik !== 'Lainnya'), 'topik');
-    const lok = cnt(D.filter(r => r.lokasi && r.lokasi !== 'Tidak menyebutkan lokasi'), 'lokasi');
+    const by = (R) => ({ t: R.length, n: R.filter(r => r.sent === 'negatif').length, p: R.filter(r => r.sent === 'positif').length, z: R.filter(r => r.sent === 'netral').length });
+    const perDay = days.map(d => ({ d, ...by(D.filter(r => r.tgl === d)) }));
+    // pembanding: 7 hari terakhir vs 7 hari sebelumnya (dalam periode)
+    const last7 = days.slice(-7), prev7 = days.slice(-14, -7);
+    const L = D.filter(r => last7.includes(r.tgl)), Pv = D.filter(r => prev7.includes(r.tgl));
+    return { all, rg, D, days, perDay, L, Pv, by };
+  }
+
+  /* ---------------- Mini SVG charts ---------------- */
+  const barsSvg = (vals, W = 300, H = 110, colorFn) => { const mx = Math.max(1, ...vals), bw = W / Math.max(1, vals.length);
+    return `<svg class="g-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px">${[.25, .5, .75].map(g => `<line x1="0" x2="${W}" y1="${H * g}" y2="${H * g}" stroke="var(--line)" stroke-dasharray="3 4"/>`).join('')}
+      ${vals.map((v, i) => { const h = Math.max(2, v / mx * (H - 6)); return `<rect x="${(i * bw + bw * .18).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw * .64).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${colorFn(v / mx, i)}"/>`; }).join('')}</svg>`; };
+  const linesSvg = (series, W = 300, H = 110) => { const mx = Math.max(1, ...series.flatMap(s => s.v)), n = Math.max(...series.map(s => s.v.length));
+    const xy = (v, i) => [n > 1 ? i / (n - 1) * W : W / 2, H - 4 - v / mx * (H - 10)];
+    return `<svg class="g-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px"><defs>${series.map((s, j) => `<linearGradient id="gl${j}${s.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.c}" stop-opacity=".32"/><stop offset="1" stop-color="${s.c}" stop-opacity="0"/></linearGradient>`).join('')}</defs>
+      ${[.25, .5, .75].map(g => `<line x1="0" x2="${W}" y1="${H * g}" y2="${H * g}" stroke="var(--line)" stroke-dasharray="3 4"/>`).join('')}
+      ${series.map((s, j) => { const d = s.v.map((v, i) => (i ? 'L' : 'M') + xy(v, i).map(z => z.toFixed(1)).join(' ')).join('');
+        return (s.fill ? `<path d="${d}L${W} ${H}L0 ${H}Z" fill="url(#gl${j}${s.id})"/>` : '') + `<path d="${d}" fill="none" stroke="${s.c}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`; }).join('')}</svg>`; };
+  const heat = t => t > .75 ? RED : t > .5 ? ORANGE : t > .25 ? AMBER : '#3FBFB2';
+
+  /* ---------------- OPS CONSOLE ---------------- */
+  let feedPf = 'Semua';
+  function buildConsole() {
+    const view = document.getElementById('viewDash'); if (!view) return;
+    const { D, days, perDay, L, Pv, by, rg } = data(); if (!D.length) return;
+    let root = document.getElementById('gConsole');
+    if (!root) { root = document.createElement('section'); root.id = 'gConsole'; root.className = 'g-wrap'; view.prepend(root); }
+    document.getElementById('opsConsole')?.remove();
+    const S = by(D), Ls = by(L), Ps = by(Pv);
+    const isl = cnt(D.filter(r => r.lokasi && r.lokasi !== NONE), 'lokasi');
+    const islL = Object.fromEntries(cnt(L.filter(r => r.lokasi && r.lokasi !== NONE), 'lokasi')), islP = Object.fromEntries(cnt(Pv.filter(r => r.lokasi && r.lokasi !== NONE), 'lokasi'));
+    const negShareL = Ls.t ? Ls.n / Ls.t * 100 : 0, negShareP = Ps.t ? Ps.n / Ps.t * 100 : 0;
+    const per = rg.from ? (rg.from === rg.to ? tgY(rg.from) : `${tg(rg.from)} – ${tgY(rg.to)}`) : '';
+    const maxIsl = isl[0]?.[1] || 1;
+    const topics = cnt(D.filter(r => r.topik && r.topik !== 'Lainnya'), 'topik');
     const plat = cnt(D, 'platform');
-    const per = rg.from ? (rg.from === rg.to ? tg(rg.from) : `${tg(rg.from)} – ${tg(rg.to)}`) : '';
-    const drLabel = document.getElementById('drLabel')?.textContent || 'Semua periode';
+    const lastD = perDay.at(-1) || { t: 0 }, prevAvg = perDay.slice(-8, -1).reduce((s, x, _, a) => s + x.t / a.length, 0);
+    const chg = prevAvg ? Math.round((lastD.t - prevAvg) / prevAvg * 100) : 0;
+    const last7d = perDay.slice(-7);
+    // waktu relatif terhadap postingan terbaru di data
+    const stamp = r => new Date(`${r.tgl}T${(r.jamStr || '00:00')}:00`).getTime();
+    const latest = Math.max(...D.map(stamp));
+    const ago = r => { const m = Math.round((latest - stamp(r)) / 60000); return m < 60 ? `${m} menit lalu` : m < 1440 ? `${Math.round(m / 60)} jam lalu` : `${Math.round(m / 1440)} hari lalu`; };
+    const feedSrc = (feedPf === 'Semua' ? D : D.filter(r => r.platform === feedPf)).slice().sort((a, b) => stamp(b) - stamp(a) || b.eng - a.eng).slice(0, 8);
+    const snC = s => s === 'negatif' ? 'neg' : s === 'positif' ? 'pos' : 'net';
+    // peringatan dini: pulau dengan negatif tinggi / lonjakan
+    const warn = isl.slice(0, 6).map(([kk, v]) => { const R = D.filter(r => r.lokasi === kk), n = R.filter(r => r.sent === 'negatif').length, np = n / v * 100, d = delta(islL[kk] || 0, islP[kk] || 0);
+      const lv = np >= 60 || (d != null && d >= 100) ? ['hi', 'Tinggi'] : np >= 45 || (d != null && d >= 30) ? ['md', 'Sedang'] : ['lo', 'Rendah'];
+      const topT = cnt(R.filter(r => r.sent === 'negatif' && r.topik !== 'Lainnya'), 'topik')[0]?.[0] || 'percakapan meningkat';
+      return { kk, v, np, d, lv, topT }; }).sort((a, b) => (b.lv[0] === 'hi') - (a.lv[0] === 'hi') || b.np - a.np);
+    const nHigh = warn.filter(w => w.lv[0] === 'hi').length;
 
-    // ---- Alerts list ----
-    const akun = r => /profile\.php|^\d+$/.test(r.user) ? (r.nama || r.user) : '@' + r.user;
-    let items = '';
-    if (tab === 'neg') items = [...neg].sort((a, b) => b.eng - a.eng).slice(0, 6).map(r => `<div class="oc-item"><span class="oc-ico">${ic('alert')}</span><div>
-        <h4><span>${esc(r.topik || 'Negatif')}</span><span class="chipx hi">Negatif</span></h4><p>“${esc(r.text.slice(0, 180))}”</p>
-        <div class="oc-meta"><span>${esc(akun(r))} · ${esc(r.platform)} · ${tg(r.tgl)}</span>${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">Lihat ${ic('link', 12)}</a>` : ''}</div></div></div>`).join('');
-    if (tab === 'lok') items = lok.slice(0, 7).map(([k, v]) => { const R = D.filter(r => r.lokasi === k), n = R.filter(r => r.sent === 'negatif').length, np = n / v * 100;
-        const c = np >= 60 ? ['hi', 'Kritis'] : np >= 45 ? ['md', 'Waspada'] : ['lo', 'Terkendali'];
-        return `<div class="oc-item"><span class="oc-ico a">${ic('pin')}</span><div><h4><span>${esc(k)}</span><span class="chipx ${c[0]}">${c[1]}</span></h4>
-          <p>${f(v)} postingan (${pc(v, T)}) · negatif ${pc(n, v, 0)}</p></div></div>`; }).join('');
-    if (tab === 'akun') { const acc = {}; neg.filter(r => r.user).forEach(r => { const k = akun(r); (acc[k] = acc[k] || { n: 0, e: 0, p: r.platform }).n++; acc[k].e += r.eng; });
-      items = Object.entries(acc).sort((a, b) => b[1].n - a[1].n || b[1].e - a[1].e).slice(0, 7).map(([k, a]) => `<div class="oc-item"><span class="oc-ico t">${ic('user')}</span><div>
-        <h4><span>${esc(k)}</span><span class="chipx hi">${a.n} post</span></h4><p>${esc(a.p)} · ${f(a.e)} engagement pada postingan negatif</p></div></div>`).join(''); }
+    const preset = (typeof state !== 'undefined' && state.preset) || 'all';
+    root.innerHTML = `
+      <div class="g-hero">
+        <div><div class="g-eyebrow">Pemantauan Nasional · ${esc(per)}</div>
+          <h1 class="g-title"><b>Karhutla</b> <span>Indonesia</span></h1>
+          <p class="g-sub">Pemantauan percakapan media sosial secara berkala dengan analitik AI untuk deteksi dini, pemetaan risiko, dan respons cepat.</p></div>
+        <div class="g-kpis">
+          <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('chat', 22)}</span><div><b>${f(S.t)}</b><small>Total postingan</small></div>${dChip(delta(Ls.t, Ps.t), false)}</div>
+          <div class="g-kpi" style="--c:${RED}"><span class="gi">${ic('heart', 22)}</span><div><b>${pc(S.n, S.t)}</b><small>Sentimen negatif</small></div>${dChip(Ps.t ? Math.round(negShareL - negShareP) : null, true, ' pp')}</div>
+          <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('pin', 22)}</span><div><b>${isl.length}<small style="font-size:13px"> / 7</small></b><small>Pulau disebut</small></div></div>
+          <div class="g-kpi" style="--c:${ORANGE}"><span class="gi">${ic('alert', 22)}</span><div><b>${f(S.n)}</b><small>Postingan negatif</small></div>${dChip(delta(Ls.n, Ps.n), true)}</div>
+        </div>
+      </div>
 
-    // ---- mini charts ----
-    const W = 260, Hh = 58, mx = Math.max(1, ...perDay.map(x => x.t));
-    const pts = perDay.map((x, i) => [perDay.length > 1 ? i / (perDay.length - 1) * W : W / 2, Hh - 6 - x.t / mx * (Hh - 14)]);
-    const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('');
-    const spark = `<svg class="sp" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none"><defs><linearGradient id="ocg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${TEAL}" stop-opacity=".35"/><stop offset="1" stop-color="${TEAL}" stop-opacity="0"/></linearGradient></defs>
-      <path d="${line}L${W} ${Hh}L0 ${Hh}Z" fill="url(#ocg)"/><path class="ln" style="--len:900" d="${line}" fill="none" stroke="${TEAL}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
-    const mn = Math.max(1, ...perDay.map(x => x.n)), bw = W / Math.max(1, perDay.length);
-    const bars = `<svg class="sp" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none">${perDay.map((x, i) => { const h = Math.max(2, x.n / mn * (Hh - 10)), t = x.n / mn;
-      return `<rect class="bar" style="animation-delay:${i * 25}ms" x="${(i * bw + bw * .2).toFixed(1)}" y="${(Hh - h).toFixed(1)}" width="${(bw * .6).toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" fill="${t > .66 ? ORANGE : t > .33 ? AMBER : '#5FA8A0'}"/>`; }).join('')}</svg>`;
-    const g = (nsi + 100) / 200, ang = Math.PI * (1 - g), gx = 60 + 46 * Math.cos(ang), gy = 58 - 46 * Math.sin(ang);
-    const gauge = `<svg class="sp" viewBox="0 0 120 64" style="height:64px"><defs><linearGradient id="ocgg" x1="0" x2="1"><stop offset="0" stop-color="${ORANGE}"/><stop offset=".5" stop-color="${AMBER}"/><stop offset="1" stop-color="${TEAL}"/></linearGradient></defs>
-      <path d="M14 58A46 46 0 0 1 106 58" fill="none" stroke="url(#ocgg)" stroke-width="5" stroke-linecap="round" opacity=".9"/><line x1="60" y1="58" x2="${gx.toFixed(1)}" y2="${gy.toFixed(1)}" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/><circle cx="60" cy="58" r="3.5" fill="var(--ink)"/></svg>`;
-    const pmax = Math.max(1, ...plat.map(p => p[1]));
-    const platBars = `<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">${plat.slice(0, 4).map(([k, v]) => `<div style="display:grid;grid-template-columns:62px 1fr 34px;gap:6px;align-items:center;font-size:11px;color:var(--mute)"><span>${esc(k)}</span><span style="height:5px;border-radius:9px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${v / pmax * 100}%;background:${TEAL};border-radius:9px"></i></span><span style="text-align:right;color:var(--ink)">${pc(v, T, 0)}</span></div>`).join('')}</div>`;
-    const nsiChip = nsi <= -20 ? ['hi', 'Negatif'] : nsi < 10 ? ['md', 'Moderat'] : ['lo', 'Positif'];
-    const chgChip = chg >= 50 ? ['hi', 'Lonjakan'] : chg >= 10 ? ['md', 'Naik'] : chg <= -10 ? ['lo', 'Turun'] : ['lo', 'Stabil'];
+      <div class="g-stage">
+        <div class="g-map"><div class="lokmap"></div></div>
+        <div class="g-glass g-int">
+          <div class="g-h"><h3>Intensitas Percakapan</h3><span class="g-live">Live</span></div>
+          <div class="g-scale"></div><div class="g-scale-l"><span>Rendah</span><span>Tinggi</span></div>
+          <ol class="g-rank">${isl.slice(0, 6).map(([kk, v], i) => { const d = delta(islL[kk] || 0, islP[kk] || 0);
+            return `<li><span class="n">${i + 1}</span><span>${esc(kk)}</span><span class="v">${k(v)}</span>${dChip(d, true)}<span class="bar"><i style="width:${v / maxIsl * 100}%"></i></span></li>`; }).join('') || '<li>Belum ada lokasi</li>'}</ol>
+          <button class="g-btn" type="button" data-go="analitik">Lihat detail ${ic('arrow', 14)}</button>
+        </div>
+        <div class="g-ctrl">
+          <div class="g-glass g-seg" role="group" aria-label="Rentang waktu">${[['last1', 'Hari terakhir'], ['last3', '3 Hari'], ['last7', '7 Hari'], ['last30', '30 Hari'], ['all', 'Semua']].map(([v, l]) => `<button type="button" data-p="${v}" class="${preset === v ? 'on' : ''}">${l}</button>`).join('')}</div>
+          <div class="g-glass g-cap">Periode <b>${esc(per)}</b> · Δ dibanding 7 hari sebelumnya</div>
+        </div>
+      </div>
+
+      <div class="g-grid4">
+        <div class="g-card"><div class="g-h"><h3>Volume Percakapan</h3><span class="g-tag">Harian</span></div>
+          <div class="g-vol"><div>${barsSvg(perDay.map(x => x.t), 300, 120, (t) => heat(t))}</div>
+          <div><span class="big">${f(lastD.t)}</span><small>postingan hari terakhir</small><div style="margin-top:8px">${dChip(chg, true)}</div><small>vs rata-rata 7 hari</small></div></div></div>
+        <div class="g-card"><div class="g-h"><h3>Tren Sentimen</h3><span class="g-tag">7 hari terakhir</span></div>
+          <div class="g-vol"><div>${linesSvg([{ id: 'n', c: RED, fill: 1, v: last7d.map(x => x.n) }, { id: 'p', c: TEAL, v: last7d.map(x => x.p) }, { id: 'z', c: GREY, v: last7d.map(x => x.z) }], 300, 120)}</div>
+          <div class="g-legend"><div><span class="g-dot" style="background:${RED}"></span>Negatif<b>${pc(Ls.n, Ls.t)}</b></div><div><span class="g-dot" style="background:${GREY}"></span>Netral<b>${pc(Ls.z, Ls.t)}</b></div><div><span class="g-dot" style="background:${TEAL}"></span>Positif<b>${pc(Ls.p, Ls.t)}</b></div></div></div></div>
+        <div class="g-card"><div class="g-h"><h3>Top Isu Terkini</h3><span class="g-tag">Semua sumber</span></div>
+          <ol class="g-list">${topics.slice(0, 5).map(([kk, v], i) => `<li><span class="n">${i + 1}</span><span class="t" title="${esc(kk)}">${esc(kk)}</span><span class="bar"><i style="width:${v / topics[0][1] * 100}%;background:${i < 1 ? RED : i < 3 ? ORANGE : AMBER}"></i></span><span class="p">${pc(v, S.t, 0)}</span></li>`).join('')}</ol></div>
+        <div class="g-card"><div class="g-h"><h3>Sumber Percakapan</h3><span class="g-tag">Semua</span></div>
+          <ol class="g-list g-src">${plat.map(([kk, v]) => `<li>${pfIco(kk)}<span class="t">${esc(kk)}</span><span class="bar"><i style="width:${v / plat[0][1] * 100}%;background:${TEAL}"></i></span><span class="p">${pc(v, S.t, 0)}</span></li>`).join('')}</ol></div>
+      </div>
+
+      <div class="g-grid2">
+        <div class="g-card"><div class="g-h"><h3>Aktivitas Terbaru</h3>
+          <div class="g-feed-tabs">${['Semua', ...plat.map(p => p[0])].map(p => `<button type="button" data-pf="${esc(p)}" class="${feedPf === p ? 'on' : ''}">${esc(p)}</button>`).join('')}</div></div>
+          <div class="g-feed">${feedSrc.map(r => `<div class="g-post"><div class="top">${pfIco(r.platform, 13)}<span>${esc(ago(r))}</span><span class="sn ${snC(r.sent)}">${esc(r.sent)}</span></div>
+            <p>${esc(r.text.slice(0, 220))}</p><div class="ft"><span>${esc(akun(r))} · ${k(r.eng)} interaksi</span>${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">Buka ${ic('ext', 12)}</a>` : ''}</div></div>`).join('') || '<p class="hint">Tidak ada postingan</p>'}</div></div>
+        <div class="g-card"><div class="g-h"><h3>Peringatan Dini</h3><span class="g-lv hi">Tinggi (${nHigh})</span></div>
+          <ul class="g-warn">${warn.slice(0, 4).map(w => `<li><span class="wi g-lv ${w.lv[0]}">${ic('flame', 18)}</span><div><b>${esc(w.kk)}</b><small>${esc(w.topT)} · ${pc(w.np, 100, 0)} negatif${w.d != null ? ` · ${w.d >= 0 ? '+' : ''}${w.d}% 7h` : ''}</small></div><span class="g-lv ${w.lv[0]}">${ic('alert', 12, 2)}${w.lv[1]}</span></li>`).join('')}</ul></div>
+      </div>`;
+
+    // peta + busur dari pulau terpanas
+    const box = root.querySelector('.g-map .lokmap');
+    if (window.renderIdMap && window.__lok) {
+      window.renderIdMap(box, window.__lok, { H: 340, oy: 3 });
+      const C = window.__IDCENT, src = isl[0] && C[isl[0][0]];
+      const svg = box.querySelector('svg');
+      if (svg && src) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('transform', 'translate(0 3)');
+        g.innerHTML = `<defs><linearGradient id="gArc" x1="0" x2="1"><stop offset="0" stop-color="${ORANGE}"/><stop offset="1" stop-color="${AMBER}" stop-opacity=".3"/></linearGradient></defs>` +
+          isl.slice(1, 7).map(([kk]) => { const t = C[kk]; if (!t) return ''; const mx = (src[0] + t[0]) / 2, my = Math.min(src[1], t[1]) - 40 - Math.abs(t[0] - src[0]) * .12;
+            return `<path class="g-arc" d="M${src[0]} ${src[1]}Q${mx} ${my} ${t[0]} ${t[1]}"/>`; }).join('');
+        svg.querySelector('g[transform]')?.before(g);
+      }
+    }
+    root.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { if (typeof state === 'undefined') return; state.preset = b.dataset.p; render(); });
+    root.querySelectorAll('[data-pf]').forEach(b => b.onclick = () => { feedPf = b.dataset.pf; buildConsole(); });
+    root.querySelector('[data-go=analitik]')?.addEventListener('click', () => document.querySelector('[data-tab=analitik]')?.click());
+  }
+
+  /* ---------------- ANALITIK ---------------- */
+  let cmpMode = 'vol', charts2 = {};
+  function buildAnalitik() {
+    const an = document.getElementById('viewAnalitik'); if (!an) return;
+    const { D, perDay, L, Pv, by } = data(); if (!D.length) return;
+    let root = document.getElementById('gAnalitik');
+    if (!root) { root = document.createElement('section'); root.id = 'gAnalitik'; root.className = 'g-wrap'; an.prepend(root); }
+    // sembunyikan kartu lama yang sudah tergantikan
+    ['kpis'].forEach(id => document.getElementById(id)?.classList.add('g-hide'));
+    ['cTrend', 'cSov', 'kanalSent', 'causePos', 'cloud', 'lokasi'].forEach(id => document.getElementById(id)?.closest('section.card')?.classList.add('g-hide'));
+    an.querySelectorAll('.row').forEach(r => { if ([...r.children].every(c => c.classList.contains('g-hide'))) r.classList.add('g-hide'); });
+    const S = by(D), Ls = by(L), Ps = by(Pv);
+    const topics = cnt(D.filter(r => r.topik && r.topik !== 'Lainnya'), 'topik'), T5 = topics.slice(0, 5).map(t => t[0]);
+    const topicsL = Object.fromEntries(cnt(L, 'topik')), topicsP = Object.fromEntries(cnt(Pv, 'topik'));
+    const plat = cnt(D, 'platform'), isl = cnt(D.filter(r => r.lokasi && r.lokasi !== NONE), 'lokasi');
+    const islL = Object.fromEntries(cnt(L, 'lokasi')), islP = Object.fromEntries(cnt(Pv, 'lokasi'));
+    const peak = perDay.slice().sort((a, b) => b.t - a.t).slice(0, 3).map(p => { const R = D.filter(r => r.tgl === p.d); const top = R.slice().sort((a, b) => b.eng - a.eng)[0];
+      const i = perDay.findIndex(x => x.d === p.d), prv = perDay.slice(Math.max(0, i - 7), i), avg = prv.length ? prv.reduce((s, x) => s + x.t, 0) / prv.length : 0;
+      return { ...p, top, d7: avg ? Math.round((p.t - avg) / avg * 100) : null, tp: cnt(R.filter(r => r.topik !== 'Lainnya'), 'topik')[0]?.[0] }; });
+    const avgDay = perDay.length ? Math.round(S.t / perDay.length) : 0;
+    // kata kunci
+    const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue lu kamu dia mereka nya ya ga gak nggak tapi karena jadi lagi mau buat sama oleh dalam the https http www com co id yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu udah belum dapat hari jangan kena usai milik setelah sedang hingga sampai menjadi tersebut karna emang memang banget sangat orang terjadi kembali saat tengah selatan utara barat timur sejumlah kondisi kawasan wilayah sekitar terus video bukan harus kota lokasi kabupaten provinsi oktober tahun bulan minggu pagi siang sore malam dari menurut ujar kata katanya disebut melalui antara lain this that with from have will are was'.split(' '));
+    const wc = {}; D.forEach(r => r.text.toLowerCase().replace(/https?:\S+|[@#]\S+/g, ' ').split(/[^a-z0-9]+/).forEach(w => { if (w.length > 3 && !STOP.has(w) && !/^\d+$/.test(w)) wc[w] = (wc[w] || 0) + 1; }));
+    const words = Object.entries(wc).sort((a, b) => b[1] - a[1]).slice(0, 26), wMax = words[0]?.[1] || 1;
+    const lay = []; words.forEach((w, i) => i % 2 ? lay.push(w) : lay.unshift(w));
+    const wCol = [TEAL, AMBER, ORANGE, '#7FB8FF', '#A78BFA', '#E7E9EA'];
+    const cmpRows = isl.map(([kk, v]) => { const R = D.filter(r => r.lokasi === kk), n = R.filter(r => r.sent === 'negatif').length; return { kk, v, n, np: n / v * 100, d: delta(islL[kk] || 0, islP[kk] || 0) }; })
+      .sort((a, b) => cmpMode === 'neg' ? b.np - a.np : cmpMode === 'grow' ? (b.d ?? -1e9) - (a.d ?? -1e9) : b.v - a.v);
+    const negD = Ps.t ? Math.round(Ls.n / Ls.t * 100 - Ps.n / Ps.t * 100) : null, posD = Ps.t ? Math.round(Ls.p / Ls.t * 100 - Ps.p / Ps.t * 100) : null, netD = Ps.t ? Math.round(Ls.z / Ls.t * 100 - Ps.z / Ps.t * 100) : null;
 
     root.innerHTML = `
-      <div class="oc-head"><div><h1>Karhutla Ops Console</h1><div class="oc-sub"><span class="oc-dot"></span>Monitoring percakapan media sosial · ${esc(per)} · ${f(T)} postingan</div></div>
-        <div class="oc-pills"><span class="oc-pill"><small>Negara</small><i></i>Indonesia</span><span class="oc-pill"><small>Isu</small><i></i>Karhutla</span><span class="oc-pill"><small>Periode</small><i></i>${esc(drLabel)}</span></div></div>
-      <div class="oc-stage">
-        <div class="oc-sweep"></div>
-        <div class="oc-map"><div class="lokmap"></div></div>
-        <div class="oc-p oc-brief">
-          <div class="oc-t"><h3>AI Situation Brief</h3><span class="chipx ${lvl[1]}">${lvl[0]}</span></div>
-          <div class="oc-upd">Diperbarui otomatis</div>
-          <div class="oc-big"><b>${pc(neg.length, T, 1)}</b><small>sentimen negatif</small></div>
-          <p class="oc-desc">Isu dominan: <b>${esc(negTop[0]?.[0] || '-')}</b>${lok[0] ? `. Lokasi paling disorot: <b>${esc(lok[0][0])}</b> (${pc(lok[0][1], T)})` : ''}. Puncak negatif pada <b>${peak ? tg(peak.d) : '-'}</b> (${peak ? f(peak.n) : 0} postingan).</p>
-          <div class="oc-kv"><div>Hari terakhir<b>${f(last.t)}</b></div><div>vs rata² 7h<b style="color:${chg >= 0 ? ORANGE : TEAL}">${chg >= 0 ? '+' : ''}${chg}%</b></div><div>NSI<b>${nsi > 0 ? '+' : ''}${nsi}</b></div></div>
-          <button class="oc-cta" type="button" data-ai>${ic('spark', 16)} Buka AI Ops Console</button>
+      <div class="g-hero">
+        <div><div class="g-eyebrow">Analitik</div><h1 class="g-title"><b>Karhutla</b> <span>Indonesia</span></h1>
+          <p class="g-sub">Analisis mendalam percakapan media sosial untuk memahami tren, isu, sentimen, dan sebaran wilayah.</p></div>
+        <div class="g-kpis">
+          <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('chat', 22)}</span><div><b>${f(S.t)}</b><small>Total postingan</small></div>${dChip(delta(Ls.t, Ps.t), false)}</div>
+          <div class="g-kpi" style="--c:${RED}"><span class="gi">${ic('heart', 22)}</span><div><b>${pc(S.n, S.t)}</b><small>Sentimen negatif</small></div>${dChip(negD, true, ' pp')}</div>
+          <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('pin', 22)}</span><div><b>${isl.length}<small style="font-size:13px"> / 7</small></b><small>Pulau disebut</small></div></div>
+          <div class="g-kpi" style="--c:${ORANGE}"><span class="gi">${ic('alert', 22)}</span><div><b>${f(S.n)}</b><small>Postingan negatif</small></div>${dChip(delta(Ls.n, Ps.n), true)}</div>
         </div>
-        <div class="oc-p oc-alerts">
-          <div class="oc-t"><h3>Alerts</h3><span class="chipx hi">${f(neg.length)} negatif</span></div>
-          <div class="oc-tabs" role="tablist"><button data-t="neg" class="${tab === 'neg' ? 'on' : ''}">Negatif</button><button data-t="lok" class="${tab === 'lok' ? 'on' : ''}">Lokasi</button><button data-t="akun" class="${tab === 'akun' ? 'on' : ''}">Akun</button></div>
-          <div class="oc-list">${items || '<p class="hint">Belum ada data</p>'}</div>
-        </div>
-        <div class="oc-p oc-pulse">
-          <div class="oc-intro"><h3>Pulse · Karhutla</h3><div class="oc-upd">${esc(per)}</div><p>Ringkasan denyut percakapan pada periode terpilih.</p></div>
-          <div class="oc-pt"><div class="oc-t"><h3>Volume Harian</h3><span class="chipx ${chgChip[0]}">${chgChip[1]}</span></div><div class="v">${f(last.t)}<small>hari terakhir</small></div>${spark}</div>
-          <div class="oc-pt"><div class="oc-t"><h3>Sentimen Bersih</h3><span class="chipx ${nsiChip[0]}">${nsiChip[1]}</span></div><div class="v">${nsi > 0 ? '+' : ''}${nsi}<small>NSI</small></div>${gauge}</div>
-          <div class="oc-pt"><div class="oc-t"><h3>Negatif Harian</h3><span class="chipx hi">Puncak ${peak ? tg(peak.d) : '-'}</span></div><div class="v">${f(neg.length)}<small>${pc(neg.length, T, 0)}</small></div>${bars}</div>
-          <div class="oc-pt"><div class="oc-t"><h3>Kanal</h3><span class="chipx lo">${esc(plat[0]?.[0] || '-')}</span></div>${platBars}</div>
-        </div>
-      </div>`;
-    const mapBox = root.querySelector('.oc-map .lokmap');
-    if (window.renderIdMap && window.__lok) window.renderIdMap(mapBox, window.__lok, { H: 360, oy: 13 });
-    root.querySelector('[data-ai]').onclick = () => document.querySelector('.ai-fab')?.click();
-    root.querySelectorAll('.oc-tabs button').forEach(b => b.onclick = () => { tab = b.dataset.t; build(); });
+      </div>
+      <div class="g-grid3">
+        <div class="g-card"><div class="g-h"><h3>Tren Percakapan & Sentimen</h3><span class="g-tag">Harian</span></div><div class="g-cv"><canvas id="gcTrend"></canvas></div></div>
+        <div class="g-card"><div class="g-h"><h3>Distribusi Sentimen</h3><span class="g-tag">Δ 7 hari</span></div>
+          <div class="g-donut"><div style="position:relative;height:150px"><canvas id="gcDonut"></canvas></div>
+            <div class="g-legend"><div><span class="g-dot" style="background:${RED}"></span>Negatif <b>${pc(S.n, S.t)} ${dChip(negD, true, ' pp')}</b></div><div><span class="g-dot" style="background:${GREY}"></span>Netral <b>${pc(S.z, S.t)} ${dChip(netD, false, ' pp')}</b></div><div><span class="g-dot" style="background:${TEAL}"></span>Positif <b>${pc(S.p, S.t)} ${dChip(posD, false, ' pp')}</b></div></div></div>
+          <div class="g-card" style="margin-top:14px;padding:12px 14px;background:var(--card2)"><div class="g-h" style="margin-bottom:6px"><h3 style="font-size:13.5px!important">Volume Percakapan</h3><span class="g-tag hot">Puncak ${peak[0] ? tg(peak[0].d) : '-'}</span></div>
+            <div class="g-vol"><div><span class="big">${f(avgDay)}</span><small>rata-rata harian</small></div><div style="width:160px">${barsSvg(perDay.map(x => x.t), 160, 54, t => heat(t))}</div></div></div></div>
+        <div class="g-card"><div class="g-h"><h3>Top Isu Dominan</h3><span class="g-tag">Semua sumber</span></div>
+          <ol class="g-list" style="gap:14px">${topics.slice(0, 6).map(([kk, v], i) => `<li style="grid-template-columns:22px minmax(0,1fr) 70px 44px"><span class="n">${i + 1}</span><span class="t" title="${esc(kk)}">${esc(kk)}<small style="display:block;color:var(--mute);font-size:11px">${f(v)} postingan ${dChip(delta(topicsL[kk] || 0, topicsP[kk] || 0), true)}</small></span><span class="bar"><i style="width:${v / topics[0][1] * 100}%;background:${i < 1 ? RED : i < 3 ? ORANGE : AMBER}"></i></span><span class="p" style="color:${i < 1 ? RED : 'var(--ink)'}">${pc(v, S.t, 0)}</span></li>`).join('')}</ol></div>
+      </div>
+      <div class="g-grid3">
+        <div class="g-card"><div class="g-h"><h3>Perbandingan Antar Pulau</h3></div>
+          <div class="g-sub-tabs">${[['vol', 'Volume'], ['neg', 'Sentimen negatif'], ['grow', 'Pertumbuhan 7h']].map(([v, l]) => `<button type="button" data-cmp="${v}" class="${cmpMode === v ? 'on' : ''}">${l}</button>`).join('')}</div>
+          <div class="g-cmp"><div class="lokmap"></div>
+            <table class="g-tbl"><thead><tr><th></th><th>Pulau</th><th class="r">Volume</th><th class="r">Negatif</th><th class="r">Δ 7h</th></tr></thead><tbody>
+            ${cmpRows.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${esc(r.kk)}</td><td class="r">${f(r.v)}</td><td class="r" style="color:${r.np >= 60 ? RED : r.np >= 45 ? AMBER : 'var(--ink)'}">${pc(r.np, 100, 0)}</td><td class="r">${dChip(r.d, true) || '–'}</td></tr>`).join('')}</tbody></table></div></div>
+        <div class="g-card"><div class="g-h"><h3>Sumber Percakapan</h3><span class="g-tag">Semua</span></div>
+          <ol class="g-list g-src" style="gap:16px">${plat.map(([kk, v]) => { const R = D.filter(r => r.platform === kk), n = R.filter(r => r.sent === 'negatif').length;
+            return `<li>${pfIco(kk)}<span class="t">${esc(kk)}<small style="display:block;color:var(--mute);font-size:11px">${f(v)} postingan · ${pc(n, v, 0)} negatif</small></span><span class="bar"><i style="width:${v / plat[0][1] * 100}%;background:linear-gradient(90deg,#2FB3A6,${TEAL})"></i></span><span class="p">${pc(v, S.t, 0)}</span></li>`; }).join('')}</ol></div>
+        <div class="g-card"><div class="g-h"><h3>Puncak Percakapan</h3><span class="g-tag">3 hari teratas</span></div>
+          <ol class="g-peak">${peak.map((p, i) => `<li><span class="n">${i + 1}</span><div><div class="meta"><span>${tgY(p.d)}</span>${dChip(p.d7, true)}</div><b>${f(p.t)}</b> <small style="color:var(--mute)">postingan · ${pc(p.n, p.t, 0)} negatif</small>
+            <p title="${esc(p.top?.text || '')}">${esc(p.tp || '')}${p.top ? ` — ${esc(akun(p.top))}: “${esc(p.top.text.slice(0, 80))}”` : ''}</p></div></li>`).join('')}</ol></div>
+      </div>
+      <div class="g-grid3">
+        <div class="g-card"><div class="g-h"><h3>Tren Topik</h3><span class="g-tag">5 topik teratas</span></div><div class="g-cv" style="height:220px"><canvas id="gcTopic"></canvas></div></div>
+        <div class="g-card"><div class="g-h"><h3>Kata Kunci Populer</h3><span class="g-tag">Semua sentimen</span></div>
+          <div class="g-cloud">${lay.map(([w, c], i) => { const r = c / wMax; return `<span title="${esc(w)}: ${f(c)}×" style="font-size:${12 + r * 26}px;font-weight:${r > .5 ? 700 : 500};color:${wCol[i % wCol.length]};opacity:${(.55 + r * .45).toFixed(2)}">${esc(w)}</span>`; }).join('')}</div></div>
+        <div class="g-card"><div class="g-h"><h3>Sentimen per Topik</h3><span class="g-tag"><span class="g-dot" style="background:${RED}"></span>Neg <span class="g-dot" style="background:${GREY};margin-left:6px"></span>Net <span class="g-dot" style="background:${TEAL};margin-left:6px"></span>Pos</span></div>
+          <div class="g-stack">${T5.map(t => { const R = D.filter(r => r.topik === t), b = by(R);
+            return `<div class="row"><span class="t" title="${esc(t)}">${esc(t)}</span><span class="sb"><i style="width:${b.n / b.t * 100}%;background:${RED}"></i><i style="width:${b.z / b.t * 100}%;background:${GREY}"></i><i style="width:${b.p / b.t * 100}%;background:${TEAL}"></i></span><span style="text-align:right;color:var(--mute)">${pc(b.p, b.t, 0)}</span></div>`; }).join('')}</div>
+          <p class="hint" style="margin:12px 0 0">Angka kanan = porsi positif per topik.</p></div>
+      </div>
+      <div class="g-section-t">Detail lanjutan</div>`;
+
+    const box = root.querySelector('.g-cmp .lokmap');
+    if (window.renderIdMap && window.__lok) window.renderIdMap(box, window.__lok);
+    root.querySelectorAll('[data-cmp]').forEach(b => b.onclick = () => { cmpMode = b.dataset.cmp; buildAnalitik(); });
+
+    // Chart.js (hanya bila tab terlihat agar ukuran benar)
+    if (typeof Chart === 'undefined' || an.hidden) return;
+    Object.values(charts2).forEach(c => c.destroy()); charts2 = {};
+    const tick = getComputedStyle(document.documentElement).getPropertyValue('--mute').trim() || '#8A97A6';
+    const grid = getComputedStyle(document.documentElement).getPropertyValue('--line').trim() || 'rgba(255,255,255,.08)';
+    const labels = perDay.map(x => tg(x.d));
+    const base = { maintainAspectRatio: false, responsive: true, animation: { duration: 600 }, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(9,14,18,.95)', borderColor: 'rgba(70,214,200,.3)', borderWidth: 1, padding: 10, titleColor: '#EAF2F4', bodyColor: '#EAF2F4',
+        callbacks: { footer: items => items.length > 1 ? 'Total: ' + f(items.filter(i => i.dataset.type !== 'bar' && i.dataset.label !== 'Total').reduce((s, i) => s + i.raw, 0)) : '' } } },
+      scales: { x: { grid: { display: false }, ticks: { color: tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }, border: { color: grid } }, y: { beginAtZero: true, grid: { color: grid }, ticks: { color: tick }, border: { display: false } } } };
+    const area = (label, data, c) => ({ type: 'line', label, data, borderColor: c, borderWidth: 2, tension: .35, pointRadius: 0, pointHoverRadius: 4, fill: true,
+      backgroundColor: ctx => { const a = ctx.chart.chartArea; if (!a) return c + '22'; const g = ctx.chart.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, c + '55'); g.addColorStop(1, c + '00'); return g; } });
+    charts2.t = new Chart(document.getElementById('gcTrend'), { data: { labels, datasets: [
+      { type: 'bar', label: 'Total', data: perDay.map(x => x.t), backgroundColor: perDay.map(x => heat(x.t / Math.max(...perDay.map(y => y.t))) + '66'), borderRadius: 3, barPercentage: .7, order: 3 },
+      { ...area('Negatif', perDay.map(x => x.n), RED), order: 1 }, { ...area('Netral', perDay.map(x => x.z), GREY), order: 2 }, { ...area('Positif', perDay.map(x => x.p), TEAL), order: 2 }] }, options: base });
+    charts2.d = new Chart(document.getElementById('gcDonut'), { type: 'doughnut', data: { labels: ['Negatif', 'Netral', 'Positif'], datasets: [{ data: [S.n, S.z, S.p], backgroundColor: [RED, GREY, TEAL], borderWidth: 0, spacing: 3, borderRadius: 6 }] },
+      options: { maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false }, tooltip: base.plugins.tooltip } } });
+    const tCol = [ORANGE, RED, AMBER, TEAL, '#7FB8FF'];
+    charts2.p = new Chart(document.getElementById('gcTopic'), { type: 'line', data: { labels, datasets: T5.map((t, i) => ({ label: t, data: perDay.map(x => D.filter(r => r.tgl === x.d && r.topik === t).length), borderColor: tCol[i], borderWidth: 2, tension: .35, pointRadius: 0 })) },
+      options: { ...base, plugins: { ...base.plugins, legend: { display: true, position: 'top', align: 'start', labels: { color: tick, boxWidth: 8, boxHeight: 8, usePointStyle: true, font: { size: 11 } } }, tooltip: { ...base.plugins.tooltip, callbacks: {} } } } });
   }
-  // Ikon emoji di judul & tab diganti gaya bersih (tanpa emoji)
-  const strip = () => document.querySelectorAll('#main h2, .tabs [role=tab]').forEach(h => { if (h.children.length === 0) h.textContent = h.textContent.replace(/^[\p{Extended_Pictographic}\uFE0F\s]+/u, ''); });
-  window.addEventListener('lok:update', () => setTimeout(strip, 0));
-  // ---- Tab "Analitik": kartu metrik dipindah dari Dashboard ke tab sendiri ----
-  function setupTabs() {
+
+  /* ---------------- Navigasi & tab ---------------- */
+  function setupNav() {
     const dash = document.getElementById('viewDash'), tabs = document.querySelector('.tabs');
-    if (!dash || !tabs || document.getElementById('viewAnalitik')) return;
-    const an = document.createElement('div'); an.id = 'viewAnalitik'; an.hidden = true;
-    [...dash.children].forEach(ch => { if (ch.id !== 'opsConsole') an.append(ch); });
-    dash.after(an);
-    const dBtn = tabs.querySelector('[data-tab=dash]'); if (dBtn) dBtn.textContent = 'Ops Console';
-    const aBtn = document.createElement('button'); aBtn.setAttribute('role', 'tab'); aBtn.dataset.tab = 'analitik'; aBtn.textContent = 'Analitik';
-    dBtn ? dBtn.after(aBtn) : tabs.prepend(aBtn);
-    const show = on => { an.hidden = !on; };
-    aBtn.addEventListener('click', () => {
-      tabs.querySelectorAll('[role=tab]').forEach(x => x.classList.toggle('on', x === aBtn));
-      ['viewDash', 'viewRaw', 'viewSna'].forEach(id => { const v = document.getElementById(id); if (v) v.hidden = true; });
-      const fs = document.getElementById('fSumber'); if (fs) fs.style.visibility = '';
-      show(true);
-      setTimeout(() => { try { Object.values(charts).forEach(ch => ch.resize()); } catch (_) {} window.dispatchEvent(new Event('resize')); }, 30);
-    });
-    tabs.querySelectorAll('[role=tab]').forEach(b => { if (b !== aBtn) b.addEventListener('click', () => show(false)); });
+    if (!dash || !tabs) return;
+    if (!document.getElementById('viewAnalitik')) {
+      const an = document.createElement('div'); an.id = 'viewAnalitik'; an.hidden = true;
+      [...dash.children].forEach(ch => { if (ch.id !== 'gConsole') an.append(ch); });
+      dash.after(an);
+      const dBtn = tabs.querySelector('[data-tab=dash]'); if (dBtn) dBtn.textContent = 'Ops Console';
+      const aBtn = document.createElement('button'); aBtn.setAttribute('role', 'tab'); aBtn.dataset.tab = 'analitik'; aBtn.textContent = 'Analitik';
+      dBtn ? dBtn.after(aBtn) : tabs.prepend(aBtn);
+      const ai = document.createElement('button'); ai.type = 'button'; ai.className = 'g-ai-tab'; ai.setAttribute('role', 'tab'); ai.innerHTML = ic('spark', 15) + 'Garuda AI';
+      ai.style.cssText = 'border:0;background:none;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer';
+      ai.onclick = e => { e.stopPropagation(); document.querySelector('.ai-fab')?.click(); };
+      tabs.querySelector('[data-tab=sna]')?.after(ai);
+      aBtn.addEventListener('click', () => {
+        tabs.querySelectorAll('[role=tab]').forEach(x => x.classList.toggle('on', x === aBtn));
+        ['viewDash', 'viewRaw', 'viewSna'].forEach(id => { const v = document.getElementById(id); if (v) v.hidden = true; });
+        an.hidden = false; buildAnalitik();
+        setTimeout(() => { try { Object.values(charts).forEach(ch => ch.resize()); } catch (_) {} }, 30);
+      });
+      tabs.querySelectorAll('[data-tab]').forEach(b => { if (b !== aBtn) b.addEventListener('click', () => { an.hidden = true; }); });
+    }
+    // pindahkan tab ke topbar pada layar lebar
+    const top = document.querySelector('.topbar'), content = document.querySelector('.content'), main = document.getElementById('main');
+    const place = () => { const wide = innerWidth >= 1100;
+      if (wide && !tabs.classList.contains('g-topnav')) { tabs.classList.add('g-topnav'); top.querySelector('.brand')?.after(tabs); }
+      else if (!wide && tabs.classList.contains('g-topnav')) { tabs.classList.remove('g-topnav'); main?.prepend(tabs); } };
+    place(); if (!setupNav.bound) { setupNav.bound = 1; addEventListener('resize', place); }
+    // hapus emoji tersisa di judul/tab
+    document.querySelectorAll('#main h2, .tabs [role=tab]').forEach(h => { if (h.children.length === 0) h.textContent = h.textContent.replace(/^[\p{Extended_Pictographic}️\s]+/u, ''); });
   }
-  window.addEventListener('lok:update', () => setTimeout(setupTabs, 0));
-  // gambar ulang setiap kali dashboard selesai render (event dikirim app.js)
-  window.addEventListener('lok:update', () => setTimeout(build, 0));
-  if (window.__lok) build();
+
+  const refresh = () => { setupNav(); buildConsole(); if (!document.getElementById('viewAnalitik')?.hidden) buildAnalitik(); };
+  window.addEventListener('lok:update', () => setTimeout(refresh, 0));
+  if (window.__lok) setTimeout(refresh, 0);
 })();

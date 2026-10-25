@@ -85,7 +85,7 @@
     svg.addEventListener('pointermove', ev => { const t = ev.target.closest('[data-k]'); t ? show(t.dataset.k, ev) : hide(); });
     svg.addEventListener('pointerleave', hide);
   }
-  window.renderIdMap = renderMap;
+  window.renderIdMap = renderMap; window.__IDCENT = MAP.cent;
   // Hemat CPU: animasi peta hanya berjalan saat terlihat di layar
   const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('lk-off', !e.isIntersecting))) : null;
   new MutationObserver(() => document.querySelectorAll('.lokmap:not([data-io])').forEach(b => { b.dataset.io = 1; io?.observe(b); })).observe(document.body, { childList: true, subtree: true });
