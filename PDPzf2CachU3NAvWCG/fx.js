@@ -60,7 +60,10 @@
   function parallax() {
     ticking = false;
     const root = document.getElementById('gConsole'), view = document.getElementById('viewDash');
-    if (!root || !view || view.hidden || innerWidth < 1100 || reduce) return;
+    if (!root || !view || view.hidden) return;
+    if (innerWidth < 1100 || reduce) { // layar sempit: kembalikan semua ke posisi normal
+      root.querySelectorAll('.g-earth,.g-pins,.g-int,.g-ctrl').forEach(el => { el.style.transform = ''; el.style.opacity = ''; el.style.filter = ''; });
+      return; }
     const stage = root.querySelector('.g-stage'), earth = root.querySelector('.g-earth'), pins = root.querySelector('.g-pins'); if (!stage || !earth) return;
     const r = stage.getBoundingClientRect(), y = Math.max(0, -r.top + 90), p = Math.min(1, y / (r.height * .55));
     earth.style.transform = `translate3d(0,${(y * .42).toFixed(1)}px,0) scale(${(1 + p * .04).toFixed(3)})`;

@@ -24,7 +24,7 @@
     const stamp = r => new Date(`${r.tgl}T${(r.jamStr || '00:00')}:00`).getTime();
     const latest = Math.max(...D.map(stamp));
     const ago = r => { const m = Math.round((latest - stamp(r)) / 60000); return m < 60 ? `${m} menit lalu` : m < 1440 ? `${Math.round(m / 60)} jam lalu` : `${Math.round(m / 1440)} hari lalu`; };
-    const feedSrc = (feedPf === 'Semua' ? D : D.filter(r => r.platform === feedPf)).slice().sort((a, b) => stamp(b) - stamp(a) || b.eng - a.eng).slice(0, 8);
+    const feedSrc = (feedPf === 'Semua' ? D : D.filter(r => r.platform === feedPf)).slice().sort((a, b) => (b.km || 0) - (a.km || 0) || (b.lk || 0) - (a.lk || 0) || (b.sh || 0) - (a.sh || 0)).slice(0, 8);
     const snC = s => s === 'negatif' ? 'neg' : s === 'positif' ? 'pos' : 'net';
     // peringatan dini: pulau dengan negatif tinggi / lonjakan
     const warn = isl.slice(0, 6).map(([kk, v]) => { const R = D.filter(r => r.lokasi === kk), n = R.filter(r => r.sent === 'negatif').length, np = n / v * 100, d = delta(islL[kk] || 0, islP[kk] || 0);
@@ -76,7 +76,7 @@
       </div>
 
       <div class="g-grid2">
-        <div class="g-card"><div class="g-h"><h3>Aktivitas Terbaru</h3>
+        <div class="g-card"><div class="g-h"><h3>Postingan Terviral</h3>
           <div class="g-feed-tabs">${['Semua', ...plat.map(p => p[0])].map(p => `<button type="button" data-pf="${esc(p)}" class="${feedPf === p ? 'on' : ''}">${esc(p)}</button>`).join('')}</div></div>
           <div class="g-feed">${feedSrc.map(r => `<div class="g-post"><div class="top">${pfIco(r.platform, 13)}<span>${tg(r.tgl)}${r.jamStr ? ' · ' + r.jamStr : ''}</span><span class="sn ${snC(r.sent)}">${esc(r.sent)}</span></div>
             <p>${esc(r.text.slice(0, 220))}</p><div class="g-eng"><span title="Likes/Reaksi">${ic('heart', 12, 2)}${k(r.lk || 0)}</span><span title="Komentar">${ic('chat', 12, 2)}${k(r.km || 0)}</span><span title="Share/Repost">${ic('ext', 12, 2)}${k(r.sh || 0)}</span></div><div class="ft"><span class="who">${esc(akun(r))}</span>${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">Buka ${ic('ext', 12)}</a>` : ''}</div></div>`).join('') || '<p class="hint">Tidak ada postingan</p>'}</div></div>
