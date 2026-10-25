@@ -96,7 +96,7 @@
     const fit = () => { const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
       if (!wide) { earth.style.cssText = ''; return; }
       const left = 300, right = 16, sc = (W - left - right) / (1640 - 150), w = IW * sc, h = IH * sc;
-      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${left - 150 * sc}px;top:${(H + 80) / 2 - 460 * sc - 150}px`;
+      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${left - 150 * sc}px;top:${(H - 20) / 2 - 460 * sc - 50}px`;
       const below = Math.max(0, (H - 70) / 2 - 460 * sc + h - H); stage.style.setProperty('--below', below + 'px'); };
     fit(); if (!buildConsole.fitBound) { buildConsole.fitBound = 1; addEventListener('resize', () => { const f = document.querySelector('#gConsole')?._fit; f && f(); }); }
     root._fit = fit;
@@ -115,7 +115,7 @@
       [...dash.children].forEach(ch => { if (ch.id !== 'gConsole') an.append(ch); });
       dash.after(an);
       const dBtn = tabs.querySelector('[data-tab=dash]'); if (dBtn) dBtn.textContent = 'Ops Console';
-      const aBtn = document.createElement('button'); aBtn.setAttribute('role', 'tab'); aBtn.dataset.tab = 'analitik'; aBtn.textContent = 'Analitik';
+      const aBtn = document.createElement('button'); aBtn.setAttribute('role', 'tab'); aBtn.dataset.tab = 'analitik'; aBtn.textContent = 'Analytics';
       dBtn ? dBtn.after(aBtn) : tabs.prepend(aBtn);
       const ai = document.createElement('button'); ai.type = 'button'; ai.className = 'g-ai-tab'; ai.setAttribute('role', 'tab'); ai.innerHTML = ic('spark', 15) + 'Garuda AI';
       ai.style.cssText = 'border:0;background:none;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer';

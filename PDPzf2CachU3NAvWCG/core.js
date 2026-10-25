@@ -199,7 +199,7 @@
 .g-pins{z-index:2}
 .g-int,.g-ctrl{z-index:3}
 .g-grid4,.g-grid2{position:relative;z-index:2}
-@media(min-width:1101px){.g-stage{height:clamp(480px,44vw,670px)!important}.g-grid4{margin-top:-170px}.g-ctrl{bottom:186px!important}}
+@media(min-width:1101px){.g-stage{height:clamp(580px,50vw,770px)!important}.g-grid4{margin-top:-170px}.g-ctrl{bottom:186px!important}}
 .g-grid4 .g-card{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.01) 45%),rgba(8,13,18,.55)!important;
   -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border-color:rgba(160,220,215,.16)!important}
 [data-theme=light] .g-earth:before{background:linear-gradient(90deg,var(--bg) 0%,transparent 14%,transparent 90%,var(--bg) 100%),linear-gradient(180deg,var(--bg) 0%,transparent 10%,transparent 70%,var(--bg) 100%)}
@@ -222,8 +222,8 @@
 /* Globe utuh di belakang judul & KPI: tepi dipudarkan dengan mask (benar-benar transparan) */
 @media(min-width:1101px){
 .g-earth:before{display:none!important}
-.g-earth img{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,transparent 100%),linear-gradient(90deg,transparent 0,#000 12%,#000 92%,transparent 100%);-webkit-mask-composite:source-in;
-  mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,transparent 100%),linear-gradient(90deg,transparent 0,#000 12%,#000 92%,transparent 100%);mask-composite:intersect}
+.g-earth img{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 3%,#000 84%,transparent 100%),linear-gradient(90deg,transparent 0,#000 12%,#000 92%,transparent 100%);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(180deg,transparent 0,#000 3%,#000 84%,transparent 100%),linear-gradient(90deg,transparent 0,#000 12%,#000 92%,transparent 100%);mask-composite:intersect}
 .g-hero{position:relative;z-index:3}
 .g-stage{z-index:1}
 }
