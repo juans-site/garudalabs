@@ -265,12 +265,18 @@ async function render() {
 
   /* Rekomendasi (template otomatis) */
   const negPf = negK[0]?.[0] || 'kanal utama';
-  const reco = {
-    'Jangka Pendek': [...negTop.slice(0, 3).map(x => `Siapkan informasi & klarifikasi resmi untuk isu "${x[0]}"`), `Perkuat kanal informasi resmi (titik api, kualitas udara) di ${negPf}`],
-    'Jangka Menengah': ['Publikasi rutin data hotspot & ISPU per wilayah', 'Koordinasi BNPB, KLHK, BMKG & pemda untuk pesan yang seragam', 'Laporan monitoring harian ke pimpinan'],
-    'Jangka Panjang': [`Angkat cerita positif: ${count(P, 'topik')[0]?.[0] || 'pemadaman'}`, 'Kampanye pencegahan pembakaran lahan bersama komunitas', 'Evaluasi tren NSI & penegakan hukum terhadap pelaku']
-  };
-  $('reco').innerHTML = Object.entries(reco).map(([k, v]) => `<div><h3>${k}</h3><ul>${v.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');
+  // Rekomendasi taktis (3–5 poin) untuk tim PR / campaign — dihitung dari data periode aktif
+  const posTopR = count(P, 'topik').filter(x => x[0] !== 'Lainnya'), negTopR = negTop.filter(x => x[0] !== 'Lainnya');
+  const lokNeg = count(N.filter(r => r.lokasi && r.lokasi !== 'Tidak menyebutkan lokasi'), 'lokasi');
+  const negAcc = count(N.filter(r => r.user && !r.media), 'user');
+  const peakH = count(D, r => isNaN(r.jam) ? '' : r.jam).filter(x => x[0] !== '')[0];
+  const recos = [];
+  if (negTopR[0]) recos.push(['Respons isu utama', `Siapkan holding statement & infografis singkat untuk isu "${negTopR[0][0]}" (${fmt(negTopR[0][1])} postingan negatif, ${pct(negTopR[0][1], N.length)} dari negatif). Fokus fakta & langkah penanganan.`]);
+  if (negPf) recos.push(['Kanal prioritas', `Prioritaskan respons & konten di ${negPf} — kanal dengan negatif terbanyak. Gunakan format thread/video pendek yang mudah dibagikan.`]);
+  if (lokNeg[0]) recos.push(['Lokalisasi pesan', `Buat konten khusus wilayah ${lokNeg[0][0]}${lokNeg[1] ? ` & ${lokNeg[1][0]}` : ''}: update titik api, kualitas udara, dan posko bantuan; libatkan akun pemda/tokoh lokal.`]);
+  if (posTopR[0]) recos.push(['Amplifikasi positif', `Angkat narasi "${posTopR[0][0]}" (${fmt(posTopR[0][1])} postingan positif) — kisah petugas/relawan dengan foto lapangan untuk menyeimbangkan percakapan.`]);
+  if (negAcc[0]) recos.push(['Engagement akun kunci', `Pantau & jangkau akun yang paling vokal (${negAcc.slice(0, 3).map(x => '@' + x[0]).join(', ')}) dengan data & klarifikasi, hindari debat terbuka.${peakH ? ` Jadwalkan posting sekitar pukul ${String(peakH[0]).padStart(2, '0')}.00 (jam tersibuk).` : ''}`]);
+  $('reco').innerHTML = `<ol class="reco-list">${recos.slice(0, 5).map(([t, x], i) => `<li><span class="rn">${i + 1}</span><div><b>${esc(t)}</b><p>${esc(x)}</p></div></li>`).join('')}</ol>`;
 
   /* Summary */
   const posTop = count(P, 'topik');

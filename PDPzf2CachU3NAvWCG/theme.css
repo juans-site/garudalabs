@@ -141,3 +141,12 @@ select option:checked{background:#2FB3A6;color:#04201D}
 #rawPf,.gran{-webkit-appearance:none;appearance:none;height:40px;line-height:normal;padding:0 38px 0 16px!important;display:inline-flex;align-items:center;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23EAF2F4' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")!important;
   background-repeat:no-repeat!important;background-position:right 14px center!important;background-size:12px!important;cursor:pointer}
+
+/* Rekomendasi taktis: daftar bernomor */
+#reco{display:block!important;grid-template-columns:none!important}
+.reco-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.reco-list li{display:grid;grid-template-columns:30px 1fr;gap:12px;padding:12px 14px;border-radius:16px;background:var(--card2);border:1px solid var(--line)}
+.reco-list .rn{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-weight:700;color:#04201D;background:linear-gradient(180deg,#5EE3D6,#2FB3A6)}
+.reco-list b{display:block;font-size:13.5px;margin-bottom:3px;color:var(--ink)}
+.reco-list p{margin:0;font-size:12.8px;line-height:1.5;color:var(--mute)}
+.reco-list li>div{background:none!important;padding:0!important;border:0!important;border-radius:0!important}
