@@ -212,6 +212,13 @@
 @media (prefers-reduced-motion:reduce){.smk i{animation:none;opacity:.6;transform:translateY(-10px)}}
 @media(max-width:1100px){.g-earth:before{display:none}.smk i{--z:30px!important}}
 .g-smoke{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+/* Light mode: globe siang hari */
+.g-earth .e-day{display:none}
+[data-theme=light] .g-earth img:not(.e-day){display:none}
+[data-theme=light] .g-earth .e-day{display:block}
+[data-theme=light] .g-stage,[data-theme=light] .g-stage.g-stage{background:none!important}
+[data-theme=light] .g-pin .lab{text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 8px rgba(0,0,0,.35)}
+[data-theme=light] .g-grid4 .g-card{background:rgba(255,255,255,.62)!important;border-color:rgba(4,7,10,.08)!important}
 @keyframes gPulse{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 7px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
 @keyframes gDash{to{stroke-dashoffset:-40}}
 @media (prefers-reduced-motion:no-preference){.g-arc{animation:gDash 2.4s linear infinite}}
