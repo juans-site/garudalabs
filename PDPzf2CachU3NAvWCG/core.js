@@ -168,7 +168,7 @@
 
 /* Peta foto bumi malam (1 gambar JPG ±80–300KB, sisanya HTML ringan) */
 .g-stage{background:#01040A!important;height:clamp(500px,46vw,680px)!important}
-.g-earth{position:relative;width:100%;aspect-ratio:1672/941}
+.g-earth{position:relative;width:100%;aspect-ratio:1672/1051}
 .g-earth img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none}
 .g-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(1,4,10,.55),transparent 28%),linear-gradient(0deg,rgba(1,4,10,.7),transparent 22%)}
 .g-int,.g-ctrl{z-index:2}
@@ -199,7 +199,7 @@
 .g-pins{z-index:2}
 .g-int,.g-ctrl{z-index:3}
 .g-grid4,.g-grid2{position:relative;z-index:2}
-@media(min-width:1101px){.g-stage{height:clamp(580px,50vw,770px)!important}.g-grid4{margin-top:-170px}.g-ctrl{bottom:186px!important}}
+@media(min-width:1101px){.g-stage{height:clamp(640px,54vw,840px)!important}.g-grid4{margin-top:-170px}.g-ctrl{bottom:186px!important}}
 .g-grid4 .g-card{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.01) 45%),rgba(8,13,18,.55)!important;
   -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border-color:rgba(160,220,215,.16)!important}
 [data-theme=light] .g-earth:before{background:linear-gradient(90deg,var(--bg) 0%,transparent 14%,transparent 90%,var(--bg) 100%),linear-gradient(180deg,var(--bg) 0%,transparent 10%,transparent 70%,var(--bg) 100%)}

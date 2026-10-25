@@ -48,7 +48,7 @@
       </div>
 
       <div class="g-stage">
-        <div class="g-earth"><img src="earth.jpg?v=1" srcset="earth-sm.jpg?v=1 836w, earth.jpg?v=1 1672w" sizes="(max-width:700px) 100vw, 1400px" alt="Peta sebaran percakapan karhutla di Indonesia" decoding="async" fetchpriority="high"><canvas class="g-smoke" aria-hidden="true"></canvas><div class="g-pins"></div></div>
+        <div class="g-earth"><img src="earth.jpg?v=2" srcset="earth-sm.jpg?v=2 836w, earth.jpg?v=2 1672w" sizes="(max-width:700px) 100vw, 1400px" alt="Peta sebaran percakapan karhutla di Indonesia" decoding="async" fetchpriority="high"><canvas class="g-smoke" aria-hidden="true"></canvas><div class="g-pins"></div></div>
         <div class="g-glass g-int">
           <div class="g-h"><h3>Intensitas Percakapan</h3><span class="g-live">Live</span></div>
           <div class="g-scale"></div><div class="g-scale-l"><span>Rendah</span><span>Tinggi</span></div>
@@ -85,8 +85,8 @@
       </div>`;
 
     // peta foto bumi + pin data
-    const PIN = { 'Sumatera': [328, 340], 'Kalimantan': [740, 393], 'Sulawesi': [978, 491], 'Jawa': [576, 631], 'Bali & Nusa Tenggara': [932, 701], 'Papua': [1445, 541], 'Maluku': [1185, 398] };
-    const IW = 1672, IH = 941, mx = Math.max(1, ...isl.map(x => x[1]));
+    const PIN = { 'Sumatera': [328, 450], 'Kalimantan': [740, 503], 'Sulawesi': [978, 601], 'Jawa': [576, 741], 'Bali & Nusa Tenggara': [932, 811], 'Papua': [1445, 651], 'Maluku': [1185, 508] };
+    const IW = 1672, IH = 1051, mx = Math.max(1, ...isl.map(x => x[1]));
     const pins = root.querySelector('.g-pins');
     pins.innerHTML = isl.map(([kk, v]) => { const p = PIN[kk]; if (!p) return ''; const d = delta(islL[kk] || 0, islP[kk] || 0), t = v / mx;
       const nm = kk === 'Bali & Nusa Tenggara' ? 'Nusa Tenggara' : kk;
@@ -96,7 +96,7 @@
     const fit = () => { const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
       if (!wide) { earth.style.cssText = ''; return; }
       const left = 300, right = 16, sc = (W - left - right) / (1640 - 150), w = IW * sc, h = IH * sc;
-      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${left - 150 * sc}px;top:${(H - 20) / 2 - 460 * sc - 50}px`;
+      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${left - 150 * sc}px;top:${(H - 20) / 2 - 570 * sc + 20}px`;
       const below = Math.max(0, (H - 70) / 2 - 460 * sc + h - H); stage.style.setProperty('--below', below + 'px'); };
     fit(); if (!buildConsole.fitBound) { buildConsole.fitBound = 1; addEventListener('resize', () => { const f = document.querySelector('#gConsole')?._fit; f && f(); }); }
     root._fit = fit;

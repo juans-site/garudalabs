@@ -4,8 +4,8 @@
   /* ---------------- Asap partikel (canvas, ringan) ----------------
      Sprite asap dibuat sekali secara prosedural; partikel tersebar di area tiap pulau,
      jumlah & kepekatan sebanding volume percakapan. Berhenti saat tak terlihat. */
-  const AREA = { 'Sumatera': [320, 395, 165, 48, 52], 'Kalimantan': [715, 410, 135, 85, 0], 'Sulawesi': [985, 480, 55, 85, 10], 'Jawa': [560, 622, 165, 22, 14],
-    'Bali & Nusa Tenggara': [960, 705, 150, 18, -6], 'Papua': [1440, 560, 105, 95, 20], 'Maluku': [1180, 405, 40, 55, 0] };
+  const AREA = { 'Sumatera': [320, 505, 165, 48, 52], 'Kalimantan': [715, 520, 135, 85, 0], 'Sulawesi': [985, 590, 55, 85, 10], 'Jawa': [560, 732, 165, 22, 14],
+    'Bali & Nusa Tenggara': [960, 815, 150, 18, -6], 'Papua': [1440, 670, 105, 95, 20], 'Maluku': [1180, 515, 40, 55, 0] };
   let SPR = null;
   function sprites() {
     if (SPR) return SPR; SPR = [];
