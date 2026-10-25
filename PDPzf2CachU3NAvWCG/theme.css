@@ -150,3 +150,5 @@ select option:checked{background:#2FB3A6;color:#04201D}
 .reco-list b{display:block;font-size:13.5px;margin-bottom:3px;color:var(--ink)}
 .reco-list p{margin:0;font-size:12.8px;line-height:1.5;color:var(--mute)}
 .reco-list li>div{background:none!important;padding:0!important;border:0!important;border-radius:0!important}
+/* Lebar penuh di layar besar */
+.content{max-width:none!important;padding-left:clamp(16px,2.4vw,48px)!important;padding-right:clamp(16px,2.4vw,48px)!important}
