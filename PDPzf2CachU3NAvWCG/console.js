@@ -189,6 +189,29 @@
 @media(max-width:640px){.g-pin .stem{height:34px}.g-pin .lab{bottom:12px;left:6px}.g-pin .lab b{font-size:10px}.g-pin .lab span,.g-pin .lab em{display:none}.g-pin .dot:after{display:none}.g-pin .dot{transform:scale(.55)}.g-pin .lab b{font-size:9px}}
 @media (prefers-reduced-motion:reduce){.g-pin .dot:after{animation:none}}
 .g-eng{display:flex;gap:12px;font-size:11.5px;color:var(--mute)}.g-eng span{display:inline-flex;align-items:center;gap:4px}.g-post .ft .who{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;margin-right:8px}
+
+/* Globe penuh: tidak terpotong, meluber ke belakang kartu di bawahnya */
+.g-stage{overflow:visible!important;border:0!important;background:none!important;z-index:0}
+.g-stage:after{display:none}
+.g-earth{z-index:0;pointer-events:none}
+.g-earth .g-pins{pointer-events:auto}
+.g-earth:before{content:"";position:absolute;inset:-2px;z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,var(--bg) 0%,rgba(4,7,10,0) 14%,rgba(4,7,10,0) 90%,var(--bg) 100%),linear-gradient(180deg,var(--bg) 0%,rgba(4,7,10,0) 10%,rgba(4,7,10,0) 82%,var(--bg) 100%)}
+.g-pins{z-index:2}
+.g-int,.g-ctrl{z-index:3}
+.g-grid4,.g-grid2{position:relative;z-index:2}
+@media(min-width:1101px){.g-stage{height:clamp(620px,52vw,820px)!important}.g-grid4{margin-top:-170px}.g-ctrl{bottom:186px!important}}
+.g-grid4 .g-card{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.01) 45%),rgba(8,13,18,.55)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border-color:rgba(160,220,215,.16)!important}
+[data-theme=light] .g-earth:before{background:linear-gradient(90deg,var(--bg) 0%,transparent 14%,transparent 90%,var(--bg) 100%),linear-gradient(180deg,var(--bg) 0%,transparent 10%,transparent 70%,var(--bg) 100%)}
+/* Kepulan asap: radial-gradient + transform (tanpa filter blur, ringan) */
+.smk{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
+.smk i{position:absolute;left:calc(var(--z)/-2);top:calc(var(--z)/-1);width:var(--z);height:var(--z);border-radius:50%;opacity:0;
+  background:radial-gradient(circle at 50% 55%,rgba(225,225,228,var(--o)) 0%,rgba(190,190,195,calc(var(--o)*.55)) 38%,rgba(160,160,165,0) 70%);
+  will-change:transform,opacity;animation:smk 6.5s ease-out var(--d) infinite}
+@keyframes smk{0%{transform:translate(0,10px) scale(.35);opacity:0}15%{opacity:1}100%{transform:translate(var(--x),calc(var(--z)*-1.1)) scale(1.6);opacity:0}}
+@media (prefers-reduced-motion:reduce){.smk i{animation:none;opacity:.6;transform:translateY(-10px)}}
+@media(max-width:1100px){.g-earth:before{display:none}.smk i{--z:30px!important}}
 @keyframes gPulse{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 7px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
 @keyframes gDash{to{stroke-dashoffset:-40}}
 @media (prefers-reduced-motion:no-preference){.g-arc{animation:gDash 2.4s linear infinite}}
@@ -364,12 +387,13 @@
     pins.innerHTML = isl.map(([kk, v]) => { const p = PIN[kk]; if (!p) return ''; const d = delta(islL[kk] || 0, islP[kk] || 0), t = v / mx;
       const nm = kk === 'Bali & Nusa Tenggara' ? 'Nusa Tenggara' : kk;
       return `<div class="g-pin${p[0] > 1350 ? ' l' : ''}" style="left:${p[0] / IW * 100}%;top:${p[1] / IH * 100}%;--s:${(10 + t * 10).toFixed(1)}px">
-        <i class="dot"></i><i class="stem"></i><div class="lab"><b>${esc(nm.toUpperCase())}</b><span>${k(v)} postingan</span>${d != null ? `<em class="${d >= 0 ? 'eu' : 'ed'}">${d >= 0 ? '↑ +' : '↓ '}${d}%</em>` : ''}</div></div>`; }).join('');
+        <span class="smk">${Array.from({ length: v ? 1 + Math.round(t * 4) : 0 }, (_, j) => `<i style="--d:${(j * 1.7).toFixed(1)}s;--x:${((j % 2 ? 1 : -1) * (6 + j * 7))}px;--o:${(.22 + t * .5).toFixed(2)};--z:${(46 + t * 90).toFixed(0)}px"></i>`).join('')}</span><i class="dot"></i><i class="stem"></i><div class="lab"><b>${esc(nm.toUpperCase())}</b><span>${k(v)} postingan</span>${d != null ? `<em class="${d >= 0 ? 'eu' : 'ed'}">${d >= 0 ? '↑ +' : '↓ '}${d}%</em>` : ''}</div></div>`; }).join('');
     const earth = root.querySelector('.g-earth'), stage = root.querySelector('.g-stage');
     const fit = () => { const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
       if (!wide) { earth.style.cssText = ''; return; }
       const left = 300, right = 16, sc = (W - left - right) / (1640 - 150), w = IW * sc, h = IH * sc;
-      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${left - 150 * sc}px;top:${(H - 70) / 2 - 460 * sc}px`; };
+      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${left - 150 * sc}px;top:${(H - 70) / 2 - 460 * sc}px`;
+      const below = Math.max(0, (H - 70) / 2 - 460 * sc + h - H); stage.style.setProperty('--below', below + 'px'); };
     fit(); if (!buildConsole.fitBound) { buildConsole.fitBound = 1; addEventListener('resize', () => { const f = document.querySelector('#gConsole')?._fit; f && f(); }); }
     root._fit = fit;
     root.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { if (typeof state === 'undefined') return; state.preset = b.dataset.p; render(); });
