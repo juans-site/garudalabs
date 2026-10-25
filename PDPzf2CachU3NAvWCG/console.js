@@ -34,13 +34,21 @@
 .oc-stage{position:relative;height:640px;border-radius:28px;overflow:hidden;border:1px solid var(--line);
   background:radial-gradient(70% 60% at 50% 35%,rgba(70,214,200,.08),transparent 70%),radial-gradient(circle at 1px 1px,rgba(160,200,210,.10) 1px,transparent 1.5px) 0 0/26px 26px,rgba(0,0,0,.35)}
 [data-theme=light] .oc-stage{background:radial-gradient(70% 60% at 50% 35%,rgba(70,214,200,.12),transparent 70%),radial-gradient(circle at 1px 1px,rgba(4,7,10,.08) 1px,transparent 1.5px) 0 0/26px 26px,rgba(255,255,255,.5)}
-.oc-map{position:absolute;left:300px;right:330px;top:40px;bottom:200px}
+.oc-map{position:absolute;left:90px;right:120px;top:10px;bottom:150px}
 .oc-map .lokmap{position:absolute!important;inset:0;aspect-ratio:auto!important;background:none!important;border:0!important;border-radius:0!important}
 .oc-map .lokmap .badge,.oc-map .lokmap .legend,.oc-map .lokmap .grid,.oc-map .lokmap .scan{display:none}
 .oc-map .lokmap .isl{stroke:rgba(70,214,200,.35)!important;stroke-width:.8!important;stroke-opacity:1!important}
 .oc-sweep{position:absolute;top:0;bottom:0;left:0;width:220px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(70,214,200,.06) 80%,rgba(70,214,200,.22));will-change:transform;transform:translateX(-240px)}
 .oc-p{position:absolute;border-radius:24px;padding:18px 18px 16px;background:linear-gradient(180deg,var(--glass-hi),transparent 40%),var(--card);border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 18px 50px rgba(0,0,0,.35)}
 [data-theme=light] .oc-p{box-shadow:inset 0 1px 0 #fff,0 14px 40px rgba(10,30,40,.10)}
+/* Kaca transparan + blur khusus Ops Console (peta terlihat samar di balik panel) */
+.oc-p,.oc-pill{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.015) 45%),rgba(10,16,20,.42)!important;
+  -webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);border-color:rgba(160,220,215,.16)!important}
+[data-theme=light] .oc-p,[data-theme=light] .oc-pill{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.4) 45%),rgba(255,255,255,.35)!important;border-color:rgba(4,7,10,.08)!important}
+.oc-pt,.oc-item{background:rgba(255,255,255,.035)!important;border-color:rgba(160,220,215,.12)!important}
+[data-theme=light] .oc-pt,[data-theme=light] .oc-item{background:rgba(255,255,255,.45)!important;border-color:rgba(4,7,10,.07)!important}
+.oc-p:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;background:linear-gradient(140deg,rgba(70,214,200,.45),transparent 35%,transparent 70%,rgba(255,196,107,.25));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
 .oc-brief{left:18px;top:18px;width:270px}
 .oc-alerts{right:18px;top:18px;width:310px;bottom:200px;display:flex;flex-direction:column}
 .oc-pulse{left:18px;right:18px;bottom:18px;height:166px;display:grid;grid-template-columns:200px repeat(4,minmax(0,1fr));gap:12px;padding:14px}
