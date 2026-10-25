@@ -32,6 +32,18 @@
       const topT = cnt(R.filter(r => r.sent === 'negatif' && r.topik !== 'Lainnya'), 'topik')[0]?.[0] || 'percakapan meningkat';
       return { kk, v, np, d, lv, topT }; }).sort((a, b) => (b.lv[0] === 'hi') - (a.lv[0] === 'hi') || b.np - a.np);
     const nHigh = warn.filter(w => w.lv[0] === 'hi').length;
+    // ---- Insight otomatis (3–4 poin, semua berbasis angka) ----
+    const ins = [];
+    const dTot = delta(Ls.t, Ps.t), dNeg = negShareP ? Math.round((negShareL - negShareP) / negShareP * 100) : null;
+    ins.push([S.n / S.t >= .5 ? 'hi' : S.n / S.t >= .35 ? 'md' : 'lo', 'Sentimen',
+      `${pc(S.n, S.t)} percakapan bernada negatif${dNeg != null ? ` (${dNeg >= 0 ? 'naik' : 'turun'} ${Math.abs(dNeg)}% vs periode sebelumnya)` : ''}${dTot != null ? `; volume total ${dTot >= 0 ? 'naik' : 'turun'} ${Math.abs(dTot)}%` : ''}.`]);
+    const negT = cnt(D.filter(r => r.sent === 'negatif' && r.topik !== 'Lainnya'), 'topik');
+    if (negT[0]) { const tL = L.filter(r => r.topik === negT[0][0]).length, tP = Pv.filter(r => r.topik === negT[0][0]).length, dt = delta(tL, tP);
+      ins.push(['hi', 'Isu pemicu', `"${negT[0][0]}" jadi sumber negatif terbesar: ${f(negT[0][1])} postingan (${pc(negT[0][1], S.n, 0)} dari negatif)${dt != null ? `, ${dt >= 0 ? '+' : ''}${dt}%` : ''}.`]); }
+    if (isl[0]) { const R = D.filter(r => r.lokasi === isl[0][0]), n = R.filter(r => r.sent === 'negatif').length;
+      ins.push([n / isl[0][1] >= .55 ? 'hi' : 'md', 'Wilayah', `${isl[0][0]} paling disorot: ${f(isl[0][1])} postingan (${pc(isl[0][1], S.t, 0)} dari total), ${pc(n, isl[0][1], 0)} negatif${isl[1] ? `; disusul ${isl[1][0]} (${f(isl[1][1])})` : ''}.`]); }
+    const posT = cnt(D.filter(r => r.sent === 'positif' && r.topik !== 'Lainnya'), 'topik');
+    if (posT[0]) ins.push(['lo', 'Peluang', `Narasi positif terkuat: "${posT[0][0]}" (${f(posT[0][1])} postingan) — layak diamplifikasi untuk menyeimbangkan percakapan.`]);
 
     const preset = (typeof state !== 'undefined' && state.preset) || 'all';
     root.innerHTML = `
@@ -47,6 +59,9 @@
         </div>
       </div>
 
+      <div class="g-card g-insight"><div class="g-h"><h3>${ic('spark', 16)} Insight Utama</h3><span class="g-tag">Otomatis dari data · ${esc(per)}</span></div>
+        <ul class="g-ins">${ins.slice(0, 4).map(([lv, t, x]) => `<li class="${lv}"><span class="g-lv ${lv}">${esc(t)}</span><p>${esc(x)}</p></li>`).join('')}</ul>
+        <button class="g-btn" type="button" data-ask>${ic('spark', 14)} Tanya Garuda AI</button></div>
       <div class="g-stage">
         <div class="g-earth"><img src="earth.jpg?v=3" srcset="earth-sm.jpg?v=3 836w, earth.jpg?v=3 1672w" sizes="(max-width:700px) 100vw, 1400px" alt="Peta sebaran percakapan karhutla di Indonesia" decoding="async" fetchpriority="high"><canvas class="g-smoke" aria-hidden="true"></canvas><div class="g-pins"></div></div>
         <div class="g-glass g-int">
@@ -103,6 +118,7 @@
     window.G.smoke?.(root.querySelector('.g-smoke'), earth, isl, mx);
     root.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { if (typeof state === 'undefined') return; state.preset = b.dataset.p; render(); });
     root.querySelectorAll('[data-pf]').forEach(b => b.onclick = () => { feedPf = b.dataset.pf; buildConsole(); });
+    root.querySelector('[data-ask]')?.addEventListener('click', () => document.querySelector('.ai-fab')?.click());
     root.querySelector('[data-go=analitik]')?.addEventListener('click', () => document.querySelector('[data-tab=analitik]')?.click());
   }
 
