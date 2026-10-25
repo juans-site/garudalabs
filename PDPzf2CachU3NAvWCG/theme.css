@@ -132,3 +132,8 @@ footer{color:var(--mute);letter-spacing:.04em}
 .cal-ic{display:inline-grid;place-items:center;color:var(--accent)}
 /* Raw data: header tabel solid agar tidak menabrak isi saat discroll */
 .raw thead th{position:sticky;top:0;z-index:2;background:#0E151A!important;padding-top:12px!important;padding-bottom:12px!important;border-bottom:1px solid var(--line)}
+/* Dropdown (select) gelap & terbaca */
+:root{color-scheme:dark}
+select,#rawPf,.gran{color-scheme:dark;background-color:#0E151A!important;color:var(--ink)!important}
+select option,#rawPf option,.gran option{background:#0E151A;color:#EAF2F4}
+select option:checked{background:#2FB3A6;color:#04201D}
