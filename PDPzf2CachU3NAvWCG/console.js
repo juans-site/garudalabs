@@ -166,6 +166,28 @@
 .e-d{font:700 12px var(--f-body);fill:#FF6B4A;paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:3px}
 .g-stage .g-arc{stroke:rgba(120,190,255,.55);stroke-dasharray:2 5}
 @media(max-width:640px){.e-n{font-size:22px}.e-v,.e-d{display:none}}
+
+/* Peta foto bumi malam (1 gambar JPG ±80–300KB, sisanya HTML ringan) */
+.g-stage{background:#01040A!important;height:clamp(500px,46vw,680px)!important}
+.g-earth{position:relative;width:100%;aspect-ratio:1672/941}
+.g-earth img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none}
+.g-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(1,4,10,.55),transparent 28%),linear-gradient(0deg,rgba(1,4,10,.7),transparent 22%)}
+.g-int,.g-ctrl{z-index:2}
+.g-pins{position:absolute;inset:0}
+.g-pin{position:absolute;width:0;height:0}
+.g-pin .dot{position:absolute;left:calc(var(--s)/-2);top:calc(var(--s)/-2);width:var(--s);height:var(--s);border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,90,40,.9),0 0 18px 6px rgba(255,110,40,.75)}
+.g-pin .dot:after{content:"";position:absolute;inset:-9px;border-radius:50%;border:1.5px solid rgba(255,160,90,.8);animation:gRing 2.4s ease-out infinite}
+.g-pin .stem{position:absolute;left:0;bottom:8px;width:1px;height:72px;background:linear-gradient(0deg,rgba(255,255,255,.75),rgba(255,255,255,.35))}
+.g-pin .lab{position:absolute;left:10px;bottom:24px;white-space:nowrap;line-height:1.25;text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 10px rgba(0,0,0,.6)}
+.g-pin.l .lab{left:auto;right:10px;text-align:right}
+.g-pin .lab b{display:block;font:700 13.5px var(--f-body);letter-spacing:.06em;color:#fff}
+.g-pin .lab span{display:block;font:500 13px var(--f-body);color:#EEF3F6}
+.g-pin .lab em{display:block;font:700 13px var(--f-body);font-style:normal}
+.g-pin .lab em.eu{color:#FF5B3A!important}.g-pin .lab em.ed{color:#46D6C8!important}
+@keyframes gRing{from{transform:scale(.6);opacity:1}to{transform:scale(1.9);opacity:0}}
+@media(max-width:1100px){.g-stage{height:auto!important}.g-earth{border-radius:18px;overflow:hidden}}
+@media(max-width:640px){.g-pin .stem{height:34px}.g-pin .lab{bottom:12px;left:6px}.g-pin .lab b{font-size:10px}.g-pin .lab span,.g-pin .lab em{display:none}.g-pin .dot:after{display:none}.g-pin .dot{transform:scale(.55)}.g-pin .lab b{font-size:9px}}
+@media (prefers-reduced-motion:reduce){.g-pin .dot:after{animation:none}}
 @keyframes gPulse{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 7px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
 @keyframes gDash{to{stroke-dashoffset:-40}}
 @media (prefers-reduced-motion:no-preference){.g-arc{animation:gDash 2.4s linear infinite}}
@@ -298,7 +320,7 @@
       </div>
 
       <div class="g-stage">
-        <div class="g-map"><div class="lokmap"></div></div>
+        <div class="g-earth"><img src="earth.jpg?v=1" srcset="earth-sm.jpg?v=1 836w, earth.jpg?v=1 1672w" sizes="(max-width:700px) 100vw, 1400px" alt="Peta sebaran percakapan karhutla di Indonesia" decoding="async" fetchpriority="high"><div class="g-pins"></div></div>
         <div class="g-glass g-int">
           <div class="g-h"><h3>Intensitas Percakapan</h3><span class="g-live">Live</span></div>
           <div class="g-scale"></div><div class="g-scale-l"><span>Rendah</span><span>Tinggi</span></div>
@@ -334,22 +356,21 @@
           <ul class="g-warn">${warn.slice(0, 4).map(w => `<li><span class="wi g-lv ${w.lv[0]}">${ic('flame', 18)}</span><div><b>${esc(w.kk)}</b><small>${esc(w.topT)} · ${pc(w.np, 100, 0)} negatif${w.d != null ? ` · ${w.d >= 0 ? '+' : ''}${w.d}% 7h` : ''}</small></div><span class="g-lv ${w.lv[0]}">${ic('alert', 12, 2)}${w.lv[1]}</span></li>`).join('')}</ul></div>
       </div>`;
 
-    // peta + busur dari pulau terpanas
-    const box = root.querySelector('.g-map .lokmap');
-    if (window.renderIdMap && window.__lok) {
-      window.renderIdMap(box, window.__lok, { H: 340, oy: 3 });
-      const C = window.__IDCENT, src = isl[0] && C[isl[0][0]];
-      const svg = box.querySelector('svg');
-      if (svg && src) {
-        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        g.setAttribute('transform', 'translate(0 3)');
-        g.innerHTML = `<defs><linearGradient id="gArc" x1="0" x2="1"><stop offset="0" stop-color="${ORANGE}"/><stop offset="1" stop-color="${AMBER}" stop-opacity=".3"/></linearGradient></defs>` +
-          isl.slice(1, 7).map(([kk]) => { const t = C[kk]; if (!t) return ''; const mx = (src[0] + t[0]) / 2, my = Math.min(src[1], t[1]) - 40 - Math.abs(t[0] - src[0]) * .12;
-            return `<path class="g-arc" d="M${src[0]} ${src[1]}Q${mx} ${my} ${t[0]} ${t[1]}"/>`; }).join('');
-        svg.querySelector('g[transform]')?.before(g);
-      }
-      if (svg) earthStyle(svg, isl, islL, islP);
-    }
+    // peta foto bumi + pin data
+    const PIN = { 'Sumatera': [328, 340], 'Kalimantan': [740, 393], 'Sulawesi': [978, 491], 'Jawa': [576, 631], 'Bali & Nusa Tenggara': [932, 701], 'Papua': [1445, 541], 'Maluku': [1185, 398] };
+    const IW = 1672, IH = 941, mx = Math.max(1, ...isl.map(x => x[1]));
+    const pins = root.querySelector('.g-pins');
+    pins.innerHTML = isl.map(([kk, v]) => { const p = PIN[kk]; if (!p) return ''; const d = delta(islL[kk] || 0, islP[kk] || 0), t = v / mx;
+      const nm = kk === 'Bali & Nusa Tenggara' ? 'Nusa Tenggara' : kk;
+      return `<div class="g-pin${p[0] > 1350 ? ' l' : ''}" style="left:${p[0] / IW * 100}%;top:${p[1] / IH * 100}%;--s:${(10 + t * 10).toFixed(1)}px">
+        <i class="dot"></i><i class="stem"></i><div class="lab"><b>${esc(nm.toUpperCase())}</b><span>${k(v)} postingan</span>${d != null ? `<em class="${d >= 0 ? 'eu' : 'ed'}">${d >= 0 ? '↑ +' : '↓ '}${d}%</em>` : ''}</div></div>`; }).join('');
+    const earth = root.querySelector('.g-earth'), stage = root.querySelector('.g-stage');
+    const fit = () => { const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
+      if (!wide) { earth.style.cssText = ''; return; }
+      const left = 300, right = 16, sc = (W - left - right) / (1640 - 150), w = IW * sc, h = IH * sc;
+      earth.style.cssText = `position:absolute;width:${w}px;height:${h}px;left:${left - 150 * sc}px;top:${(H - 70) / 2 - 460 * sc}px`; };
+    fit(); if (!buildConsole.fitBound) { buildConsole.fitBound = 1; addEventListener('resize', () => { const f = document.querySelector('#gConsole')?._fit; f && f(); }); }
+    root._fit = fit;
     root.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { if (typeof state === 'undefined') return; state.preset = b.dataset.p; render(); });
     root.querySelectorAll('[data-pf]').forEach(b => b.onclick = () => { feedPf = b.dataset.pf; buildConsole(); });
     root.querySelector('[data-go=analitik]')?.addEventListener('click', () => document.querySelector('[data-tab=analitik]')?.click());
