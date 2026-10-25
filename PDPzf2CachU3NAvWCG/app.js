@@ -287,13 +287,8 @@ async function render() {
 }
 
 /* ---------- UI ---------- */
-function setThemeIcon() { $('themeBtn').innerHTML = tIcon(document.documentElement.dataset.theme === 'dark' ? 'sun' : 'moon', 19); }
-$('themeBtn').onclick = () => {
-  const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = t; try { localStorage.setItem('theme', t); } catch (e) {}
-  setThemeIcon(); sna.key = ''; render();
-};
-setThemeIcon();
+// Tema: hanya mode gelap (toggle dihapus)
+document.documentElement.dataset.theme = 'dark'; try { localStorage.removeItem('theme'); } catch (e) {}
 
 $('fSumber').onclick = e => { const b = e.target.closest('button'); if (!b) return; state.src = b.dataset.v; [...$('fSumber').children].forEach(x => x.classList.toggle('on', x === b)); render(); };
 
