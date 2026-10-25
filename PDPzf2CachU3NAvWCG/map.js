@@ -86,6 +86,10 @@
     svg.addEventListener('pointerleave', hide);
   }
   window.renderIdMap = renderMap;
+  // Hemat CPU: animasi peta hanya berjalan saat terlihat di layar
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('lk-off', !e.isIntersecting))) : null;
+  new MutationObserver(() => document.querySelectorAll('.lokmap:not([data-io])').forEach(b => { b.dataset.io = 1; io?.observe(b); })).observe(document.body, { childList: true, subtree: true });
+  const st = document.createElement('style'); st.textContent = '.lokmap.lk-off *{animation-play-state:paused!important}'; document.head.append(st);
   window.addEventListener('lok:update', e => draw(e.detail));
   if (window.__lok) draw(window.__lok);
 })();

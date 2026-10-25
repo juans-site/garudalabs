@@ -8,19 +8,19 @@
   --f-body:"Outfit","Plus Jakarta Sans",system-ui,sans-serif;
 }
 [data-theme=dark]{
-  --bg:#04070A;--nav:rgba(8,13,17,.72);--card:rgba(22,30,36,.62);--card2:rgba(255,255,255,.045);--line:rgba(160,200,210,.12);
+  --bg:#04070A;--nav:rgba(8,13,17,.72);--card:rgba(17,24,29,.88);--card2:rgba(255,255,255,.045);--line:rgba(160,200,210,.12);
   --ink:#EAF2F4;--mute:#8A97A6;--accent:#46D6C8;--accent-ink:#04201D;--hover:rgba(70,214,200,.08);--active:rgba(70,214,200,.14);
   --glass-hi:rgba(255,255,255,.07);--glow:0 0 0 1px rgba(70,214,200,.25),0 8px 30px rgba(70,214,200,.18);
 }
 [data-theme=light]{
-  --bg:#EEF3F4;--nav:rgba(255,255,255,.75);--card:rgba(255,255,255,.72);--card2:rgba(4,7,10,.035);--line:rgba(4,7,10,.08);
+  --bg:#EEF3F4;--nav:rgba(255,255,255,.75);--card:rgba(255,255,255,.92);--card2:rgba(4,7,10,.035);--line:rgba(4,7,10,.08);
   --ink:#0B1418;--mute:#5B6873;--accent:#13A99B;--accent-ink:#fff;--hover:rgba(19,169,155,.07);--active:rgba(19,169,155,.12);
   --glass-hi:rgba(255,255,255,.9);--glow:0 0 0 1px rgba(19,169,155,.25),0 8px 24px rgba(19,169,155,.15);
 }
 
 /* Latar: gelap pekat + cahaya teal/oranye samar + grid titik halus */
 body{font-family:var(--f-body);letter-spacing:.005em;background:var(--bg)}
-body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+body:before{content:"";position:fixed;transform:translateZ(0);inset:0;z-index:-1;pointer-events:none;
   background:
     radial-gradient(60% 45% at 85% -5%,rgba(70,214,200,.13),transparent 70%),
     radial-gradient(45% 40% at 0% 100%,rgba(255,127,59,.08),transparent 70%),
@@ -31,11 +31,17 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
     radial-gradient(circle at 1px 1px,rgba(4,7,10,.07) 1px,transparent 1.4px) 0 0/22px 22px}
 
 /* Kaca: kartu, topbar, popover */
-.card,.kpi,.post,.dr-pop,.ai-panel,.lokmap .tip{
+.card,.kpi,.post,.ai-panel,.lokmap .tip{
   background:linear-gradient(180deg,var(--glass-hi),transparent 38%),var(--card)!important;
   border:1px solid var(--line)!important;border-radius:var(--radius)!important;
-  -webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 40px rgba(0,0,0,.25)}
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 30px rgba(0,0,0,.22)}
+/* Popover periode: solid & di atas semua elemen agar terbaca */
+.dr-pop{background:#0E151A!important;border:1px solid rgba(160,200,210,.18)!important;border-radius:18px!important;z-index:100!important;box-shadow:0 24px 60px rgba(0,0,0,.6)!important}
+[data-theme=light] .dr-pop{background:#fff!important;border-color:rgba(4,7,10,.1)!important;box-shadow:0 20px 50px rgba(10,30,40,.18)!important}
+.dr-pop .presets button{border-radius:12px!important}
+.dr-pop .custom{border-top:1px solid var(--line)}
+.dr-pop .dates input{background:var(--card2)!important;border:1px solid var(--line)!important;border-radius:10px!important;color:var(--ink)!important;color-scheme:var(--scheme)}
+.topbar{z-index:90!important}
 [data-theme=light] .card,[data-theme=light] .kpi,[data-theme=light] .post{box-shadow:inset 0 1px 0 #fff,0 10px 30px rgba(10,30,40,.06)}
 .topbar{background:var(--nav)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)!important}
 .card:hover,.kpi:hover{border-color:rgba(70,214,200,.28)!important;transition:border-color .25s}
@@ -85,8 +91,8 @@ h3.pos,.pos{color:var(--teal)!important}h3.neg,.neg{color:var(--orange)!importan
 .raw th{background:transparent!important;color:var(--mute)!important;font-weight:500;letter-spacing:.03em}
 .raw tr:hover td{background:var(--hover)}
 .raw-bar input,.sna-bar input,#rawPf,.gran{background:var(--card2)!important;border:1px solid var(--line)!important;border-radius:12px!important;color:var(--ink)!important}
-.sna-zoom{background:var(--card)!important;border:1px solid var(--line)!important;border-radius:16px!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-.sna-legend{background:var(--card)!important;border:1px solid var(--line)!important;border-radius:14px!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.sna-zoom{background:var(--card)!important;border:1px solid var(--line)!important;border-radius:16px!important}
+.sna-legend{background:var(--card)!important;border:1px solid var(--line)!important;border-radius:14px!important}
 .pager button.on{background:var(--accent)!important;color:var(--accent-ink)!important}
 
 /* Peta lokasi: nuansa konsol */
@@ -108,7 +114,6 @@ footer{color:var(--mute);letter-spacing:.04em}
 
 @media (prefers-reduced-motion:no-preference){
   .card,.kpi{animation:tcIn .5s cubic-bezier(.2,.7,.3,1) both}
-  .tabs [role=tab].on{animation:tcGlow 3.2s ease-in-out infinite}
 }
 @keyframes tcIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes tcGlow{0%,100%{box-shadow:0 0 0 1px rgba(70,214,200,.25),0 6px 22px rgba(70,214,200,.12)}50%{box-shadow:0 0 0 1px rgba(70,214,200,.45),0 6px 28px rgba(70,214,200,.28)}}

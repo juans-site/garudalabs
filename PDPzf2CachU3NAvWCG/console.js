@@ -29,7 +29,7 @@
 .oc-sub{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:13px;margin-top:8px}
 .oc-dot{width:7px;height:7px;border-radius:50%;background:${TEAL};box-shadow:0 0 0 0 rgba(70,214,200,.6);animation:ocLive 1.8s infinite}
 .oc-pills{display:flex;gap:8px;flex-wrap:wrap}
-.oc-pill{display:flex;align-items:center;gap:10px;height:40px;padding:0 16px;border-radius:999px;background:var(--card);border:1px solid var(--line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);font-size:13px;color:var(--ink);white-space:nowrap}
+.oc-pill{display:flex;align-items:center;gap:10px;height:40px;padding:0 16px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;color:var(--ink);white-space:nowrap}
 .oc-pill small{color:var(--mute);font-size:12.5px}.oc-pill i{width:1px;height:16px;background:var(--line)}
 .oc-stage{position:relative;height:640px;border-radius:28px;overflow:hidden;border:1px solid var(--line);
   background:radial-gradient(70% 60% at 50% 35%,rgba(70,214,200,.08),transparent 70%),radial-gradient(circle at 1px 1px,rgba(160,200,210,.10) 1px,transparent 1.5px) 0 0/26px 26px,rgba(0,0,0,.35)}
@@ -38,8 +38,8 @@
 .oc-map .lokmap{position:absolute!important;inset:0;aspect-ratio:auto!important;background:none!important;border:0!important;border-radius:0!important}
 .oc-map .lokmap .badge,.oc-map .lokmap .legend,.oc-map .lokmap .grid,.oc-map .lokmap .scan{display:none}
 .oc-map .lokmap .isl{stroke:rgba(70,214,200,.35)!important;stroke-width:.8!important;stroke-opacity:1!important}
-.oc-sweep{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(70,214,200,.07) 45%,rgba(70,214,200,.22) 50%,transparent 51%);background-size:200% 100%;opacity:.8}
-.oc-p{position:absolute;border-radius:24px;padding:18px 18px 16px;background:linear-gradient(180deg,var(--glass-hi),transparent 40%),var(--card);border:1px solid var(--line);-webkit-backdrop-filter:blur(20px) saturate(140%);backdrop-filter:blur(20px) saturate(140%);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 18px 50px rgba(0,0,0,.35)}
+.oc-sweep{position:absolute;top:0;bottom:0;left:0;width:220px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(70,214,200,.06) 80%,rgba(70,214,200,.22));will-change:transform;transform:translateX(-240px)}
+.oc-p{position:absolute;border-radius:24px;padding:18px 18px 16px;background:linear-gradient(180deg,var(--glass-hi),transparent 40%),var(--card);border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 18px 50px rgba(0,0,0,.35)}
 [data-theme=light] .oc-p{box-shadow:inset 0 1px 0 #fff,0 14px 40px rgba(10,30,40,.10)}
 .oc-brief{left:18px;top:18px;width:270px}
 .oc-alerts{right:18px;top:18px;width:310px;bottom:200px;display:flex;flex-direction:column}
@@ -82,11 +82,11 @@
 .oc-intro h3{font-size:18px!important}.oc-intro p{margin:6px 0 0;font-size:12px;color:var(--mute);line-height:1.45}
 .oc-intro{background:none;border:0;padding:6px 6px}
 @keyframes ocLive{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 9px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
-@keyframes ocSweep{from{background-position:120% 0}to{background-position:-120% 0}}
+@keyframes ocSweep{from{transform:translateX(-240px)}to{transform:translateX(1500px)}}
 @keyframes ocBar{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @keyframes ocDraw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
 @media (prefers-reduced-motion:no-preference){
-  .oc-sweep{animation:ocSweep 7s linear infinite}
+  .oc-sweep{animation:ocSweep 9s linear infinite}
   .oc-pt .bar{transform-origin:bottom;animation:ocBar .9s cubic-bezier(.2,.7,.3,1) both}
   .oc-pt path.ln{stroke-dasharray:var(--len);animation:ocDraw 1.4s ease-out both}
 }
@@ -198,6 +198,6 @@
   const strip = () => document.querySelectorAll('#main h2, .tabs [role=tab]').forEach(h => { if (h.children.length === 0) h.textContent = h.textContent.replace(/^[\p{Extended_Pictographic}\uFE0F\s]+/u, ''); });
   window.addEventListener('lok:update', () => requestAnimationFrame(strip));
   // gambar ulang setiap kali dashboard selesai render (event dikirim app.js)
-  window.addEventListener('lok:update', () => requestAnimationFrame(build));
+  window.addEventListener('lok:update', () => setTimeout(build, 0));
   if (window.__lok) build();
 })();
