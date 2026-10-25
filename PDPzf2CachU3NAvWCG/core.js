@@ -266,9 +266,14 @@
     const by = (R) => ({ t: R.length, n: R.filter(r => r.sent === 'negatif').length, p: R.filter(r => r.sent === 'positif').length, z: R.filter(r => r.sent === 'netral').length });
     const perDay = days.map(d => ({ d, ...by(D.filter(r => r.tgl === d)) }));
     // pembanding: 7 hari terakhir vs 7 hari sebelumnya (dalam periode)
-    const last7 = days.slice(-7), prev7 = days.slice(-14, -7);
-    const L = D.filter(r => last7.includes(r.tgl)), Pv = D.filter(r => prev7.includes(r.tgl));
-    return { all, rg, D, days, perDay, L, Pv, by };
+    // Pembanding: periode terpilih vs periode sebelumnya dengan panjang hari yang sama
+    const allDays = [...new Set(all.map(r => r.tgl))].sort();
+    const from = rg.from || days[0], to = rg.to || days.at(-1);
+    const span = Math.max(1, Math.round((new Date(to) - new Date(from)) / 864e5) + 1);
+    const pTo = new Date(new Date(from) - 864e5).toISOString().slice(0, 10), pFrom = new Date(new Date(from) - span * 864e5).toISOString().slice(0, 10);
+    const L = D, Pv = all.filter(r => r.tgl >= pFrom && r.tgl <= pTo);
+    const cmpLbl = Pv.length ? `vs ${span} hari sebelumnya` : 'tidak ada pembanding';
+    return { all, rg, D, days, perDay, L, Pv, by, cmpLbl };
   }
 
   /* ---------------- Mini SVG charts ---------------- */

@@ -31,24 +31,25 @@
     const sCol = s => { const t = s.n + s.p + s.z || 1, nr = s.n / t, pr = s.p / t; return nr >= .5 ? RED : pr >= .5 ? TEAL : nr > pr ? ORANGE : pr > nr ? '#7FD8CE' : GREY; };
     const cmpRows = isl.map(([kk, v]) => { const R = D.filter(r => r.lokasi === kk), n = R.filter(r => r.sent === 'negatif').length; return { kk, v, n, np: n / v * 100, d: delta(islL[kk] || 0, islP[kk] || 0) }; })
       .sort((a, b) => cmpMode === 'neg' ? b.np - a.np : cmpMode === 'grow' ? (b.d ?? -1e9) - (a.d ?? -1e9) : b.v - a.v);
-    const negD = Ps.t ? Math.round(Ls.n / Ls.t * 100 - Ps.n / Ps.t * 100) : null, posD = Ps.t ? Math.round(Ls.p / Ls.t * 100 - Ps.p / Ps.t * 100) : null, netD = Ps.t ? Math.round(Ls.z / Ls.t * 100 - Ps.z / Ps.t * 100) : null;
+    const rel = (x, y) => y ? Math.round((x - y) / y * 100) : null, sh = (b, kk) => b.t ? b[kk] / b.t : 0;
+    const negD = Ps.t ? rel(sh(Ls, 'n'), sh(Ps, 'n')) : null, posD = Ps.t ? rel(sh(Ls, 'p'), sh(Ps, 'p')) : null, netD = Ps.t ? rel(sh(Ls, 'z'), sh(Ps, 'z')) : null;
 
     root.innerHTML = `
       <div class="g-hero">
         <div><div class="g-eyebrow">Analytics</div><h1 class="g-title"><b>Karhutla</b> <span>Indonesia</span></h1>
           <p class="g-sub">Analisis mendalam percakapan media sosial untuk memahami tren, isu, sentimen, dan sebaran wilayah.</p></div>
-        <div class="g-kpis">
+        <div class="g-kpis" title="Perubahan (%) dibanding periode sebelumnya dengan jumlah hari yang sama">
           <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('chat', 22)}</span><div><b>${f(S.t)}</b><small>Total postingan</small></div>${dChip(delta(Ls.t, Ps.t), false)}</div>
-          <div class="g-kpi" style="--c:${RED}"><span class="gi">${ic('heart', 22)}</span><div><b>${pc(S.n, S.t)}</b><small>Sentimen negatif</small></div>${dChip(negD, true, ' pp')}</div>
+          <div class="g-kpi" style="--c:${RED}"><span class="gi">${ic('heart', 22)}</span><div><b>${pc(S.n, S.t)}</b><small>Sentimen negatif</small></div>${dChip(negD, true)}</div>
           <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('pin', 22)}</span><div><b>${isl.length}<small style="font-size:13px"> / 7</small></b><small>Pulau disebut</small></div></div>
           <div class="g-kpi" style="--c:${ORANGE}"><span class="gi">${ic('alert', 22)}</span><div><b>${f(S.n)}</b><small>Postingan negatif</small></div>${dChip(delta(Ls.n, Ps.n), true)}</div>
         </div>
       </div>
       <div class="g-grid3">
         <div class="g-card"><div class="g-h"><h3>Tren Percakapan & Sentimen</h3><span class="g-tag">Harian</span></div><div class="g-cv"><canvas id="gcTrend"></canvas></div></div>
-        <div class="g-card"><div class="g-h"><h3>Distribusi Sentimen</h3><span class="g-tag">Δ 7 hari</span></div>
+        <div class="g-card"><div class="g-h"><h3>Distribusi Sentimen</h3><span class="g-tag">Δ periode sebelumnya</span></div>
           <div class="g-donut"><div style="position:relative;height:150px"><canvas id="gcDonut"></canvas></div>
-            <div class="g-legend"><div><span class="g-dot" style="background:${RED}"></span>Negatif <b>${pc(S.n, S.t)} ${dChip(negD, true, ' pp')}</b></div><div><span class="g-dot" style="background:${GREY}"></span>Netral <b>${pc(S.z, S.t)} ${dChip(netD, false, ' pp')}</b></div><div><span class="g-dot" style="background:${TEAL}"></span>Positif <b>${pc(S.p, S.t)} ${dChip(posD, false, ' pp')}</b></div></div></div>
+            <div class="g-legend"><div><span class="g-dot" style="background:${RED}"></span>Negatif <b>${pc(S.n, S.t)} ${dChip(negD, true)}</b></div><div><span class="g-dot" style="background:${GREY}"></span>Netral <b>${pc(S.z, S.t)} ${dChip(netD, false)}</b></div><div><span class="g-dot" style="background:${TEAL}"></span>Positif <b>${pc(S.p, S.t)} ${dChip(posD, false)}</b></div></div></div>
           <div class="g-card" style="margin-top:14px;padding:12px 14px;background:var(--card2)"><div class="g-h" style="margin-bottom:6px"><h3 style="font-size:13.5px!important">Volume Percakapan</h3><span class="g-tag hot">Puncak ${peak[0] ? tg(peak[0].d) : '-'}</span></div>
             <div class="g-vol"><div><span class="big">${f(avgDay)}</span><small>rata-rata harian</small></div><div style="width:160px">${barsSvg(perDay.map(x => x.t), 160, 54, t => heat(t))}</div></div></div></div>
         <div class="g-card"><div class="g-h"><h3>Top Isu Dominan</h3><span class="g-tag">Semua sumber</span></div>
@@ -56,9 +57,9 @@
       </div>
       <div class="g-grid3">
         <div class="g-card"><div class="g-h"><h3>Perbandingan Antar Pulau</h3></div>
-          <div class="g-sub-tabs">${[['vol', 'Volume'], ['neg', 'Sentimen negatif'], ['grow', 'Pertumbuhan 7h']].map(([v, l]) => `<button type="button" data-cmp="${v}" class="${cmpMode === v ? 'on' : ''}">${l}</button>`).join('')}</div>
+          <div class="g-sub-tabs">${[['vol', 'Volume'], ['neg', 'Sentimen negatif'], ['grow', 'Pertumbuhan']].map(([v, l]) => `<button type="button" data-cmp="${v}" class="${cmpMode === v ? 'on' : ''}">${l}</button>`).join('')}</div>
           <div class="g-cmp"><div class="lokmap"></div>
-            <table class="g-tbl"><thead><tr><th></th><th>Pulau</th><th class="r">Volume</th><th class="r">Negatif</th><th class="r">Δ 7h</th></tr></thead><tbody>
+            <table class="g-tbl"><thead><tr><th></th><th>Pulau</th><th class="r">Volume</th><th class="r">Negatif</th><th class="r">Δ</th></tr></thead><tbody>
             ${cmpRows.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${esc(r.kk)}</td><td class="r">${f(r.v)}</td><td class="r" style="color:${r.np >= 60 ? RED : r.np >= 45 ? AMBER : 'var(--ink)'}">${pc(r.np, 100, 0)}</td><td class="r">${dChip(r.d, true) || '–'}</td></tr>`).join('')}</tbody></table></div></div>
         <div class="g-card"><div class="g-h"><h3>Sumber Percakapan</h3><span class="g-tag">Semua</span></div>
           <ol class="g-list g-src" style="gap:16px">${plat.map(([kk, v]) => { const R = D.filter(r => r.platform === kk), n = R.filter(r => r.sent === 'negatif').length;
@@ -84,15 +85,16 @@
       <div class="g-section-t">Detail lanjutan</div>`;
 
     // Word cloud spiral: kata terbesar di tengah, tidak bertumpuk
-    (() => { const el = root.querySelector('#gWc'); if (!el) return; const W = el.clientWidth || 600, H = 300; el.style.height = H + 'px';
+    (() => { const el = root.querySelector('#gWc'); if (!el) return; const W = el.clientWidth || 600, sk = Math.max(.5, Math.min(1, W / 720)), H = W < 600 ? 340 : 300; el.style.height = H + 'px';
       const boxes = [], ctx = document.createElement('canvas').getContext('2d');
-      words.forEach(([w, c]) => { const r = Math.sqrt(c / wMax), fs = Math.round(12 + r * 32), fw = r > .45 ? 700 : 600; ctx.font = `${fw} ${fs}px Outfit, sans-serif`;
+      words.forEach(([w, c]) => { const r = Math.sqrt(c / wMax), fs = Math.round((12 + r * 32) * sk), fw = r > .45 ? 700 : 600; ctx.font = `${fw} ${fs}px Outfit, sans-serif`;
         const bw = ctx.measureText(w).width + 6, bh = fs * 1.05;
-        for (let t = 0; t < 1800; t += 1) { const a = t * .32, rad = 1.6 * t * .35, x = W / 2 + rad * Math.cos(a) * 1.5 - bw / 2, y = H / 2 + rad * Math.sin(a) * .8 - bh / 2;
+        for (let t = 0; t < 1800; t += 1) { const a = t * .32, rad = 1.6 * t * .35, x = W / 2 + rad * Math.cos(a) * (W < 600 ? 1 : 1.5) - bw / 2, y = H / 2 + rad * Math.sin(a) * .8 - bh / 2;
           if (x < 2 || y < 2 || x + bw > W - 2 || y + bh > H - 2) continue;
           if (boxes.some(b => x < b.x + b.w && x + bw > b.x && y < b.y + b.h && y + bh > b.y)) continue;
           boxes.push({ x, y, w: bw, h: bh, word: w, c, fs, fw }); break; } });
       el.innerHTML = boxes.map(b => { const s = ws[b.word]; return `<span title="${esc(b.word)} — ${f(b.c)} postingan · neg ${s.n} / net ${s.z} / pos ${s.p}" style="left:${b.x}px;top:${b.y}px;font-size:${b.fs}px;font-weight:${b.fw};color:${sCol(s)};opacity:${(.6 + b.c / wMax * .4).toFixed(2)}">${esc(b.word)}</span>`; }).join(''); })();
+    if (!buildAnalitik.rz) { buildAnalitik.rz = 1; let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { if (!document.getElementById('viewAnalitik')?.hidden) buildAnalitik(); }, 300); }); }
     const box = root.querySelector('.g-cmp .lokmap');
     if (window.renderIdMap && window.__lok) window.renderIdMap(box, window.__lok);
     root.querySelectorAll('[data-cmp]').forEach(b => b.onclick = () => { cmpMode = b.dataset.cmp; buildAnalitik(); });
