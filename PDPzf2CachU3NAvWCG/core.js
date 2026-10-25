@@ -244,6 +244,7 @@
 .g-ins p{margin:8px 0 0;font-size:12.8px;line-height:1.5;color:rgba(234,242,244,.86)}
 .g-insight .g-btn{height:32px}
 @media(max-width:1280px){.g-ins{grid-template-columns:1fr 1fr}}@media(max-width:640px){.g-ins{grid-template-columns:1fr}}
+@media(min-width:1101px){.g-insight{margin-top:-170px}.g-insight+.g-grid4{margin-top:0!important}}
 @keyframes gPulse{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 7px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
 @keyframes gDash{to{stroke-dashoffset:-40}}
 @media (prefers-reduced-motion:no-preference){.g-arc{animation:gDash 2.4s linear infinite}}

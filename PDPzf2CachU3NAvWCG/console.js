@@ -59,9 +59,6 @@
         </div>
       </div>
 
-      <div class="g-card g-insight"><div class="g-h"><h3>${ic('spark', 16)} Insight Utama</h3><span class="g-tag">Otomatis dari data · ${esc(per)}</span></div>
-        <ul class="g-ins">${ins.slice(0, 4).map(([lv, t, x]) => `<li class="${lv}"><span class="g-lv ${lv}">${esc(t)}</span><p>${esc(x)}</p></li>`).join('')}</ul>
-        <button class="g-btn" type="button" data-ask>${ic('spark', 14)} Tanya Garuda AI</button></div>
       <div class="g-stage">
         <div class="g-earth"><img src="earth.jpg?v=3" srcset="earth-sm.jpg?v=3 836w, earth.jpg?v=3 1672w" sizes="(max-width:700px) 100vw, 1400px" alt="Peta sebaran percakapan karhutla di Indonesia" decoding="async" fetchpriority="high"><canvas class="g-smoke" aria-hidden="true"></canvas><div class="g-pins"></div></div>
         <div class="g-glass g-int">
@@ -77,6 +74,9 @@
         </div>
       </div>
 
+      <div class="g-card g-insight"><div class="g-h"><h3>${ic('spark', 16)} Insight Utama</h3><span class="g-tag">Otomatis dari data · ${esc(per)}</span></div>
+        <ul class="g-ins">${ins.slice(0, 4).map(([lv, t, x]) => `<li class="${lv}"><span class="g-lv ${lv}">${esc(t)}</span><p>${esc(x)}</p></li>`).join('')}</ul>
+        <button class="g-btn" type="button" data-ask>${ic('spark', 14)} Tanya Garuda AI</button></div>
       <div class="g-grid4">
         <div class="g-card"><div class="g-h"><h3>Volume Percakapan</h3><span class="g-tag">Harian</span></div>
           <div class="g-vol"><div>${barsSvg(perDay.map(x => x.t), 300, 120, (t) => heat(t))}</div>
