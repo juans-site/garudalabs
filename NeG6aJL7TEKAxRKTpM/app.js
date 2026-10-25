@@ -582,14 +582,15 @@ $('rawXlsx').onclick = async () => {
   btn.disabled = true; const old = btn.innerHTML; btn.textContent = 'Menyiapkan…';
   try {
     await loadXLSX();
+    const cut = s => { s = String(s ?? ''); return s.length > 32000 ? s.slice(0, 32000) + '…' : s; }; // batas 1 sel Excel: 32.767 karakter
     const data = rows.map(r => ({ 'Tanggal': r.tgl, 'Jam': r.jamStr || '', 'Platform': r.platform, 'Akun': r.user, 'Jenis': r.kind === 'post' ? 'Post' : 'Komentar',
-      'Caption': r.text, 'Topik': r.topik, 'Sentimen': r.sent[0].toUpperCase() + r.sent.slice(1), 'Akun resmi': r.resmi ? 'Ya' : '',
-      'Jumlah komentar/likes': r.eng, 'Link': r.link }));
+      'Caption': cut(r.text), 'Topik': cut(r.topik), 'Sentimen': r.sent[0].toUpperCase() + r.sent.slice(1), 'Akun resmi': r.resmi ? 'Ya' : '',
+      'Jumlah komentar/likes': r.eng, 'Link': cut(r.link) }));
     const ws = XLSX.utils.json_to_sheet(data);
     ws['!cols'] = [12, 7, 11, 22, 10, 70, 30, 10, 10, 12, 50].map(w => ({ wch: w }));
     const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Raw Data');
     const { from, to } = state.range || {};
-    XLSX.writeFile(wb, `raw-data-bmri_${state.src}_${from || 'semua'}_${to || ''}.xlsx`.replace(/_\.xlsx$/, '.xlsx'));
+    XLSX.writeFile(wb, `raw-data-bmri_${state.src}_${from || 'semua'}_${to || ''}.xlsx`.replace(/_\.xlsx$/, '.xlsx'), { compression: true });
   btn.disabled = false; btn.innerHTML = old;
-  } catch (e) { btn.disabled = false; btn.textContent = 'Gagal, coba lagi'; setTimeout(() => btn.innerHTML = old, 2500); }
+  } catch (e) { console.error(e); btn.disabled = false; btn.textContent = 'Gagal, coba lagi'; setTimeout(() => btn.innerHTML = old, 4000); }
 };

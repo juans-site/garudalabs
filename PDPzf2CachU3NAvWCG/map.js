@@ -51,7 +51,7 @@
 
   function draw({ rows, T }) {
     const host = document.getElementById('lokasi'); if (!host) return;
-    let wrap = host.parentElement.querySelector('.lokmap-wrap');
+    let wrap = host.closest('.lokmap-wrap'); // sudah dibungkus sebelumnya? pakai ulang (jangan bersarang)
     if (!wrap) { wrap = document.createElement('div'); wrap.className = 'lokmap-wrap'; host.before(wrap); const m = document.createElement('div'); m.className = 'lokmap'; wrap.append(m, host); }
     const box = wrap.querySelector('.lokmap');
     const by = Object.fromEntries(rows.map(r => [r.k, r]));
