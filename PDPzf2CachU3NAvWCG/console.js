@@ -188,6 +188,7 @@
 @media(max-width:1100px){.g-stage{height:auto!important}.g-earth{border-radius:18px;overflow:hidden}}
 @media(max-width:640px){.g-pin .stem{height:34px}.g-pin .lab{bottom:12px;left:6px}.g-pin .lab b{font-size:10px}.g-pin .lab span,.g-pin .lab em{display:none}.g-pin .dot:after{display:none}.g-pin .dot{transform:scale(.55)}.g-pin .lab b{font-size:9px}}
 @media (prefers-reduced-motion:reduce){.g-pin .dot:after{animation:none}}
+.g-eng{display:flex;gap:12px;font-size:11.5px;color:var(--mute)}.g-eng span{display:inline-flex;align-items:center;gap:4px}.g-post .ft .who{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;margin-right:8px}
 @keyframes gPulse{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 7px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
 @keyframes gDash{to{stroke-dashoffset:-40}}
 @media (prefers-reduced-motion:no-preference){.g-arc{animation:gDash 2.4s linear infinite}}
@@ -350,8 +351,8 @@
       <div class="g-grid2">
         <div class="g-card"><div class="g-h"><h3>Aktivitas Terbaru</h3>
           <div class="g-feed-tabs">${['Semua', ...plat.map(p => p[0])].map(p => `<button type="button" data-pf="${esc(p)}" class="${feedPf === p ? 'on' : ''}">${esc(p)}</button>`).join('')}</div></div>
-          <div class="g-feed">${feedSrc.map(r => `<div class="g-post"><div class="top">${pfIco(r.platform, 13)}<span>${esc(ago(r))}</span><span class="sn ${snC(r.sent)}">${esc(r.sent)}</span></div>
-            <p>${esc(r.text.slice(0, 220))}</p><div class="ft"><span>${esc(akun(r))} · ${k(r.eng)} interaksi</span>${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">Buka ${ic('ext', 12)}</a>` : ''}</div></div>`).join('') || '<p class="hint">Tidak ada postingan</p>'}</div></div>
+          <div class="g-feed">${feedSrc.map(r => `<div class="g-post"><div class="top">${pfIco(r.platform, 13)}<span>${tg(r.tgl)}${r.jamStr ? ' · ' + r.jamStr : ''}</span><span class="sn ${snC(r.sent)}">${esc(r.sent)}</span></div>
+            <p>${esc(r.text.slice(0, 220))}</p><div class="g-eng"><span title="Likes/Reaksi">${ic('heart', 12, 2)}${k(r.lk || 0)}</span><span title="Komentar">${ic('chat', 12, 2)}${k(r.km || 0)}</span><span title="Share/Repost">${ic('ext', 12, 2)}${k(r.sh || 0)}</span></div><div class="ft"><span class="who">${esc(akun(r))}</span>${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">Buka ${ic('ext', 12)}</a>` : ''}</div></div>`).join('') || '<p class="hint">Tidak ada postingan</p>'}</div></div>
         <div class="g-card"><div class="g-h"><h3>Peringatan Dini</h3><span class="g-lv hi">Tinggi (${nHigh})</span></div>
           <ul class="g-warn">${warn.slice(0, 4).map(w => `<li><span class="wi g-lv ${w.lv[0]}">${ic('flame', 18)}</span><div><b>${esc(w.kk)}</b><small>${esc(w.topT)} · ${pc(w.np, 100, 0)} negatif${w.d != null ? ` · ${w.d >= 0 ? '+' : ''}${w.d}% 7h` : ''}</small></div><span class="g-lv ${w.lv[0]}">${ic('alert', 12, 2)}${w.lv[1]}</span></li>`).join('')}</ul></div>
       </div>`;

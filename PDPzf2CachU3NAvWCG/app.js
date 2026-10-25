@@ -72,7 +72,7 @@ function norm(r, kind) {
     text: r['Caption'] || r['Teks Postingan'] || r['Text Komentar'] || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
     sent: !s ? '' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
-    link: r['Link'] || r['URL'] || '', lokasi: (() => { const l = (r['Lokasi (Pulau)'] || '').trim(); return !l || /^(lainnya|-|tidak ada|n\/?a)$/i.test(l) ? 'Tidak menyebutkan lokasi' : l; })(), jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), eng: ['Likes/Reaksi', 'Komentar', 'Share/Repost'].reduce((s, k) => s + (parseInt(String(r[k] || '0').replace(/[.,]/g, '')) || 0), 0), kind
+    link: r['Link'] || r['URL'] || '', lokasi: (() => { const l = (r['Lokasi (Pulau)'] || '').trim(); return !l || /^(lainnya|-|tidak ada|n\/?a)$/i.test(l) ? 'Tidak menyebutkan lokasi' : l; })(), jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), lk: parseInt(String(r['Likes/Reaksi'] || '0').replace(/[.,]/g, '')) || 0, km: parseInt(String(r['Komentar'] || '0').replace(/[.,]/g, '')) || 0, sh: parseInt(String(r['Share/Repost'] || '0').replace(/[.,]/g, '')) || 0, eng: ['Likes/Reaksi', 'Komentar', 'Share/Repost'].reduce((s, k) => s + (parseInt(String(r[k] || '0').replace(/[.,]/g, '')) || 0), 0), kind
   };
 }
 const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
