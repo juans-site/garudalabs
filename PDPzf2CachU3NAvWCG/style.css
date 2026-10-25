@@ -320,10 +320,10 @@ h1,.hero h1{font-family:"Playfair Display",Georgia,serif;font-weight:600;font-si
 /* Hero dengan foto gedung: versi gelap & terang; disembunyikan di HP */
 .hero{min-height:200px;display:flex;align-items:center;
   background:linear-gradient(90deg,var(--card) 0%,var(--card) 30%,color-mix(in srgb,var(--card) 70%,transparent) 46%,transparent 70%),
-  url("hero-dark.jpg?v=36") right 40% / 72% auto no-repeat,var(--card)}
+  var(--card)}
 .hero:after{display:none}
 .hero>div{position:relative;z-index:1;max-width:60%}
-[data-theme=light] .hero{background:linear-gradient(90deg,#fff 0%,#fff 30%,rgba(255,255,255,.7) 46%,rgba(255,255,255,0) 70%),url("hero-light.jpg?v=36") right 40% / 72% auto no-repeat,#fff}
+[data-theme=light] .hero{background:linear-gradient(90deg,#fff 0%,#fff 30%,rgba(255,255,255,.7) 46%,rgba(255,255,255,0) 70%),#fff}
 @media(max-width:640px){
   .hero,[data-theme=light] .hero{min-height:0;background:var(--card)}
   .hero>div{max-width:100%}
