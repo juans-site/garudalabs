@@ -21,6 +21,22 @@ const PLATFORM_COLOR = { twitter: '#1d9bf0', x: '#1d9bf0', facebook: '#1877f2', 
 const pColor = p => PLATFORM_COLOR[p.toLowerCase().split(/[ /]/)[0]] || '#94a3b8';
 const SENT = { positif: '#46D6C8', negatif: '#FF7F3B', netral: '#8A97A6' }; // palet Ops Console
 
+
+/* Ikon garis bergaya "AI/tech" (pengganti emoji) */
+const TI = {
+  radar: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>',
+  up: '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  down: '<path d="M3 7l6 6 4-4 8 8"/><path d="M15 17h6v-6"/>',
+  flat: '<path d="M4 12h16"/><path d="M4 7h10M4 17h10" opacity=".45"/>',
+  gauge: '<path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4-5"/><circle cx="12" cy="17" r="1.3" fill="currentColor"/>',
+  shield: '<path d="M12 3l8 3v6c0 4.6-3.4 8-8 9-4.6-1-8-4.4-8-9V6z"/><path d="M12 8v5M12 16v.01"/>',
+  cpu: '<rect x="6" y="6" width="12" height="12" rx="2.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/>',
+  cal: '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/><circle cx="9" cy="14.5" r="1" fill="currentColor"/><circle cx="15" cy="14.5" r="1" fill="currentColor"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'
+};
+const tIcon = (n, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TI[n]}</svg>`;
+
 const state = { gran: 'harian', cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'all' }; // from/to = 'yyyy-mm-dd', null = semua
 const cache = {}, charts = {};
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -123,16 +139,16 @@ async function render() {
   const lvlColor = { TINGGI: SENT.negatif, SEDANG: '#f59e0b', RENDAH: SENT.positif }[lvl];
   const sh = (s, k) => s ? s[k] / (s.T || 1) * 100 : undefined;
   const K = [
-    ['💬', 'Total Mention', fmt(S.T), '', perDay.map(s => s.T), css('--accent'), delta(cur.T, prev?.T, '')],
-    ['😊', 'Positif', fmt(S.p), pct(S.p, S.T), perDay.map(s => s.p), SENT.positif, delta(sh(cur, 'p'), sh(prev, 'p'), ' pp')],
-    ['☹️', 'Negatif', fmt(S.n), pct(S.n, S.T), perDay.map(s => s.n), SENT.negatif, delta(sh(cur, 'n'), sh(prev, 'n'), ' pp', true)],
-    ['😐', 'Netral', fmt(S.z), pct(S.z, S.T), perDay.map(s => s.z), SENT.netral, delta(sh(cur, 'z'), sh(prev, 'z'), ' pp')],
-    ['⚖️', 'Net Sentiment Index', (S.nsi > 0 ? '+' : '') + S.nsi, '', perDay.map(s => s.nsi), '#a78bfa', delta(cur.nsi, prev?.nsi, ' poin')],
-    ['🚨', 'Level Risiko', `<span style="color:${lvlColor}">${lvl[0] + lvl.slice(1).toLowerCase()}</span>`, `negatif ${pct(S.n, S.T)} dari total`, null, lvlColor, '']
+    ['radar', 'Total Mention', fmt(S.T), '', perDay.map(s => s.T), css('--accent'), delta(cur.T, prev?.T, '')],
+    ['up', 'Positif', fmt(S.p), pct(S.p, S.T), perDay.map(s => s.p), SENT.positif, delta(sh(cur, 'p'), sh(prev, 'p'), ' pp')],
+    ['down', 'Negatif', fmt(S.n), pct(S.n, S.T), perDay.map(s => s.n), SENT.negatif, delta(sh(cur, 'n'), sh(prev, 'n'), ' pp', true)],
+    ['flat', 'Netral', fmt(S.z), pct(S.z, S.T), perDay.map(s => s.z), SENT.netral, delta(sh(cur, 'z'), sh(prev, 'z'), ' pp')],
+    ['gauge', 'Net Sentiment Index', (S.nsi > 0 ? '+' : '') + S.nsi, '', perDay.map(s => s.nsi), '#a78bfa', delta(cur.nsi, prev?.nsi, ' poin')],
+    ['shield', 'Level Risiko', `<span style="color:${lvlColor}">${lvl[0] + lvl.slice(1).toLowerCase()}</span>`, `negatif ${pct(S.n, S.T)} dari total`, null, lvlColor, '']
   ];
   const segs = Math.min(5, Math.ceil(S.negP / 10));
   $('kpis').innerHTML = K.map((k, i) => `<div class="kpi">
-    <div class="kh"><span class="l">${k[1]}</span><span class="ic" style="background:${k[5]}26">${k[0]}</span></div>
+    <div class="kh"><span class="l">${k[1]}</span><span class="ic tic" style="--c:${k[5]}">${tIcon(k[0])}</span></div>
     <div class="v">${k[2]}</div>${k[3] ? `<div class="sub">${k[3]}</div>` : '<div class="sub">&nbsp;</div>'}
     <div class="kf">${k[4] ? `<div class="d">${k[6]}</div><canvas id="sp${i}"></canvas>`
       : `<div class="riskbar">${[0, 1, 2, 3, 4].map(x => `<i style="${x < segs ? `background:${k[5]}` : ''}"></i>`).join('')}</div>`}</div></div>`).join('');
@@ -271,7 +287,7 @@ async function render() {
 }
 
 /* ---------- UI ---------- */
-function setThemeIcon() { $('themeBtn').textContent = document.documentElement.dataset.theme === 'dark' ? '☀️' : '🌙'; }
+function setThemeIcon() { $('themeBtn').innerHTML = tIcon(document.documentElement.dataset.theme === 'dark' ? 'sun' : 'moon', 19); }
 $('themeBtn').onclick = () => {
   const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = t; try { localStorage.setItem('theme', t); } catch (e) {}
