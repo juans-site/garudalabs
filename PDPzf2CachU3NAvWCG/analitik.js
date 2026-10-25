@@ -23,10 +23,12 @@
     const avgDay = perDay.length ? Math.round(S.t / perDay.length) : 0;
     // kata kunci
     const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue lu kamu dia mereka nya ya ga gak nggak tapi karena jadi lagi mau buat sama oleh dalam the https http www com co id yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu udah belum dapat hari jangan kena usai milik setelah sedang hingga sampai menjadi tersebut karna emang memang banget sangat orang terjadi kembali saat tengah selatan utara barat timur sejumlah kondisi kawasan wilayah sekitar terus video bukan harus kota lokasi kabupaten provinsi oktober tahun bulan minggu pagi siang sore malam dari menurut ujar kata katanya disebut melalui antara lain this that with from have will are was'.split(' '));
-    const wc = {}; D.forEach(r => r.text.toLowerCase().replace(/https?:\S+|[@#]\S+/g, ' ').split(/[^a-z0-9]+/).forEach(w => { if (w.length > 3 && !STOP.has(w) && !/^\d+$/.test(w)) wc[w] = (wc[w] || 0) + 1; }));
-    const words = Object.entries(wc).sort((a, b) => b[1] - a[1]).slice(0, 26), wMax = words[0]?.[1] || 1;
-    const lay = []; words.forEach((w, i) => i % 2 ? lay.push(w) : lay.unshift(w));
-    const wCol = [TEAL, AMBER, ORANGE, '#7FB8FF', '#A78BFA', '#E7E9EA'];
+    const wc = {}, ws = {}; D.forEach(r => new Set(r.text.toLowerCase().replace(/https?:\S+|[@#]\S+/g, ' ').split(/[^a-z0-9]+/)).forEach(w => { if (w.length > 3 && !STOP.has(w) && !/^\d+$/.test(w)) { wc[w] = (wc[w] || 0) + 1; const s = ws[w] || (ws[w] = { n: 0, p: 0, z: 0 }); r.sent === 'negatif' ? s.n++ : r.sent === 'positif' ? s.p++ : s.z++; } }));
+    const tags = {}, tagS = {}; D.forEach(r => new Set((r.text.match(/#[\p{L}\d_]+/gu) || []).map(t => t.toLowerCase())).forEach(t => { tags[t] = (tags[t] || 0) + 1; const s = tagS[t] || (tagS[t] = { n: 0, p: 0, z: 0 }); r.sent === 'negatif' ? s.n++ : r.sent === 'positif' ? s.p++ : s.z++; }));
+    const tag5 = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const words = Object.entries(wc).sort((a, b) => b[1] - a[1]).slice(0, 45), wMax = words[0]?.[1] || 1;
+    
+    const sCol = s => { const t = s.n + s.p + s.z || 1, nr = s.n / t, pr = s.p / t; return nr >= .5 ? RED : pr >= .5 ? TEAL : nr > pr ? ORANGE : pr > nr ? '#7FD8CE' : GREY; };
     const cmpRows = isl.map(([kk, v]) => { const R = D.filter(r => r.lokasi === kk), n = R.filter(r => r.sent === 'negatif').length; return { kk, v, n, np: n / v * 100, d: delta(islL[kk] || 0, islP[kk] || 0) }; })
       .sort((a, b) => cmpMode === 'neg' ? b.np - a.np : cmpMode === 'grow' ? (b.d ?? -1e9) - (a.d ?? -1e9) : b.v - a.v);
     const negD = Ps.t ? Math.round(Ls.n / Ls.t * 100 - Ps.n / Ps.t * 100) : null, posD = Ps.t ? Math.round(Ls.p / Ls.t * 100 - Ps.p / Ps.t * 100) : null, netD = Ps.t ? Math.round(Ls.z / Ls.t * 100 - Ps.z / Ps.t * 100) : null;
@@ -65,17 +67,32 @@
           <ol class="g-peak">${peak.map((p, i) => `<li><span class="n">${i + 1}</span><div><div class="meta"><span>${tgY(p.d)}</span>${dChip(p.d7, true)}</div><b>${f(p.t)}</b> <small style="color:var(--mute)">postingan · ${pc(p.n, p.t, 0)} negatif</small>
             <p title="${esc(p.top?.text || '')}">${esc(p.tp || '')}${p.top ? ` — ${esc(akun(p.top))}: “${esc(p.top.text.slice(0, 80))}”` : ''}</p></div></li>`).join('')}</ol></div>
       </div>
-      <div class="g-grid3">
-        <div class="g-card"><div class="g-h"><h3>Tren Topik</h3><span class="g-tag">5 topik teratas</span></div><div class="g-cv" style="height:220px"><canvas id="gcTopic"></canvas></div></div>
-        <div class="g-card"><div class="g-h"><h3>Kata Kunci Populer</h3><span class="g-tag">Semua sentimen</span></div>
-          <div class="g-cloud">${lay.map(([w, c], i) => { const r = c / wMax; return `<span title="${esc(w)}: ${f(c)}×" style="font-size:${12 + r * 26}px;font-weight:${r > .5 ? 700 : 500};color:${wCol[i % wCol.length]};opacity:${(.55 + r * .45).toFixed(2)}">${esc(w)}</span>`; }).join('')}</div></div>
+      <div class="g-grid-tt">
+        <div class="g-card"><div class="g-h"><h3>Tren Topik</h3><span class="g-tag">5 topik teratas</span></div><div class="g-cv" style="height:260px"><canvas id="gcTopic"></canvas></div></div>
         <div class="g-card"><div class="g-h"><h3>Sentimen per Topik</h3><span class="g-tag"><span class="g-dot" style="background:${RED}"></span>Neg <span class="g-dot" style="background:${GREY};margin-left:6px"></span>Net <span class="g-dot" style="background:${TEAL};margin-left:6px"></span>Pos</span></div>
           <div class="g-stack">${T5.map(t => { const R = D.filter(r => r.topik === t), b = by(R);
             return `<div class="row"><span class="t" title="${esc(t)}">${esc(t)}</span><span class="sb"><i style="width:${b.n / b.t * 100}%;background:${RED}"></i><i style="width:${b.z / b.t * 100}%;background:${GREY}"></i><i style="width:${b.p / b.t * 100}%;background:${TEAL}"></i></span><span style="text-align:right;color:var(--mute)">${pc(b.p, b.t, 0)}</span></div>`; }).join('')}</div>
           <p class="hint" style="margin:12px 0 0">Angka kanan = porsi positif per topik.</p></div>
       </div>
+      <div class="g-grid-wh">
+        <div class="g-card"><div class="g-h"><h3>Word Cloud</h3><span class="g-tag"><span class="g-dot" style="background:${RED}"></span>Negatif <span class="g-dot" style="background:${GREY};margin-left:6px"></span>Netral <span class="g-dot" style="background:${TEAL};margin-left:6px"></span>Positif</span></div>
+          <div class="g-wc" id="gWc"></div><p class="hint" style="margin:6px 0 0">Ukuran = jumlah postingan yang memuat kata · warna = sentimen dominan.</p></div>
+        <div class="g-card"><div class="g-h"><h3>5 Hashtag Populer</h3><span class="g-tag">Semua sumber</span></div>
+          <ol class="g-list" style="gap:16px">${tag5.map(([t, v], i) => { const s = tagS[t], tt = s.n + s.p + s.z;
+            return `<li style="grid-template-columns:22px minmax(0,1fr) 90px 44px"><span class="n">${i + 1}</span><span class="t" title="${esc(t)}" style="color:${sCol(s)};font-weight:600">${esc(t)}<small style="display:block;color:var(--mute);font-weight:400;font-size:11px">${f(v)} postingan · ${pc(s.n, tt, 0)} negatif</small></span><span class="sb" style="display:flex;height:8px;border-radius:9px;overflow:hidden;background:var(--line)"><i style="width:${s.n / tt * 100}%;background:${RED}"></i><i style="width:${s.z / tt * 100}%;background:${GREY}"></i><i style="width:${s.p / tt * 100}%;background:${TEAL}"></i></span><span class="p">${pc(v, S.t, 0)}</span></li>`; }).join('') || '<li class="hint" style="display:block">Belum ada hashtag pada periode ini</li>'}</ol></div>
+      </div>
       <div class="g-section-t">Detail lanjutan</div>`;
 
+    // Word cloud spiral: kata terbesar di tengah, tidak bertumpuk
+    (() => { const el = root.querySelector('#gWc'); if (!el) return; const W = el.clientWidth || 600, H = 300; el.style.height = H + 'px';
+      const boxes = [], ctx = document.createElement('canvas').getContext('2d');
+      words.forEach(([w, c]) => { const r = Math.sqrt(c / wMax), fs = Math.round(12 + r * 32), fw = r > .45 ? 700 : 600; ctx.font = `${fw} ${fs}px Outfit, sans-serif`;
+        const bw = ctx.measureText(w).width + 6, bh = fs * 1.05;
+        for (let t = 0; t < 1800; t += 1) { const a = t * .32, rad = 1.6 * t * .35, x = W / 2 + rad * Math.cos(a) * 1.5 - bw / 2, y = H / 2 + rad * Math.sin(a) * .8 - bh / 2;
+          if (x < 2 || y < 2 || x + bw > W - 2 || y + bh > H - 2) continue;
+          if (boxes.some(b => x < b.x + b.w && x + bw > b.x && y < b.y + b.h && y + bh > b.y)) continue;
+          boxes.push({ x, y, w: bw, h: bh, word: w, c, fs, fw }); break; } });
+      el.innerHTML = boxes.map(b => { const s = ws[b.word]; return `<span title="${esc(b.word)} — ${f(b.c)} postingan · neg ${s.n} / net ${s.z} / pos ${s.p}" style="left:${b.x}px;top:${b.y}px;font-size:${b.fs}px;font-weight:${b.fw};color:${sCol(s)};opacity:${(.6 + b.c / wMax * .4).toFixed(2)}">${esc(b.word)}</span>`; }).join(''); })();
     const box = root.querySelector('.g-cmp .lokmap');
     if (window.renderIdMap && window.__lok) window.renderIdMap(box, window.__lok);
     root.querySelectorAll('[data-cmp]').forEach(b => b.onclick = () => { cmpMode = b.dataset.cmp; buildAnalitik(); });

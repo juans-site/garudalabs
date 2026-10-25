@@ -230,6 +230,10 @@
 .g-kpi{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.01) 45%),rgba(8,13,18,.5)!important;
   -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border-color:rgba(160,220,215,.16)!important}
 @media(max-width:1100px){.g-stage{margin-bottom:10px!important;gap:10px!important;padding:0!important}.g-hero{margin-bottom:10px}.g-grid4,.g-grid2{gap:10px;margin-bottom:10px}}
+.g-grid-tt{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
+.g-grid-wh{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
+.g-wc{position:relative;width:100%;overflow:hidden}.g-wc span{position:absolute;white-space:nowrap;line-height:1;cursor:default;transition:transform .15s}.g-wc span:hover{transform:scale(1.08)}
+@media(max-width:1100px){.g-grid-tt,.g-grid-wh{grid-template-columns:1fr}}
 @keyframes gPulse{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 7px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
 @keyframes gDash{to{stroke-dashoffset:-40}}
 @media (prefers-reduced-motion:no-preference){.g-arc{animation:gDash 2.4s linear infinite}}
