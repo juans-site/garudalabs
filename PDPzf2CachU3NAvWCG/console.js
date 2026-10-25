@@ -152,6 +152,20 @@
 .g-cv{position:relative;height:250px}
 .g-section-t{display:flex;align-items:center;gap:10px;margin:22px 2px 12px;font:500 12px var(--f-body);letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
 .g-section-t:after{content:"";flex:1;height:1px;background:var(--line)}
+/* Peta bergaya bumi malam: horizon biru, awan tipis, CSS saja */
+.g-stage{background:
+  radial-gradient(circle 1800px at 62% 1700px,#0D2438 0px,#071624 1400px,#040B12 1755px,rgba(120,195,255,.85) 1762px,rgba(70,150,255,.22) 1775px,transparent 1820px),
+  radial-gradient(40% 30% at 22% 78%,rgba(255,255,255,.045),transparent 70%),radial-gradient(30% 22% at 70% 82%,rgba(255,255,255,.035),transparent 70%),
+  radial-gradient(1px 1px at 92% 12%,#fff,transparent),radial-gradient(1px 1px at 84% 6%,#cfe,transparent),radial-gradient(1px 1px at 97% 30%,#fff,transparent),#010307!important}
+[data-theme=light] .g-stage{background:radial-gradient(circle 1800px at 62% 1700px,#0D2438 0px,#071624 1400px,#040B12 1755px,rgba(120,195,255,.85) 1762px,rgba(70,150,255,.22) 1775px,transparent 1820px),#010307!important}
+.g-stage .g-map .lokmap .isl{stroke:rgba(255,200,120,.25)!important;filter:none!important}
+.g-stage .hs-core{fill:#fff!important;stroke:#FF6A1F!important;stroke-width:3!important}
+.g-stage .hs-ring{stroke:#FFB04A!important}
+.e-n{font:700 13px var(--f-body);letter-spacing:.06em;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:3px}
+.e-v{font:500 12.5px var(--f-body);fill:#E8EEF2;paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:3px}
+.e-d{font:700 12px var(--f-body);fill:#FF6B4A;paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:3px}
+.g-stage .g-arc{stroke:rgba(120,190,255,.55);stroke-dasharray:2 5}
+@media(max-width:640px){.e-n{font-size:22px}.e-v,.e-d{display:none}}
 @keyframes gPulse{0%{box-shadow:0 0 0 0 rgba(70,214,200,.6)}70%{box-shadow:0 0 0 7px rgba(70,214,200,0)}100%{box-shadow:0 0 0 0 rgba(70,214,200,0)}}
 @keyframes gDash{to{stroke-dashoffset:-40}}
 @media (prefers-reduced-motion:no-preference){.g-arc{animation:gDash 2.4s linear infinite}}
@@ -199,6 +213,43 @@
       ${series.map((s, j) => { const d = s.v.map((v, i) => (i ? 'L' : 'M') + xy(v, i).map(z => z.toFixed(1)).join(' ')).join('');
         return (s.fill ? `<path d="${d}L${W} ${H}L0 ${H}Z" fill="url(#gl${j}${s.id})"/>` : '') + `<path d="${d}" fill="none" stroke="${s.c}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`; }).join('')}</svg>`; };
   const heat = t => t > .75 ? RED : t > .5 ? ORANGE : t > .25 ? AMBER : '#3FBFB2';
+
+  /* ---------------- Peta gaya "Earth at night" (ringan: SVG statis, tanpa gambar) ---------------- */
+  function earthStyle(svg, isl, islL, islP) {
+    const NS = 'http://www.w3.org/2000/svg', C = window.__IDCENT || {};
+    const max = Math.max(1, ...isl.map(x => x[1])), byK = Object.fromEntries(isl);
+    const defs = document.createElementNS(NS, 'defs');
+    defs.innerHTML = `
+      <pattern id="ePts" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#FFD27A" opacity=".55"/><circle cx="5.5" cy="5" r=".6" fill="#FFB347" opacity=".4"/></pattern>
+      <radialGradient id="eHot" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".35" stop-color="#FF8A2B"/><stop offset=".75" stop-color="#C2300F"/><stop offset="1" stop-color="#5A1206"/></radialGradient>
+      <radialGradient id="eWarm" cx=".5" cy=".5" r=".65"><stop offset="0" stop-color="#FFC46B"/><stop offset=".6" stop-color="#C9702A"/><stop offset="1" stop-color="#4A2A12"/></radialGradient>
+      <radialGradient id="eCool" cx=".5" cy=".5" r=".7"><stop offset="0" stop-color="#5C6B4A"/><stop offset="1" stop-color="#1E2A22"/></radialGradient>
+      <filter id="eGlow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7"/></filter>
+      <radialGradient id="eHalo"><stop offset="0" stop-color="#FF7A2B" stop-opacity=".55"/><stop offset="1" stop-color="#FF7A2B" stop-opacity="0"/></radialGradient>`;
+    svg.prepend(defs);
+    const g = svg.querySelector('g[transform]:last-of-type') || svg;
+    const paths = [...svg.querySelectorAll('.isl')];
+    // lapisan cahaya (sekali render, statis)
+    const glow = document.createElementNS(NS, 'g'); glow.setAttribute('filter', 'url(#eGlow)'); glow.setAttribute('opacity', '.85');
+    const tex = document.createElementNS(NS, 'g');
+    paths.forEach(p => { const v = byK[p.dataset.k] || 0, t = v / max;
+      p.style.fill = `url(#${t > .45 ? 'eHot' : t > .08 ? 'eWarm' : 'eCool'})`;
+      if (v) { const q = p.cloneNode(); q.removeAttribute('class'); q.style.fill = t > .45 ? '#FF6A1F' : '#E08A2E'; q.style.opacity = .35 + t * .6; glow.append(q); }
+      const d = p.cloneNode(); d.removeAttribute('class'); d.style.fill = 'url(#ePts)'; d.style.pointerEvents = 'none'; d.style.opacity = v ? .4 + t * .6 : .15; tex.append(d); });
+    paths[0]?.parentNode.insertBefore(glow, paths[0]);
+    paths.at(-1)?.after(tex);
+    // halo + callout bergaya label satelit
+    svg.querySelectorAll('.hs-lbl,.hs-sub').forEach(t => t.remove());
+    const call = document.createElementNS(NS, 'g'); call.setAttribute('class', 'e-call');
+    isl.forEach(([kk, v], i) => { const c = C[kk]; if (!c) return; const t = v / max, d = delta(islL[kk] || 0, islP[kk] || 0);
+      const up = c[1] > 170 ? 1 : 0, len = 46 + (i % 2) * 18, y2 = c[1] - len, name = kk === 'Bali & Nusa Tenggara' ? 'NUSA TENGGARA' : kk.toUpperCase();
+      call.insertAdjacentHTML('beforeend', `<circle cx="${c[0]}" cy="${c[1]}" r="${18 + t * 40}" fill="url(#eHalo)"/>
+        <line x1="${c[0]}" y1="${c[1] - 6}" x2="${c[0]}" y2="${y2}" stroke="rgba(255,255,255,.55)" stroke-width="1"/>
+        <text x="${c[0] + (c[0] > 860 ? -7 : 7)}" y="${y2 + 9}" text-anchor="${c[0] > 860 ? 'end' : 'start'}" class="e-n">${esc(name)}</text>
+        <text x="${c[0] + (c[0] > 860 ? -7 : 7)}" y="${y2 + 26}" text-anchor="${c[0] > 860 ? 'end' : 'start'}" class="e-v">${k(v)} postingan</text>
+        ${d != null ? `<text x="${c[0] + (c[0] > 860 ? -7 : 7)}" y="${y2 + 42}" text-anchor="${c[0] > 860 ? 'end' : 'start'}" class="e-d">${d >= 0 ? '↑ +' : '↓ '}${d}%</text>` : ''}`); });
+    (svg.querySelector('.hs')?.parentNode || svg).append(call);
+  }
 
   /* ---------------- OPS CONSOLE ---------------- */
   let feedPf = 'Semua';
@@ -297,6 +348,7 @@
             return `<path class="g-arc" d="M${src[0]} ${src[1]}Q${mx} ${my} ${t[0]} ${t[1]}"/>`; }).join('');
         svg.querySelector('g[transform]')?.before(g);
       }
+      if (svg) earthStyle(svg, isl, islL, islP);
     }
     root.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { if (typeof state === 'undefined') return; state.preset = b.dataset.p; render(); });
     root.querySelectorAll('[data-pf]').forEach(b => b.onclick = () => { feedPf = b.dataset.pf; buildConsole(); });
