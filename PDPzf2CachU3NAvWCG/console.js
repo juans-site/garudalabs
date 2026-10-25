@@ -197,6 +197,27 @@
   // Ikon emoji di judul & tab diganti gaya bersih (tanpa emoji)
   const strip = () => document.querySelectorAll('#main h2, .tabs [role=tab]').forEach(h => { if (h.children.length === 0) h.textContent = h.textContent.replace(/^[\p{Extended_Pictographic}\uFE0F\s]+/u, ''); });
   window.addEventListener('lok:update', () => requestAnimationFrame(strip));
+  // ---- Tab "Analitik": kartu metrik dipindah dari Dashboard ke tab sendiri ----
+  function setupTabs() {
+    const dash = document.getElementById('viewDash'), tabs = document.querySelector('.tabs');
+    if (!dash || !tabs || document.getElementById('viewAnalitik')) return;
+    const an = document.createElement('div'); an.id = 'viewAnalitik'; an.hidden = true;
+    [...dash.children].forEach(ch => { if (ch.id !== 'opsConsole') an.append(ch); });
+    dash.after(an);
+    const dBtn = tabs.querySelector('[data-tab=dash]'); if (dBtn) dBtn.textContent = 'Ops Console';
+    const aBtn = document.createElement('button'); aBtn.setAttribute('role', 'tab'); aBtn.dataset.tab = 'analitik'; aBtn.textContent = 'Analitik';
+    dBtn ? dBtn.after(aBtn) : tabs.prepend(aBtn);
+    const show = on => { an.hidden = !on; };
+    aBtn.addEventListener('click', () => {
+      tabs.querySelectorAll('[role=tab]').forEach(x => x.classList.toggle('on', x === aBtn));
+      ['viewDash', 'viewRaw', 'viewSna'].forEach(id => { const v = document.getElementById(id); if (v) v.hidden = true; });
+      const fs = document.getElementById('fSumber'); if (fs) fs.style.visibility = '';
+      show(true);
+      setTimeout(() => { try { Object.values(charts).forEach(ch => ch.resize()); } catch (_) {} window.dispatchEvent(new Event('resize')); }, 30);
+    });
+    tabs.querySelectorAll('[role=tab]').forEach(b => { if (b !== aBtn) b.addEventListener('click', () => show(false)); });
+  }
+  window.addEventListener('lok:update', () => setTimeout(setupTabs, 0));
   // gambar ulang setiap kali dashboard selesai render (event dikirim app.js)
   window.addEventListener('lok:update', () => setTimeout(build, 0));
   if (window.__lok) build();

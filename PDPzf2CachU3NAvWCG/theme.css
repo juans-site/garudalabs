@@ -118,3 +118,6 @@ footer{color:var(--mute);letter-spacing:.04em}
 @keyframes tcIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes tcGlow{0%,100%{box-shadow:0 0 0 1px rgba(70,214,200,.25),0 6px 22px rgba(70,214,200,.12)}50%{box-shadow:0 0 0 1px rgba(70,214,200,.45),0 6px 28px rgba(70,214,200,.28)}}
 @media(max-width:640px){.tabs{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tabs [role=tab]{flex:none;padding:8px 14px!important}}
+/* Tab pil: tanpa garis bawah yang menabrak, beri jarak */
+.tabs{border-bottom:0!important;padding:4px 0 6px;gap:8px!important;margin-bottom:18px!important}
+.tabs [role=tab]{margin:0!important;margin-bottom:0!important;border-bottom-width:1px!important}
