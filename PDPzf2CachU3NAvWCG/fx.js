@@ -4,7 +4,7 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const css = document.createElement('style');
   css.textContent = `
-.fx-intro .g-earth img{animation:fxEarth 1.6s cubic-bezier(.2,.7,.2,1) both}
+.fx-intro:not(.fx-quick) .g-earth img{animation:fxEarth 1.6s cubic-bezier(.2,.7,.2,1) both}
 .fx-intro .g-pin .dot{animation:fxPop .5s cubic-bezier(.3,1.6,.5,1) both;animation-delay:calc(.5s + var(--i)*.14s)}
 .fx-intro .g-pin .stem{transform-origin:bottom;animation:fxGrow .45s ease-out both;animation-delay:calc(.7s + var(--i)*.14s)}
 .fx-intro .g-pin .lab{animation:fxLab .55s ease-out both;animation-delay:calc(.95s + var(--i)*.14s)}
@@ -13,6 +13,8 @@
 .fx-scan{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden;border-radius:inherit}
 .fx-scan:before{content:"";position:absolute;left:0;right:0;height:140px;top:-140px;background:linear-gradient(180deg,transparent,rgba(70,214,200,.10) 70%,rgba(120,240,225,.55) 98%,transparent);animation:fxScan 1.5s cubic-bezier(.4,0,.2,1) .2s both}
 .fx-scan:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 1px 1px,rgba(70,214,200,.35) 1px,transparent 1.6px) 0 0/22px 22px;animation:fxGrid 1.8s ease-out .2s both}
+.fx-quick .g-kpi,.fx-quick .g-int,.fx-quick .g-grid4>*,.fx-quick .g-insight{animation-duration:.45s!important;animation-delay:calc(var(--i,0)*.04s)!important}
+html,body{overflow-x:hidden}
 @keyframes fxEarth{from{opacity:0;transform:scale(1.08);filter:brightness(1.8) saturate(.4)}to{opacity:1;transform:none;filter:none}}
 @keyframes fxPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes fxGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
@@ -47,12 +49,12 @@
     root.querySelectorAll('.g-pin').forEach((p, i) => p.style.setProperty('--i', i));
     root.querySelectorAll('.g-kpi').forEach((p, i) => p.style.setProperty('--i', i));
     root.querySelectorAll('.g-grid4>*').forEach((p, i) => p.style.setProperty('--i', i + 4));
-    root.classList.add('fx-intro');
-    const stage = root.querySelector('.g-stage'); if (stage) { const s = document.createElement('div'); s.className = 'fx-scan'; stage.append(s); setTimeout(() => s.remove(), 2400); }
+    root.classList.add('fx-intro'); const quick = !!window.__afterLoader; if (quick) root.classList.add('fx-quick');
+    const stage = root.querySelector('.g-stage'); if (stage && !quick) { const s = document.createElement('div'); s.className = 'fx-scan'; stage.append(s); setTimeout(() => s.remove(), 2400); }
     root.querySelectorAll('.g-kpi b').forEach((b, i) => countUp(b.firstChild?.nodeType === 3 ? { get textContent() { return b.firstChild.textContent; }, set textContent(v) { b.firstChild.textContent = v; } } : b, 1300, 200 + i * 80));
     root.querySelectorAll('.g-pin').forEach((p, i) => p.querySelectorAll('.lab span, .lab em').forEach(el => countUp(el, 1100, 950 + i * 140)));
     root.querySelectorAll('.g-rank .v, .g-vol .big').forEach((el, i) => countUp(el, 1100, 400 + i * 60));
-    setTimeout(() => root.classList.remove('fx-intro'), 4000);
+    setTimeout(() => root.classList.remove('fx-intro', 'fx-quick'), 4000);
   }
 
   /* Parallax: globe bergerak lebih lambat; label & angka globe memudar + blur saat discroll */
@@ -75,5 +77,5 @@
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', onScroll);
 
-  window.addEventListener('lok:update', () => setTimeout(() => { intro(); parallax(); }, document.getElementById('loader') ? 1150 : 40));
+  window.addEventListener('lok:update', () => setTimeout(() => { intro(); parallax(); }, (window.__afterLoader = !!document.getElementById('loader')) ? 950 : 40));
 })();
