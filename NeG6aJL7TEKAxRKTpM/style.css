@@ -585,3 +585,5 @@ footer{color:var(--mute)}
 .co-bl,.co-br{bottom:24px}
 @media(max-width:640px){.co-tl,.co-tr,.co-bl,.co-br{top:auto;bottom:auto}}
 @media(max-width:900px){.tabs{flex-wrap:nowrap!important}}
+
+.ver{margin-left:6px;font-size:11px;font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:3px 7px;border-radius:6px;color:var(--mute);background:var(--glass);border:1px solid var(--glass-line)}
