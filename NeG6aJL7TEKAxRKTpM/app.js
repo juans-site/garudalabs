@@ -11,6 +11,22 @@ const AKUN_RESMI = ['bankmandiri', 'bank mandiri', 'mandiricard', 'mandiricare',
 const HOMELESS_MEDIA = ['putrapostdaily', 'mojiupdates', 'volleyballidn', 'democrazymedia', 'updatenusantaracom', 'mediakonsumenid'];
 /* ====================== */
 
+/* Ikon garis (gaya Garuda Labs) */
+const ICON = (p, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const IC = {
+  chat: ICON('<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>'),
+  pos: ICON('<circle cx="12" cy="12" r="9"/><path d="M8.5 14c1.8 2 5.2 2 7 0"/><path d="M9 9.5v.01M15 9.5v.01" stroke-width="2.6"/>'),
+  neg: ICON('<circle cx="12" cy="12" r="9"/><path d="M8.5 16.2c1.8-1.9 5.2-1.9 7 0"/><path d="M9 9.5v.01M15 9.5v.01" stroke-width="2.6"/><path d="M7.5 7.3l2.4 1M16.5 7.3l-2.4 1"/>'),
+  neu: ICON('<circle cx="12" cy="12" r="9"/><path d="M8.5 15h7"/><path d="M9 9.5v.01M15 9.5v.01" stroke-width="2.6"/>'),
+  nsi: ICON('<path d="M12 4v16M5 20h14"/><path d="M5 8h14"/><path d="M5 8l-2.5 6a2.5 2.5 0 0 0 5 0zM19 8l-2.5 6a2.5 2.5 0 0 0 5 0z"/>'),
+  risk: ICON('<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.5v.01"/>'),
+  bank: ICON('<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>', 16),
+  eye: ICON('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', 16),
+  pin: ICON('<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.4"/>', 16),
+  scale: ICON('<path d="M12 4v16M5 20h14M5 8h14"/>', 16),
+  info: ICON('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/>', 16),
+  fire: ICON('<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 1.5.8 2.5 2 3 0-3 .5-6 1-8.5z"/>', 18)
+};
 const $ = id => document.getElementById(id);
 const fmt = n => n.toLocaleString('id-ID');
 const pct = (a, b) => b ? (a / b * 100).toFixed(1).replace('.', ',') + '%' : '0%';
@@ -124,18 +140,18 @@ async function render() {
   const lvlColor = { TINGGI: SENT.negatif, SEDANG: '#f59e0b', RENDAH: SENT.positif }[lvl];
   const sh = (s, k) => s ? s[k] / (s.T || 1) * 100 : undefined;
   const K = [
-    ['💬', 'Total Mention', fmt(S.T), '', perDay.map(s => s.T), css('--accent'), delta(cur.T, prev?.T, '')],
-    ['😊', 'Positif', fmt(S.p), pct(S.p, S.T), perDay.map(s => s.p), SENT.positif, delta(sh(cur, 'p'), sh(prev, 'p'), ' pp')],
-    ['☹️', 'Negatif', fmt(S.n), pct(S.n, S.T), perDay.map(s => s.n), SENT.negatif, delta(sh(cur, 'n'), sh(prev, 'n'), ' pp', true)],
-    ['😐', 'Netral', fmt(S.z), pct(S.z, S.T), perDay.map(s => s.z), SENT.netral, delta(sh(cur, 'z'), sh(prev, 'z'), ' pp')],
-    ['⚖️', 'Net Sentiment Index', (S.nsi > 0 ? '+' : '') + S.nsi, '', perDay.map(s => s.nsi), '#a78bfa', delta(cur.nsi, prev?.nsi, ' poin')],
-    ['🚨', 'Level Risiko', `<span style="color:${lvlColor}">${lvl[0] + lvl.slice(1).toLowerCase()}</span>`, `negatif ${pct(S.n, S.T)} dari total`, null, lvlColor, '']
+    [IC.chat, 'Total Mention', fmt(S.T), '', perDay.map(s => s.T), css('--accent'), delta(cur.T, prev?.T, '')],
+    [IC.pos, 'Positif', fmt(S.p), pct(S.p, S.T), perDay.map(s => s.p), SENT.positif, delta(sh(cur, 'p'), sh(prev, 'p'), ' pp')],
+    [IC.neg, 'Negatif', fmt(S.n), pct(S.n, S.T), perDay.map(s => s.n), SENT.negatif, delta(sh(cur, 'n'), sh(prev, 'n'), ' pp', true)],
+    [IC.neu, 'Netral', fmt(S.z), pct(S.z, S.T), perDay.map(s => s.z), SENT.netral, delta(sh(cur, 'z'), sh(prev, 'z'), ' pp')],
+    [IC.nsi, 'Net Sentiment Index', (S.nsi > 0 ? '+' : '') + S.nsi, '', perDay.map(s => s.nsi), '#a78bfa', delta(cur.nsi, prev?.nsi, ' poin')],
+    [IC.risk, 'Level Risiko', `<span style="color:${lvlColor}">${lvl[0] + lvl.slice(1).toLowerCase()}</span>`, `negatif ${pct(S.n, S.T)} dari total`, null, lvlColor, '']
   ];
   const segs = Math.min(5, Math.ceil(S.negP / 10));
   // Kolom kiri: Positif / Negatif / Netral; tengah: callout Total & NSI
   const LEFT = [1, 2, 3];
   $('kpiLeft').innerHTML = LEFT.map(i => { const k = K[i]; return `<div class="kli">
-    <span class="ic" style="background:${k[5]}26">${k[0]}</span>
+    <span class="ic" style="background:${k[5]}22;color:${k[5]};border:1px solid ${k[5]}55">${k[0]}</span>
     <div class="kl-m"><div class="kl-t"><span>${k[1]}</span><small>${k[3]}</small></div><b>${k[2]}</b><div class="d">${k[6]}</div></div>
     <canvas id="sp${i}"></canvas></div>`; }).join('');
   $('kpiHint').textContent = periode;
@@ -514,14 +530,14 @@ async function renderSNA() {
   const bigKom = komRank.filter(l => komSize[l] > 2);
   const komHub = l => N.filter(n => lab.get(n.id) === l).sort((a, b) => (b.din + b.dout) - (a.din + a.dout))[0];
   const ins = [];
-  if (!totalInter) ins.push(['ℹ️', 'Belum ada interaksi antar-akun pada rentang dan platform ini.']);
+  if (!totalInter) ins.push([IC.info, 'Belum ada interaksi antar-akun pada rentang dan platform ini.']);
   else {
-    if (toResmi) ins.push(['🏦', `<b>${pct(toResmi, totalInter)}</b> sebutan dan balasan ditujukan ke akun resmi Mandiri, dan <b>${fmt(negToResmi.size)}</b> akun bernada negatif ikut menyebut akun resmi. Akun resmi menjadi tempat utama orang menyampaikan keluhan, jadi kecepatan dan kualitas balasan di sana sangat menentukan.`]);
+    if (toResmi) ins.push([IC.bank, `<b>${pct(toResmi, totalInter)}</b> sebutan dan balasan ditujukan ke akun resmi Mandiri, dan <b>${fmt(negToResmi.size)}</b> akun bernada negatif ikut menyebut akun resmi. Akun resmi menjadi tempat utama orang menyampaikan keluhan, jadi kecepatan dan kualitas balasan di sana sangat menentukan.`]);
     const negLoud = negA.slice().sort((a, b) => (b.dout + b.din) - (a.dout + a.din)).slice(0, 3);
-    if (negLoud.length) ins.push(['👀', `Akun bernada negatif yang paling banyak berinteraksi: ${negLoud.map(nm).join(', ')}. Layak dipantau dan, bila perlu, dihubungi langsung sebelum keluhannya menyebar.`]);
+    if (negLoud.length) ins.push([IC.eye, `Akun bernada negatif yang paling banyak berinteraksi: ${negLoud.map(nm).join(', ')}. Layak dipantau dan, bila perlu, dihubungi langsung sebelum keluhannya menyebar.`]);
     const nonResmi = byIn.filter(n => !resmiIds.has(n.id)).slice(0, 3);
-    if (nonResmi.length) ins.push(['📌', `Akun non-resmi yang paling sering dituju orang: ${nonResmi.map(nm).join(', ')}. Akun seperti ini (misalnya media, influencer, atau brand lain) ikut membentuk opini publik, jadi perlu dipantau apa yang mereka sampaikan tentang Mandiri.`]);
-    if (negA.length > posA.length) ins.push(['⚖️', `Suara keluhan lebih banyak daripada suara dukungan (${pct(negA.length, authors.length)} vs ${pct(posA.length, authors.length)} akun). Konten positif dan klarifikasi perlu diperkuat di ${sna.pf}.`]);
+    if (nonResmi.length) ins.push([IC.pin, `Akun non-resmi yang paling sering dituju orang: ${nonResmi.map(nm).join(', ')}. Akun seperti ini (misalnya media, influencer, atau brand lain) ikut membentuk opini publik, jadi perlu dipantau apa yang mereka sampaikan tentang Mandiri.`]);
+    if (negA.length > posA.length) ins.push([IC.scale, `Suara keluhan lebih banyak daripada suara dukungan (${pct(negA.length, authors.length)} vs ${pct(posA.length, authors.length)} akun). Konten positif dan klarifikasi perlu diperkuat di ${sna.pf}.`]);
   }
   $('snaInsight').innerHTML = ins.map(([i, t]) => `<li><span class="ii">${i}</span><span>${t}</span></li>`).join('');
   const ink = css('--ink'), line = css('--line'), bg = css('--card');

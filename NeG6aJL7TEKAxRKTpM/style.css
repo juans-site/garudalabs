@@ -646,3 +646,24 @@ body:before{background-position:center bottom!important;background-size:cover!im
 [data-theme=light]{--glass:rgba(255,255,255,.66)}
 .card,.kpi,.card.glass,.glass,.co{backdrop-filter:blur(32px) saturate(1.25)!important;-webkit-backdrop-filter:blur(32px) saturate(1.25)!important}
 .co-tl,.co-tr{top:auto;bottom:150px}@media(max-width:640px){.co-tl,.co-tr{bottom:auto}}
+
+/* v0.46: ikon garis + mobile lebih lega */
+.kli .ic{background:none}
+.kli .ic svg{display:block}
+.sna-insight .ii{color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);background:color-mix(in srgb,var(--gold) 10%,transparent)}
+.ih{display:flex;align-items:center;gap:10px}
+.ihi{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--neg);background:color-mix(in srgb,var(--neg) 14%,transparent);border:1px solid color-mix(in srgb,var(--neg) 40%,transparent)}
+@media(max-width:640px){
+  .topbar{position:relative!important;background:transparent}
+  .content{padding:8px 18px 28px}
+  .hero{padding:10px 2px 22px}
+  .stage{gap:18px}
+  .st-center{gap:12px}
+  .co{padding:14px 16px}
+  .card{padding:20px}
+  .row,.row.dash2{gap:18px;margin-top:18px}
+  .kli{padding:16px 0}
+  .tabs{gap:8px;margin-top:4px}
+  #fSumber{margin-top:6px}
+}
+.cal{display:grid;color:var(--gold)}
