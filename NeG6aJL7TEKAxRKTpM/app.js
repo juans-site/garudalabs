@@ -67,7 +67,7 @@ function baseOpts(extra = {}) {
   const grid = css('--line'), tick = css('--mute');
   return Object.assign({
     maintainAspectRatio: false, responsive: true,
-    plugins: { legend: { labels: { color: tick, usePointStyle: true, pointStyle: 'circle', boxWidth: 8, font: { family: 'Plus Jakarta Sans' } } },
+    plugins: { legend: { labels: { color: tick, usePointStyle: true, pointStyle: 'circle', boxWidth: 8, font: { family: 'Urbanist' } } },
       tooltip: { backgroundColor: css('--card2'), titleColor: css('--ink'), bodyColor: css('--ink'), borderColor: grid, borderWidth: 1, padding: 10 } },
     scales: { x: { grid: { display: false }, ticks: { color: tick }, border: { color: grid } },
       y: { beginAtZero: true, grid: { color: grid, borderDash: [4, 4] }, ticks: { color: tick }, border: { display: false } } }
@@ -172,7 +172,7 @@ async function render() {
   /* Share of voice: bar horizontal */
   const kanal = count(D, 'platform');
   mk('cSov', { type: 'bar', data: { labels: kanal.map(k => k[0]), datasets: [{ label: 'Mention', data: kanal.map(k => k[1]), backgroundColor: kanal.map(k => pColor(k[0])), borderRadius: 4, barThickness: 16 }] },
-    plugins: [{ id: 'pctLbl', afterDatasetsDraw(c) { const { ctx } = c; ctx.save(); ctx.fillStyle = css('--ink'); ctx.font = '600 12px Plus Jakarta Sans, sans-serif'; ctx.textBaseline = 'middle'; c.getDatasetMeta(0).data.forEach((b, x) => ctx.fillText(pct(kanal[x][1], S.T), b.x + 8, b.y)); ctx.restore(); } }],
+    plugins: [{ id: 'pctLbl', afterDatasetsDraw(c) { const { ctx } = c; ctx.save(); ctx.fillStyle = css('--ink'); ctx.font = '600 12px Urbanist, sans-serif'; ctx.textBaseline = 'middle'; c.getDatasetMeta(0).data.forEach((b, x) => ctx.fillText(pct(kanal[x][1], S.T), b.x + 8, b.y)); ctx.restore(); } }],
     options: baseOpts({ indexAxis: 'y', plugins: { ...baseOpts().plugins, legend: { display: false }, tooltip: { ...baseOpts().plugins.tooltip, callbacks: { label: c => ` ${fmt(c.raw)} mention (${pct(c.raw, S.T)})` } } },
       layout: { padding: { right: 56 } }, scales: { x: { display: false, beginAtZero: true }, y: { grid: { display: false }, ticks: { color: css('--ink'), font: { weight: 600 } }, border: { display: false } } } }) });
   $('sovNote').textContent = kanal[0] ? `${kanal[0][0]} dominan (${pct(kanal[0][1], S.T)})` : '';
@@ -311,7 +311,7 @@ $('drApply').onclick = () => {
 
 
 
-Chart.defaults.font.family = 'Plus Jakarta Sans, system-ui, sans-serif';
+Chart.defaults.font.family = 'Urbanist, system-ui, sans-serif';
 render();
 setInterval(() => { delete cache.post; delete cache.komentar; delete cache.all; render(); }, REFRESH_MENIT * 60 * 1000);
 
@@ -322,7 +322,8 @@ const raw = { q: '', sent: '', pf: '', sort: 'dt', dir: -1, page: 1, size: 50 };
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
   $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewAna').hidden = b.dataset.tab !== 'ana'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
-  $('fSumber').style.visibility = b.dataset.tab === 'sna' ? 'hidden' : ''; // SNA selalu Post + Komentar
+  document.body.dataset.tab = b.dataset.tab;
+  $('fSumber').style.display = b.dataset.tab === 'sna' ? 'none' : ''; // SNA selalu Post + Komentar
   if (b.dataset.tab === 'sna') renderSNA();
   if (b.dataset.tab === 'dash' || b.dataset.tab === 'ana') Object.values(charts).forEach(c => c.resize());
 });
@@ -516,7 +517,7 @@ async function renderSNA() {
   sna.cy = cytoscape({
     container: $('snaGraph'), elements: els, minZoom: .1, maxZoom: 4, wheelSensitivity: .25,
     style: [
-      { selector: 'node', style: { 'background-color': 'data(color)', width: 'data(size)', height: 'data(size)', label: 'data(label)', color: ink, 'font-size': 10, 'font-family': 'Plus Jakarta Sans, sans-serif', 'text-valign': 'bottom', 'text-margin-y': 4, 'text-outline-color': bg, 'text-outline-width': 2, 'min-zoomed-font-size': 7, 'text-wrap': 'ellipsis', 'text-max-width': 110, 'border-width': 1.5, 'border-color': bg } },
+      { selector: 'node', style: { 'background-color': 'data(color)', width: 'data(size)', height: 'data(size)', label: 'data(label)', color: ink, 'font-size': 10, 'font-family': 'Urbanist, sans-serif', 'text-valign': 'bottom', 'text-margin-y': 4, 'text-outline-color': bg, 'text-outline-width': 2, 'min-zoomed-font-size': 7, 'text-wrap': 'ellipsis', 'text-max-width': 110, 'border-width': 1.5, 'border-color': bg } },
       { selector: 'node[!big]', style: { label: '' } },
       { selector: 'node.lbl', style: { label: 'data(label)' } },
       { selector: 'edge', style: { width: 'data(w)', 'line-color': line, 'curve-style': 'haystack', opacity: .5 } },

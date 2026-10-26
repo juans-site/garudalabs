@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bank Mandiri - Garuda Labs Intelligent Media Monitoring</title>
-<link rel="icon" href="favicon.ico?v=37" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=37">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=37">
+<link rel="icon" href="favicon.ico?v=38" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=38">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=38">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Dashboard monitoring percakapan media sosial terkait Bank Mandiri: sentimen, kanal, isu utama, dan level risiko.">
 <meta property="og:type" content="website">
@@ -18,8 +18,8 @@
 <meta name="twitter:title" content="Bank Mandiri - Garuda Labs Intelligent Media Monitoring">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light'}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=37">
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=38">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
@@ -27,12 +27,19 @@
 <body>
 <header class="topbar">
   <div class="brand">
-    <img class="logo logo-dark" src="logo-dark.png?v=37" alt="Logo">
-    <img class="logo logo-light" src="logo-light.png?v=37" alt="Logo">
+    <img class="logo logo-dark" src="logo-dark.png?v=38" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png?v=38" alt="Logo">
     <span class="divider"></span>
     <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="beta">Beta</span>
   </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="dash" class="on">Dashboard</button>
+    <button role="tab" data-tab="ana">Analytics</button>
+    <button role="tab" data-tab="raw">Raw Data</button>
+    <button role="tab" data-tab="sna">SNA</button>
+  </nav>
   <div class="top-r">
+    <div class="seg" id="fSumber"><button data-v="post" class="on">Post</button><button data-v="komentar">Komentar</button><button data-v="all">All</button></div>
       <div class="dr">
       <button class="dr-btn" id="drBtn" aria-haspopup="true" aria-expanded="false"><span>📅</span><b id="drLabel">Semua periode</b><span class="caret">▾</span></button>
       <div class="dr-pop" id="drPop" hidden>
@@ -56,20 +63,12 @@
   <div id="loading" class="loading" role="status" aria-label="Memuat"><span class="spinner"></span></div>
 
   <div id="main" hidden>
-    <div class="tabs" role="tablist">
-      <button role="tab" data-tab="dash" class="on">📊 Dashboard</button>
-      <button role="tab" data-tab="ana">🔎 Analytics</button>
-      <button role="tab" data-tab="raw">📄 Raw Data</button>
-      <button role="tab" data-tab="sna">🕸️ SNA</button>
-      <div class="seg" id="fSumber"><button data-v="post" class="on">Post</button><button data-v="komentar">Komentar</button><button data-v="all">All</button></div>
-    </div>
     <div id="viewDash">
     <div class="stage">
       <aside class="st-col">
         <section class="card glass"><div class="card-h"><h2>Sentimen</h2><span class="hint" id="kpiHint"></span></div><div class="kpi-list" id="kpiLeft"></div></section>
       </aside>
       <div class="st-center">
-        <div class="st-img" role="img" aria-label="Gedung Bank Mandiri"></div>
         <div class="co co-tl" id="coTotal"></div>
         <div class="co co-tr" id="coNsi"></div>
         <div class="co co-bl" id="coStatus"></div>
@@ -185,6 +184,6 @@
     <footer>© 2026 Garuda Labs Intelligent Media Monitoring</footer>
   </div>
 </main>
-<script src="app.js?v=37"></script>
+<script src="app.js?v=38"></script>
 </body>
 </html>
