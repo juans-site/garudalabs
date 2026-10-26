@@ -667,3 +667,20 @@ body:before{background-position:center bottom!important;background-size:cover!im
   #fSumber{margin-top:6px}
 }
 .cal{display:grid;color:var(--gold)}
+
+/* v0.47: mobile lebih lega */
+@media(max-width:640px){
+  .stage{display:flex!important;flex-direction:column;gap:22px!important}
+  .st-center{display:grid!important;grid-template-columns:1fr 1fr;gap:14px!important;min-height:0!important;padding:0!important}
+  .co{position:static!important;margin:0!important;transform:none!important;width:auto!important;padding:16px!important;border-radius:18px}
+  .co b{font-size:22px}
+  .st-col .card{padding:22px!important}
+  .content{padding:8px 20px 32px!important}
+  .hero{padding:14px 2px 26px!important}
+  .topbar{padding:10px 20px!important;column-gap:8px}
+  .topbar .dr-btn{padding:0 12px}
+  .icon-btn,.dr-btn{height:42px!important}
+  .icon-btn{width:42px!important}
+  .tabs [role=tab]{padding:8px 13px!important}
+}
+@media(max-width:380px){.beta-ver span,.beta-ver i{display:none}}
