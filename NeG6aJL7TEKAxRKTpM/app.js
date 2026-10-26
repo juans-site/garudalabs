@@ -99,7 +99,7 @@ async function render() {
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
   const unit = { post: 'post', komentar: 'komentar', all: 'mention' }[state.src];
-  $('periode').textContent = `Percakapan media sosial terkait Bank Mandiri · ${periode} · ${unit}`;
+  $('periode').textContent = `Pemantauan media sosial · Bank Mandiri · ${periode} · ${unit}`;
 
   const S = stats(D), N = D.filter(r => r.sent === 'negatif'), P = D.filter(r => r.sent === 'positif');
 
@@ -138,6 +138,17 @@ async function render() {
     <div class="kl-m"><div class="kl-t"><span>${k[1]}</span><small>${k[3]}</small></div><b>${k[2]}</b><div class="d">${k[6]}</div></div>
     <canvas id="sp${i}"></canvas></div>`; }).join('');
   $('kpiHint').textContent = periode;
+  { const t = S.T || 1, pd = days.map(d => ({ d, ...stats(D.filter(r => r.tgl === d)) })).filter(x => x.T);
+    const worst = pd.slice().sort((a, b) => b.n - a.n)[0], best = pd.slice().sort((a, b) => b.p - a.p)[0];
+    const avg = pd.length ? S.T / pd.length : 0;
+    $('sentExtra').innerHTML = `<h3 class="sub">Komposisi</h3>
+      <div class="ks-bar big"><i style="width:${S.n / t * 100}%;background:${SENT.negatif}"></i><i style="width:${S.z / t * 100}%;background:${SENT.netral}"></i><i style="width:${S.p / t * 100}%;background:${SENT.positif}"></i></div>
+      <div class="se-grid">
+        <div><small>Rata-rata/hari</small><b>${fmt(Math.round(avg))}</b></div>
+        <div><small>NSI</small><b style="color:${S.nsi < 0 ? SENT.negatif : SENT.positif}">${S.nsi > 0 ? '+' : ''}${S.nsi}</b></div>
+        ${worst ? `<div><small>Hari paling negatif</small><b>${tglShort(worst.d)}</b><span>${fmt(worst.n)} negatif</span></div>` : ''}
+        ${best ? `<div><small>Hari paling positif</small><b>${tglShort(best.d)}</b><span>${fmt(best.p)} positif</span></div>` : ''}
+      </div>`; }
   const co = (el, lbl, val, sub) => $(el).innerHTML = `<small>${lbl}</small><b>${val}</b>${sub ? `<span>${sub}</span>` : ''}`;
   co('coTotal', 'Total Mention', K[0][2], K[0][6]);
   co('coNsi', 'Net Sentiment Index', K[4][2], K[4][6]);
@@ -243,12 +254,16 @@ async function render() {
 
   /* Rekomendasi (template otomatis) */
   const negPf = negK[0]?.[0] || 'kanal utama';
-  const reco = {
-    'Jangka Pendek': [...negTop.slice(0, 3).map(x => `Holding statement & klarifikasi isu "${x[0]}"`), `Perkuat respons akun resmi di ${negPf}`],
-    'Jangka Menengah': ['Susun FAQ untuk pertanyaan berulang', 'Koordinasi dengan unit terkait untuk penyelesaian isu', 'Laporan monitoring harian ke manajemen'],
-    'Jangka Panjang': [`Dorong konten positif: ${count(P, 'topik')[0]?.[0] || 'kinerja'}`, 'Libatkan media & komunitas untuk narasi penyeimbang', 'Evaluasi tren NSI mingguan']
-  };
-  $('reco').innerHTML = Object.entries(reco).map(([k, v]) => `<div><h3>${k}</h3><ul>${v.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');
+  // Rekomendasi taktis untuk tim PR / campaign (3–5 poin, dari data)
+  const posTopR = count(P, 'topik')[0]?.[0];
+  const reco = [
+    negTop[0] && ['Klarifikasi isu utama', `Rilis holding statement singkat untuk isu "${negTop[0][0]}" (${fmt(negTop[0][1])} mention negatif), lalu pin di kanal resmi.`],
+    negPf && ['Fokus kanal', `Prioritaskan respons di ${negPf}, kanal dengan keluhan terbanyak; targetkan balasan < 1 jam pada jam sibuk.`],
+    negTop[1] && ['Siapkan jawaban baku', `Buat FAQ & template balasan untuk "${negTop[1][0]}" agar respons admin konsisten.`],
+    posTopR && ['Dorong narasi positif', `Perbanyak konten tentang "${posTopR}" dan ajak akun pendukung ikut menyebarkannya.`],
+    ['Pantau & laporkan', `Level risiko ${lvl.toLowerCase()} (NSI ${S.nsi > 0 ? '+' : ''}${S.nsi}). Laporkan perkembangan harian ke manajemen.`]
+  ].filter(Boolean).slice(0, 5);
+  $('reco').innerHTML = `<ol class="reco-list">${reco.map(([t, d], i) => `<li><span class="rn">${i + 1}</span><div><b>${esc(t)}</b><p>${esc(d)}</p></div></li>`).join('')}</ol>`;
 
   /* Summary */
   const posTop = count(P, 'topik');

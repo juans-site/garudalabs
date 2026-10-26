@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bank Mandiri - Garuda Labs Intelligent Media Monitoring</title>
-<link rel="icon" href="favicon.ico?v=40" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=40">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=40">
+<link rel="icon" href="favicon.ico?v=41" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=41">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=41">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Dashboard monitoring percakapan media sosial terkait Bank Mandiri: sentimen, kanal, isu utama, dan level risiko.">
 <meta property="og:type" content="website">
@@ -19,7 +19,7 @@
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light'}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=40">
+<link rel="stylesheet" href="style.css?v=41">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
@@ -27,10 +27,10 @@
 <body>
 <header class="topbar">
   <div class="brand">
-    <img class="logo logo-dark" src="logo-dark.png?v=40" alt="Logo">
-    <img class="logo logo-light" src="logo-light.png?v=40" alt="Logo">
+    <img class="logo logo-dark" src="logo-dark.png?v=41" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png?v=41" alt="Logo">
     <span class="divider"></span>
-    <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="beta">Beta</span><span class="ver" title="Versi dashboard">v0.40</span>
+    <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="beta-ver" title="Versi dashboard"><b>BETA</b><i></i><span>v0.41</span></span>
   </div>
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="dash" class="on">Dashboard</button>
@@ -57,7 +57,7 @@
 
 <main class="content">
   <div class="page-head hero">
-    <div><h1>Analisis Media Monitoring</h1><p id="periode">Memuat data…</p></div>
+    <div><p class="eyebrow" id="periode">Memuat data…</p><h1>Analisis Media<br><span>Monitoring</span></h1></div>
   </div>
 
   <div id="loading" class="loading" role="status" aria-label="Memuat"><span class="spinner"></span></div>
@@ -66,7 +66,7 @@
     <div id="viewDash">
     <div class="stage">
       <aside class="st-col">
-        <section class="card glass"><div class="card-h"><h2>Sentimen</h2><span class="hint" id="kpiHint"></span></div><div class="kpi-list" id="kpiLeft"></div></section>
+        <section class="card glass"><div class="card-h"><h2>Sentimen</h2><span class="hint" id="kpiHint"></span></div><div class="kpi-list" id="kpiLeft"></div><div class="sent-extra" id="sentExtra"></div></section>
       </aside>
       <div class="st-center">
         <div class="co co-tl" id="coTotal"></div>
@@ -184,6 +184,6 @@
     <footer>© 2026 Garuda Labs Intelligent Media Monitoring</footer>
   </div>
 </main>
-<script src="app.js?v=40"></script>
+<script src="app.js?v=41"></script>
 </body>
 </html>
