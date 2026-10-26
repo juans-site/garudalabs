@@ -75,5 +75,5 @@
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', onScroll);
 
-  window.addEventListener('lok:update', () => setTimeout(() => { intro(); parallax(); }, 40));
+  window.addEventListener('lok:update', () => setTimeout(() => { intro(); parallax(); }, document.getElementById('loader') ? 1150 : 40));
 })();
