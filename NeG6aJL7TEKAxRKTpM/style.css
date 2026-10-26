@@ -619,3 +619,21 @@ footer{color:var(--mute)}
 .reco-list li>div{background:none!important;padding:0!important;border-radius:0}
 .hero,.eyebrow{overflow-wrap:anywhere}
 @media(max-width:640px){.beta-ver{margin-left:8px;padding:3px 8px;gap:6px;font-size:10px}.logo{height:28px}.hero h1{font-size:30px}}
+
+/* ===== v0.42: keterbacaan — kaca lebih pekat, latar diredupkan ===== */
+[data-theme=dark]{--glass:rgba(14,16,22,.74);--glass-line:rgba(255,255,255,.10);--mute:#B4B6C0;
+  --shade:linear-gradient(180deg,rgba(6,8,14,.70) 0%,rgba(6,8,14,.35) 35%,rgba(6,8,14,.45) 65%,rgba(6,8,14,.92) 100%)}
+[data-theme=light]{--glass:rgba(255,255,255,.80);--glass-line:rgba(255,255,255,.9);--mute:#4c5668;
+  --shade:linear-gradient(180deg,rgba(255,255,255,.70) 0%,rgba(255,255,255,.25) 35%,rgba(255,255,255,.35) 65%,rgba(238,243,250,.95) 100%)}
+.card,.kpi,.card.glass,.glass,.co{backdrop-filter:blur(28px) saturate(1.2)!important;-webkit-backdrop-filter:blur(28px) saturate(1.2)!important}
+.co{background:var(--glass)!important;padding:14px 18px}
+/* teks lebih tebal dan bayangan halus agar terbaca di atas foto */
+body{font-weight:500}
+.kli b,.co b,.se-grid b{font-weight:600}
+.kl-t,.kli .d,.hint,.impact,.co small,.co span{font-weight:500}
+.hero h1{font-weight:400;text-shadow:0 2px 24px rgba(0,0,0,.55)}
+.hero h1 span{font-weight:300}
+.eyebrow{text-shadow:0 1px 10px rgba(0,0,0,.7);color:var(--ink)!important;opacity:.85}
+[data-theme=light] .hero h1,[data-theme=light] .eyebrow{text-shadow:0 1px 18px rgba(255,255,255,.9)}
+.tabs [role=tab]{font-weight:600}
+.issues .nt{font-weight:600}
