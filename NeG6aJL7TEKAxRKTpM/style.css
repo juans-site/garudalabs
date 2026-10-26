@@ -683,4 +683,4 @@ body:before{background-position:center bottom!important;background-size:cover!im
   .icon-btn{width:42px!important}
   .tabs [role=tab]{padding:8px 13px!important}
 }
-@media(max-width:380px){.beta-ver span,.beta-ver i{display:none}}
+@media(max-width:400px){.logo{height:24px!important}.beta-ver{margin-left:6px;padding:3px 7px;gap:5px;font-size:9.5px;letter-spacing:.06em}.topbar .dr-btn{padding:0 9px}.topbar .dr{margin-right:6px}}
