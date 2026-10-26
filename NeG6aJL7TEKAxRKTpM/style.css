@@ -424,8 +424,8 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
 @media(max-width:640px){.raw-bar .dl{width:100%}}
 
 /* ===== Desain v3: panggung gedung + kartu kaca ===== */
-:root{--stage-img:url("stage-dark.jpg?v=40")}
-[data-theme=light]{--stage-img:url("stage-light.jpg?v=40")}
+:root{--stage-img:url("stage-dark.jpg?v=45")}
+[data-theme=light]{--stage-img:url("stage-light.jpg?v=45")}
 [data-theme=dark]{--glass:rgba(30,31,34,.62);--glass-line:rgba(255,255,255,.08)}
 [data-theme=light]{--glass:rgba(255,255,255,.72);--glass-line:rgba(13,43,91,.10)}
 /* latar halaman: foto yang sama, diburamkan */
@@ -639,3 +639,10 @@ body{font-weight:500}
 .issues .nt{font-weight:600}
 
 #loading:not(.err){display:none!important}
+
+/* v0.45: gedung lebih kecil (langit lebih luas), kartu lebih transparan */
+body:before{background-position:center bottom!important;background-size:cover!important}
+[data-theme=dark]{--glass:rgba(14,16,22,.60)}
+[data-theme=light]{--glass:rgba(255,255,255,.66)}
+.card,.kpi,.card.glass,.glass,.co{backdrop-filter:blur(32px) saturate(1.25)!important;-webkit-backdrop-filter:blur(32px) saturate(1.25)!important}
+.co-tl,.co-tr{top:auto;bottom:150px}@media(max-width:640px){.co-tl,.co-tr{bottom:auto}}
