@@ -77,10 +77,10 @@ function mk(id, cfg) { charts[id]?.destroy(); charts[id] = new Chart($(id), cfg)
 
 /* ---------- Render ---------- */
 async function render() {
-  $('loading').hidden = !$('main').hidden; // spinner hanya saat pertama memuat
+  $('loading').hidden = true; // spinner hanya saat pertama memuat
   let all;
   try { all = await load(state.src); }
-  catch (e) { $('loading').textContent = `Gagal memuat data. Silakan muat ulang halaman beberapa saat lagi. (${e.message})`; return; }
+  catch (e) { $('loading').hidden = false; $('loading').classList.add('err'); $('loading').textContent = `Gagal memuat data. Silakan muat ulang halaman beberapa saat lagi. (${e.message})`; window.GarudaLoader?.complete(); return; }
   const dates = [...new Set(all.map(r => r.tgl))].sort();
   const minD = dates[0], maxD = dates.at(-1);
   applyPreset(dates);
@@ -94,6 +94,7 @@ async function render() {
 
   const single = from === to, isAll = from <= minD && to >= maxD, D = all.filter(r => inRange(r.tgl));
   $('loading').hidden = true; $('main').hidden = false;
+  window.GarudaLoader?.complete();
   if (!$('viewSna').hidden) renderSNA();
   state.rawD = D; state.rawUnitPost = state.src; renderRaw(true); document.querySelector('.raw-wrap').scrollTop = 0;
 

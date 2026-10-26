@@ -637,3 +637,5 @@ body{font-weight:500}
 [data-theme=light] .hero h1,[data-theme=light] .eyebrow{text-shadow:0 1px 18px rgba(255,255,255,.9)}
 .tabs [role=tab]{font-weight:600}
 .issues .nt{font-weight:600}
+
+#loading:not(.err){display:none!important}
