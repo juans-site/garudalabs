@@ -422,3 +422,72 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
 .raw-bar .dl{height:36px;padding:0 14px;white-space:nowrap}
 .raw-bar .dl:disabled{opacity:.6}
 @media(max-width:640px){.raw-bar .dl{width:100%}}
+
+/* ===== Desain v3: panggung gedung + kartu kaca ===== */
+:root{--stage-img:url("stage-dark.jpg?v=37")}
+[data-theme=light]{--stage-img:url("stage-light.jpg?v=37")}
+[data-theme=dark]{--glass:rgba(30,31,34,.62);--glass-line:rgba(255,255,255,.08)}
+[data-theme=light]{--glass:rgba(255,255,255,.72);--glass-line:rgba(13,43,91,.10)}
+/* latar halaman: foto yang sama, diburamkan */
+body:before{content:"";position:fixed;inset:-40px;z-index:-2;background:var(--stage-img) center/cover no-repeat;filter:blur(38px) saturate(1.1);opacity:.55}
+body:after{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 70%,transparent),var(--bg) 85%)}
+body{background:var(--bg)}
+.topbar{background:color-mix(in srgb,var(--nav) 75%,transparent)}
+/* judul tanpa foto (foto pindah ke tengah dashboard) */
+.hero,[data-theme=light] .hero{background:transparent;border:0;min-height:0;padding:8px 0 4px;margin:0}
+.hero>div{max-width:100%}
+.card.glass,.glass{background:var(--glass);border:1px solid var(--glass-line);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+
+.stage{display:grid;grid-template-columns:300px 1fr 300px;gap:20px;align-items:stretch;margin-bottom:20px}
+.st-col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.st-col .card{flex:1}
+.st-center{position:relative;min-height:540px;border-radius:20px;overflow:hidden}
+.st-img{position:absolute;inset:0;background:var(--stage-img) center 35%/cover no-repeat;
+  -webkit-mask-image:radial-gradient(ellipse 62% 70% at 50% 48%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 62% 70% at 50% 48%,#000 55%,transparent 100%)}
+/* callout angka di sekitar gedung */
+.co{position:absolute;z-index:2;display:flex;flex-direction:column;gap:2px;max-width:46%;padding:12px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.co small{color:var(--mute);font-size:12px;font-weight:600}
+.co b{font-size:26px;font-weight:800;line-height:1.1;letter-spacing:-.4px}
+.co span{font-size:12px;color:var(--mute)}
+.co span b{font-size:12px;display:inline}
+.co:after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 30%,transparent)}
+.co-tl{top:18px;left:18px}.co-tl:after{right:-26px;bottom:-14px}
+.co-tr{top:18px;right:18px;text-align:right}.co-tr:after{left:-26px;bottom:-14px}
+.co-bl{bottom:18px;left:18px}.co-bl:after{right:-26px;top:-14px}
+.co-br{bottom:18px;right:18px;text-align:right}.co-br:after{left:-26px;top:-14px}
+
+/* daftar sentimen kiri */
+.kpi-list{display:flex;flex-direction:column}
+.kli{display:grid;grid-template-columns:40px 1fr 84px;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.kli:last-child{border-bottom:0}
+.kli .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px}
+.kl-t{display:flex;gap:8px;align-items:baseline;font-size:13px;color:var(--mute)}
+.kl-t small{font-weight:700}
+.kli b{display:block;font-size:24px;font-weight:800;letter-spacing:-.4px;line-height:1.2}
+.kli .d{font-size:11.5px;color:var(--mute);line-height:1.35}
+.kli .d b{display:inline;font-size:12px}
+.kli canvas{width:84px!important;height:40px!important}
+.st-col .risk .risk-ring{width:110px;height:110px}
+.row.dash2{grid-template-columns:1.6fr 1fr}
+#viewAna .row.first{margin-top:0}
+
+@media(max-width:1200px){
+  .stage{grid-template-columns:1fr 1fr}
+  .st-center{grid-column:1/-1;order:-1;min-height:460px}
+  .row.dash2{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .stage{grid-template-columns:1fr}
+  .st-center{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:10px;overflow:visible;border-radius:0}
+  .st-img{position:relative;grid-column:1/-1;height:240px;border-radius:16px;-webkit-mask-image:none;mask-image:none}
+  .co{position:relative;inset:auto;max-width:none;text-align:left}
+  .co:after{display:none}
+  .co b{font-size:20px}
+}
+.st-img{-webkit-mask-image:radial-gradient(ellipse 50% 52% at 50% 50%,#000 45%,transparent 100%);mask-image:radial-gradient(ellipse 50% 52% at 50% 50%,#000 45%,transparent 100%);background-size:auto 112%}
+.co b span{font-size:inherit;color:inherit}
+.co b span[style]{font-size:inherit}
+@media(max-width:640px){.st-img{-webkit-mask-image:none;mask-image:none;background-size:cover}}
+/* semua tab memakai kartu kaca yang sama */
+.card,.kpi{background:var(--glass);border-color:var(--glass-line);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2)}
+.sna-canvas{background:radial-gradient(circle at 1px 1px,var(--line) 1px,transparent 0) 0 0/22px 22px,var(--glass)}

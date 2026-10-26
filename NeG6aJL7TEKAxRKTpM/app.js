@@ -131,12 +131,18 @@ async function render() {
     ['🚨', 'Level Risiko', `<span style="color:${lvlColor}">${lvl[0] + lvl.slice(1).toLowerCase()}</span>`, `negatif ${pct(S.n, S.T)} dari total`, null, lvlColor, '']
   ];
   const segs = Math.min(5, Math.ceil(S.negP / 10));
-  $('kpis').innerHTML = K.map((k, i) => `<div class="kpi">
-    <div class="kh"><span class="l">${k[1]}</span><span class="ic" style="background:${k[5]}26">${k[0]}</span></div>
-    <div class="v">${k[2]}</div>${k[3] ? `<div class="sub">${k[3]}</div>` : '<div class="sub">&nbsp;</div>'}
-    <div class="kf">${k[4] ? `<div class="d">${k[6]}</div><canvas id="sp${i}"></canvas>`
-      : `<div class="riskbar">${[0, 1, 2, 3, 4].map(x => `<i style="${x < segs ? `background:${k[5]}` : ''}"></i>`).join('')}</div>`}</div></div>`).join('');
-  K.forEach((k, i) => { if (!k[4]) return; new Chart($('sp' + i), { type: 'line', data: { labels: k[4].map((_, x) => x), datasets: [{ data: k[4], borderColor: k[5], borderWidth: 1.8, pointRadius: 0, tension: .35, fill: true,
+  // Kolom kiri: Positif / Negatif / Netral; tengah: callout Total & NSI
+  const LEFT = [1, 2, 3];
+  $('kpiLeft').innerHTML = LEFT.map(i => { const k = K[i]; return `<div class="kli">
+    <span class="ic" style="background:${k[5]}26">${k[0]}</span>
+    <div class="kl-m"><div class="kl-t"><span>${k[1]}</span><small>${k[3]}</small></div><b>${k[2]}</b><div class="d">${k[6]}</div></div>
+    <canvas id="sp${i}"></canvas></div>`; }).join('');
+  $('kpiHint').textContent = periode;
+  const co = (el, lbl, val, sub) => $(el).innerHTML = `<small>${lbl}</small><b>${val}</b>${sub ? `<span>${sub}</span>` : ''}`;
+  co('coTotal', 'Total Mention', K[0][2], K[0][6]);
+  co('coNsi', 'Net Sentiment Index', K[4][2], K[4][6]);
+  co('coStatus', 'Level Risiko', K[5][2], K[5][3]);
+  K.forEach((k, i) => { if (!k[4] || !$('sp' + i)) return; new Chart($('sp' + i), { type: 'line', data: { labels: k[4].map((_, x) => x), datasets: [{ data: k[4], borderColor: k[5], borderWidth: 1.8, pointRadius: 0, tension: .35, fill: true,
     backgroundColor: ctx => { const a = ctx.chart.chartArea; if (!a) return k[5] + '22'; const g = ctx.chart.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, k[5] + '55'); g.addColorStop(1, k[5] + '00'); return g; } }] },
     options: { responsive: false, animation: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } } }); });
 
@@ -170,6 +176,7 @@ async function render() {
     options: baseOpts({ indexAxis: 'y', plugins: { ...baseOpts().plugins, legend: { display: false }, tooltip: { ...baseOpts().plugins.tooltip, callbacks: { label: c => ` ${fmt(c.raw)} mention (${pct(c.raw, S.T)})` } } },
       layout: { padding: { right: 56 } }, scales: { x: { display: false, beginAtZero: true }, y: { grid: { display: false }, ticks: { color: css('--ink'), font: { weight: 600 } }, border: { display: false } } } }) });
   $('sovNote').textContent = kanal[0] ? `${kanal[0][0]} dominan (${pct(kanal[0][1], S.T)})` : '';
+  co('coKanal', 'Kanal Dominan', kanal[0] ? esc(kanal[0][0]) : '–', kanal[0] ? `${pct(kanal[0][1], S.T)} dari total ${unit}` : '');
 
   /* Sentimen per kanal: grouped bar */
   const pf = kanal.map(k => k[0]);
@@ -314,10 +321,10 @@ document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b =
 const raw = { q: '', sent: '', pf: '', sort: 'dt', dir: -1, page: 1, size: 50 };
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
-  $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
+  $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewAna').hidden = b.dataset.tab !== 'ana'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
   $('fSumber').style.visibility = b.dataset.tab === 'sna' ? 'hidden' : ''; // SNA selalu Post + Komentar
   if (b.dataset.tab === 'sna') renderSNA();
-  if (b.dataset.tab === 'dash') Object.values(charts).forEach(c => c.resize());
+  if (b.dataset.tab === 'dash' || b.dataset.tab === 'ana') Object.values(charts).forEach(c => c.resize());
 });
 function renderRaw(reset) {
   const D = state.rawD || [];
