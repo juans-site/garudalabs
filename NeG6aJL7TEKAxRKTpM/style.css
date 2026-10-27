@@ -684,3 +684,16 @@ body:before{background-position:center bottom!important;background-size:cover!im
   .tabs [role=tab]{padding:8px 13px!important}
 }
 @media(max-width:400px){.logo{height:24px!important}.beta-ver{margin-left:6px;padding:3px 7px;gap:5px;font-size:9.5px;letter-spacing:.06em}.topbar .dr-btn{padding:0 9px}.topbar .dr{margin-right:6px}}
+
+/* v0.49 */
+/* navbar: latar kaca agar judul tidak tembus saat di-scroll */
+.topbar{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 86%,transparent)!important;
+  backdrop-filter:blur(18px) saturate(1.2)!important;-webkit-backdrop-filter:blur(18px) saturate(1.2)!important;border-bottom:1px solid var(--glass-line)!important}
+/* titik penanda: rapi, menempel di sisi dalam kotak, sejajar tengah */
+.co:after{width:10px;height:10px;top:50%!important;bottom:auto!important;transform:translateY(-50%);box-shadow:0 0 0 5px rgba(239,68,68,.22)}
+.co-tl:after,.co-bl:after{right:-22px!important;left:auto!important}
+.co-tr:after,.co-br:after{left:-22px!important;right:auto!important}
+.co:before{content:"";position:absolute;top:50%;width:14px;height:1px;background:rgba(239,68,68,.55)}
+.co-tl:before,.co-bl:before{right:-14px}
+.co-tr:before,.co-br:before{left:-14px}
+@media(max-width:640px){.co:before{display:none}}

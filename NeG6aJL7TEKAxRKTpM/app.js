@@ -48,7 +48,8 @@ async function load(src) {
   if (src === 'all') { const [p, k] = await Promise.all([load('post'), load('komentar')]); return cache.all = p.concat(k); }
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(TABS[src])}&_=${Date.now()}`;
   const txt = await fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); });
-  const rows = Papa.parse(txt, { header: true, skipEmptyLines: true }).data;
+  // parsing di worker agar animasi loader tidak tersendat
+  const rows = await new Promise((ok, no) => { try { Papa.parse(txt, { header: true, skipEmptyLines: true, worker: true, complete: r => ok(r.data), error: no }); } catch (e) { ok(Papa.parse(txt, { header: true, skipEmptyLines: true }).data); } });
   return cache[src] = rows.map(r => norm(r, src)).filter(r => r.tgl && r.sent);
 }
 // Tanggal: "dd/mm/yyyy", serial angka, atau "yyyy-mm-dd". Jam: "HH:MM" atau pecahan hari.
