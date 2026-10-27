@@ -75,6 +75,6 @@ function refreshProgress(now){
  if(!reduced&&document.body.contains(canvas))requestAnimationFrame(refreshProgress);
 }
 function restart(){born=performance.now();manualProgress=null;const b=document.querySelector('.brand');b.style.animation='none';void b.offsetWidth;b.style.animation='';}
-window.GarudaLoader={setProgress(v){manualProgress=Number(v)||0},complete(){manualProgress=100;const loader=document.querySelector('#loader');setTimeout(()=>{loader.classList.add('done');setTimeout(()=>{loader.remove();},700);},400);},restart};
+window.GarudaLoader={setProgress(v){manualProgress=Number(v)||0},complete(){manualProgress=100;const loader=document.querySelector('#loader');if(!loader||loader.dataset.closing)return;loader.dataset.closing='1';setTimeout(()=>{loader.classList.add('done');setTimeout(()=>{loader.remove();},700);},400);},restart};
 window.addEventListener('resize',rebuild,{passive:true});rebuild();requestAnimationFrame(draw);requestAnimationFrame(refreshProgress);
 })();
