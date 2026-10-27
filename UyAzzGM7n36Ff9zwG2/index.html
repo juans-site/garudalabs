@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bank DKI - Garuda Labs Intelligent Media Monitoring</title>
+<link rel="icon" href="favicon.ico?v=54" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=54">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=54">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Dashboard monitoring percakapan media sosial terkait Bank DKI: sentimen, kanal, isu utama, dan level risiko.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Garuda Labs">
+<meta property="og:title" content="Bank DKI - Garuda Labs Intelligent Media Monitoring">
+<meta property="og:description" content="Dashboard monitoring percakapan media sosial terkait Bank DKI: sentimen, kanal, isu utama, dan level risiko.">
+<meta property="og:url" content="https://garudalabs.co.id/UyAzzGM7n36Ff9zwG2/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Bank DKI - Garuda Labs Intelligent Media Monitoring">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light'}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=54">
+<link rel="stylesheet" href="loader.css?v=54">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+</head>
+<body>
+<div id="loader" role="status" aria-label="Garuda Labs sedang memuat">
+  <canvas id="network" aria-hidden="true"></canvas>
+  <div class="glow"></div><div class="brand-halo"></div>
+  <div class="top"><b>GL /</b> INTELLIGENCE SYSTEMS</div>
+  <button class="replay" id="replay" type="button" aria-label="Ulangi animasi">↻ REPLAY</button>
+  <div class="brand" aria-label="Logo Garuda Labs">
+    <img src="loader-logo.png" alt="GARUDA LABS"/>
+    <div class="brand-shine" aria-hidden="true"></div>
+  </div>
+  <div class="status"><div class="status-label">NEURAL INTELLIGENCE ENGINE</div><div class="track"><div class="fill" id="fill"></div></div><div class="status-bottom"><span id="status-text">CONNECTING NODES</span><span id="percent">00%</span></div></div>
+  <div class="footer"><em>SYS.01</em> / GARUDA NEURAL INTERFACE<br>DATA STREAM INITIALIZING</div>
+  <div class="signal" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+<script src="loader.js?v=54"></script>
+<header class="topbar">
+  <div class="brand">
+    <img class="logo logo-dark" src="logo-dark.png?v=54" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png?v=54" alt="Logo">
+    <span class="divider"></span>
+    <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="beta-ver" title="Versi dashboard"><b>BETA</b><i></i><span>v0.54</span></span>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="dash" class="on">Dashboard</button>
+    <button role="tab" data-tab="ana">Analytics</button>
+    <button role="tab" data-tab="raw">Raw Data</button>
+    <button role="tab" data-tab="sna">SNA</button>
+  </nav>
+  <div class="top-r">
+    <div class="seg" id="fSumber"><button data-v="post" class="on">Post</button><button data-v="komentar">Komentar</button><button data-v="all">All</button></div>
+      <div class="dr">
+      <button class="dr-btn" id="drBtn" aria-haspopup="true" aria-expanded="false"><span class="cal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/><circle cx="9" cy="14.5" r="1" fill="currentColor"/><circle cx="15" cy="14.5" r="1" fill="currentColor"/></svg></span><b id="drLabel">30 hari terakhir</b><span class="caret">▾</span></button>
+      <div class="dr-pop" id="drPop" hidden>
+        <div class="presets" id="presets"></div>
+        <div class="custom">
+          <label>Rentang kustom</label>
+          <div class="dates"><input type="date" id="dFrom"><span>–</span><input type="date" id="dTo"></div>
+          <div class="dr-act"><button class="btn ghost" id="drCancel">Batal</button><button class="btn" id="drApply">Terapkan</button></div>
+        </div>
+      </div>
+    </div>
+  <button class="icon-btn" id="themeBtn" aria-label="Ganti tema" title="Mode gelap / terang"></button>
+  </div>
+</header>
+
+<main class="content">
+  <div class="page-head hero">
+    <div class="hl-wrap a">
+      <div class="ttl"><h1 class="t-main" data-client>Bank DKI</h1><span class="t-sub">Media Monitoring</span></div>
+      <div class="hl-meta" id="periode"></div>
+    </div>
+    </div>
+  </div>
+
+  <div id="loading" class="loading" role="status" aria-label="Memuat"><span class="spinner"></span></div>
+
+  <div id="main" hidden>
+    <div id="viewDash">
+    <div class="stage">
+      <aside class="st-col">
+        <section class="card glass"><div class="card-h"><h2>Sentimen</h2><span class="hint" id="kpiHint"></span></div><div class="kpi-list" id="kpiLeft"></div><div class="sent-extra" id="sentExtra"></div></section>
+      </aside>
+      <div class="st-center">
+        <div class="co co-tl" id="coTotal"></div>
+        <div class="co co-tr" id="coNsi"></div>
+        <div class="co co-bl" id="coStatus"></div>
+        <div class="co co-br" id="coKanal"></div>
+      </div>
+      <aside class="st-col">
+        <section class="card glass risk"><div class="card-h"><h2>Krisis / Alert</h2></div>
+        <div class="risk-body">
+          <div class="risk-ring" id="riskRing"><b id="riskPct"></b><small>negatif</small></div>
+          <div><small class="lbl">LEVEL RISIKO</small><div class="risk-lv" id="risk"></div><small id="riskNote"></small></div>
+        </div>
+        <h3 class="sub">Narasi Krisis Utama</h3>
+        <ol class="acc-list issues" id="flow"></ol>
+        <p class="impact" id="impact"></p>
+      </section>
+      </aside>
+    </div>
+    <div class="row dash2">
+      <section class="card glass"><div class="card-h"><div class="th"><h2 id="trendTitle">Tren Sentimen</h2><span class="lg"><i style="background:var(--neg)"></i>Negatif<i style="background:var(--neu)"></i>Netral<i style="background:var(--pos)"></i>Positif</span></div><span class="th-r"><span class="hint" id="trendNote"></span><select class="gran" id="fGran" aria-label="Rentang waktu grafik"></select></span></div><div class="chart h300"><canvas id="cTrend"></canvas></div></section>
+      <section class="card glass"><div class="card-h"><h2>Share of Voice per Kanal</h2><span class="hint" id="sovNote"></span></div><div class="chart h300"><canvas id="cSov"></canvas></div></section>
+    </div>
+    <div class="row">
+      <section class="card glass"><div class="card-h"><h2>Rekomendasi Tindak Lanjut</h2></div><div class="reco" id="reco"></div></section>
+      <section class="card glass"><div class="card-h"><h2>Summary</h2></div><ul class="sum-list" id="summaryText"></ul></section>
+    </div>
+    </div>
+
+    <div id="viewAna" hidden>
+    <div class="row first">
+      <section class="card"><div class="card-h"><h2>Sentimen per Kanal</h2><span class="hint" id="negNote"></span></div><div class="kanal-sent" id="kanalSent"></div></section>
+      <section class="card"><div class="card-h"><h2>Penyebab Utama Sentimen</h2><span class="hint" id="causeHint"></span></div>
+        <div class="cause"><div><h3 class="pos">Positif</h3><ul id="causePos"></ul></div><div><h3 class="neg">Negatif</h3><ul id="causeNeg"></ul></div></div>
+      </section>
+    </div>
+    <section class="card mt"><div class="card-h"><h2 class="ih"><span class="ihi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 1.5.8 2.5 2 3 0-3 .5-6 1-8.5z"/></svg></span>Postingan Negatif Teratas</h2><span class="hint" id="postsHint"></span></div><div class="posts" id="posts"></div></section>
+    <div class="row">
+      <section class="card"><div class="card-h"><h2 id="cloudTitle">Word Cloud</h2>
+        <div class="seg mini" data-k="cloud"><button data-v="neg" class="on">Negatif</button><button data-v="pos">Positif</button></div></div>
+        <div class="cloud" id="cloud"></div></section>
+      <section class="card"><div class="card-h"><h2 id="accTitle">Top 5 Akun</h2>
+        <div class="seg mini" data-k="acc"><button data-v="neg" class="on">Negatif</button><button data-v="pos">Positif</button></div></div>
+        <ol class="acc-list" id="topAcc"></ol></section>
+    </div>
+    </div>
+
+    <div id="viewRaw" hidden>
+      <section class="card">
+        <div class="raw-bar">
+          <input type="search" id="rawQ" placeholder="Cari caption, akun, atau topik…">
+          <div class="seg mini" id="rawSent"><button data-v="" class="on">Semua</button><button data-v="positif">Positif</button><button data-v="negatif">Negatif</button><button data-v="netral">Netral</button></div>
+          <select id="rawPf"><option value="">Semua platform</option></select>
+          <span class="hint" id="rawCount"></span>
+          <button class="btn dl" id="rawXlsx" title="Unduh baris sesuai filter">⬇ Download .xlsx</button>
+        </div>
+        <div class="raw-wrap">
+          <table class="raw">
+            <thead><tr>
+              <th data-sort="dt" class="sortable">Tanggal &amp; Jam <i>▼</i></th>
+              <th>Akun / Platform</th>
+              <th>Caption</th>
+              <th>Sentimen</th>
+              <th data-sort="eng" class="sortable r">Komentar <i></i></th>
+              <th class="c">Link</th>
+            </tr></thead>
+            <tbody id="rawBody"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="rawPager"></div>
+      </section>
+    </div>
+
+    <div id="viewSna" hidden>
+      <div class="sna-bar">
+        <div class="seg mini" id="snaPf"><button data-v="Twitter" class="on">Twitter</button><button data-v="Threads">Threads</button></div>
+        <div class="seg mini" id="snaColor"><button data-v="sent" class="on">Warna: Sentimen</button><button data-v="kom">Warna: Komunitas</button></div>
+        <div class="seg mini" id="snaMax" title="Jumlah akun yang digambar"><button data-v="75">75 akun</button><button data-v="150" class="on">150</button><button data-v="300">300</button></div>
+        <input type="search" id="snaQ" placeholder="Cari akun…" list="snaList"><datalist id="snaList"></datalist>
+        <span class="hint" id="snaHint"></span>
+      </div>
+      <div class="sna-grid">
+        <div class="sna-main">
+        <section class="card sna-canvas">
+          <div id="snaGraph"></div>
+          <div class="sna-zoom" role="group" aria-label="Navigasi zoom">
+            <button id="zIn" title="Perbesar">+</button>
+            <span id="zLvl">100%</span>
+            <button id="zOut" title="Perkecil">−</button>
+            <button id="zFit" title="Paskan ke layar">⤢</button>
+            <button id="zRe" title="Susun ulang">↻</button>
+          </div>
+          <div class="sna-legend" id="snaLegend"></div>
+          <div class="sna-empty" id="snaEmpty" hidden>Tidak ada interaksi pada rentang ini</div>
+          <div class="sna-load" id="snaLoad" hidden><span class="spinner"></span></div>
+        </section>
+        <section class="card sna-read">
+          <div class="card-h"><h2>Memahami Jaringan Ini</h2><span class="hint" id="snaReadHint"></span></div>
+          <div class="sna-how"><b>Cara membaca grafik:</b> setiap <b>titik</b> adalah satu akun, dan setiap <b>garis</b> berarti dua akun pernah saling menyebut (@) atau membalas. Titik yang <b>lebih besar</b> berarti akun itu lebih banyak berinteraksi. Akun yang letaknya <b>berdekatan</b> berarti sering saling bicara. Warna titik menunjukkan nada tulisan akun itu: hijau positif, merah negatif, abu-abu netral.</div>
+          <div class="sna-explain" id="snaExplain"></div>
+          <h3 class="sub">Poin penting untuk <span data-client>Bank DKI</span></h3>
+          <ul class="sna-insight" id="snaInsight"></ul>
+        </section>
+        </div>
+        <aside class="sna-side">
+          <section class="card"><div class="card-h"><h2>Ringkasan Jaringan</h2></div><div class="sna-stats" id="snaStats"></div></section>
+          <section class="card" id="snaDetailCard" hidden><div class="card-h"><h2>Detail Akun</h2><button class="x" id="snaClose" aria-label="Tutup">×</button></div><div id="snaDetail"></div></section>
+          <section class="card"><div class="card-h"><h2>Akun Berpengaruh</h2>
+            <div class="seg mini" id="snaRank"><button data-v="in" class="on">Paling disebut</button><button data-v="out">Paling aktif</button></div></div>
+            <ol class="acc-list" id="snaTop"></ol></section>
+        </aside>
+      </div>
+    </div>
+
+    <footer>© 2026 Garuda Labs Intelligent Media Monitoring</footer>
+  </div>
+</main>
+<script src="app.js?v=54"></script>
+</body>
+</html>
