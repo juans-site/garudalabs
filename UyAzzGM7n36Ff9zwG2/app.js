@@ -117,7 +117,7 @@ function norm(r, kind) {
     link: r['Link'] || '', jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind
   };
 }
-const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
+const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => (a[0] === 'Lainnya') - (b[0] === 'Lainnya') || b[1] - a[1]); };
 const stats = D => { const T = D.length, p = D.filter(r => r.sent === 'positif').length, n = D.filter(r => r.sent === 'negatif').length; return { T, p, n, z: T - p - n, nsi: T ? Math.round((p - n) / T * 100) : 0, negP: T ? n / T * 100 : 0 }; };
 
 /* ---------- Chart helpers ---------- */
@@ -259,7 +259,7 @@ async function render() {
   $('negNote').textContent = negK[0] ? `${negK[0][0]}: ${pct(negK[0][1], N.length)} dari negatif` : '';
 
   /* Penyebab */
-  const bars = (arr, c) => { const mx = arr[0]?.[1] || 1; return arr.slice(0, 6).map(([k, v], x) => `<li><span class="num">${x + 1}</span><div class="cb"><div class="t"><span>${esc(k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${v / mx * 100}%;background:${c}"></i></div></div></li>`).join('') || '<li>–</li>'; };
+  const bars = (arr, c) => { const lain = arr.filter(x => x[0] === 'Lainnya'), top = arr.filter(x => x[0] !== 'Lainnya').slice(0, 6 - lain.length).concat(lain), mx = Math.max(1, ...top.map(x => x[1])); return top.map(([k, v], x) => `<li><span class="num">${x + 1}</span><div class="cb"><div class="t"><span>${esc(k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${v / mx * 100}%;background:${c}"></i></div></div></li>`).join('') || '<li>–</li>'; };
   const negTop = count(N, 'topik');
   $('periode').insertAdjacentHTML('beforeend', `<span class="chip-m lv-${lvl.toLowerCase()}"><i class="lv-dot"></i>Risiko ${lvl[0] + lvl.slice(1).toLowerCase()}</span><span class="chip-m">NSI ${S.nsi > 0 ? '+' : ''}${S.nsi}</span>`);
   $('causePos').innerHTML = bars(count(P, 'topik'), SENT.positif);
