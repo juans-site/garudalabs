@@ -44,9 +44,9 @@
     const BL = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'], d = t => { const [y, m, dd] = t.split('-'); return { d: +dd, m: BL[m - 1], y }; };
     if (h3 && meta) { const a = d(meta.from), b = d(meta.to);
       const per = meta.from === meta.to ? `${b.d} ${b.m} ${b.y}` : a.m === b.m && a.y === b.y ? `${a.d}–${b.d} ${b.m} ${b.y}` : `${a.d} ${a.m} – ${b.d} ${b.m} ${b.y}`;
-      h3.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/></svg><span class="nt-t">Narasi per ${esc(per)}</span><span class="nt-s">s/d pukul ${esc(meta.lastJam)} WIB</span>`; }
+      h3.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/></svg><span class="nt-t">Narasi per ${esc(per)}</span>`; }
     if (tag) tag.innerHTML = meta ? `<span class="ai-dot"></span>Garuda AI · ${meta.n.toLocaleString('id-ID')} postingan` : 'Garuda AI';
-    if (state === 'loading') { list.innerHTML = '<li class="md" style="grid-column:1/-1"><span class="g-lv md">Menganalisis</span><p>Garuda AI sedang membaca percakapan pada periode ini…</p></li>'; return; }
+    if (state === 'loading') { list.innerHTML = `<li class="ai-load" style="grid-column:1/-1"><div class="al-head"><span class="al-orb"><i></i><i></i><i></i></span><span class="al-txt">Garuda AI menganalisis percakapan<em>.</em><em>.</em><em>.</em></span></div><div class="al-sk">${'<div><b></b><i></i><i></i></div>'.repeat(4)}</div></li>`; return; }
     if (state === 'error' || !data) return;   // tetap tampilkan insight angka bawaan
     list.innerHTML = data.poin.map(p => { const lv = LV[p.level] || LV.md;
       return `<li class="${lv[0]}"><span class="g-lv ${lv[0]}">${esc(lv[1])}${p.jumlah ? ` · ${esc(p.jumlah)}` : ''}</span><b class="nj">${esc(p.judul || '')}</b><p>${esc(p.isi || '')}</p></li>`; }).join('');
@@ -67,7 +67,18 @@
   }
 
   const css = document.createElement('style');
-  css.textContent = `.g-insight .g-h h3{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.g-insight .nt-t{font-size:16px;font-weight:600}.g-insight .nt-s{font-size:12px;font-weight:400;color:var(--mute)}
+  css.textContent = `.ai-load{border-left:0!important;padding:14px!important;position:relative;overflow:hidden}
+  .ai-load:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(70,214,200,.08),transparent);transform:translateX(-100%);animation:alSweep 1.6s ease-in-out infinite}
+  .al-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:12.5px;color:var(--mute)}
+  .al-orb{position:relative;width:18px;height:18px}.al-orb i{position:absolute;inset:0;border-radius:50%;border:1.5px solid #46D6C8;opacity:0;animation:alRing 1.8s ease-out infinite}.al-orb i:nth-child(2){animation-delay:.6s}.al-orb i:nth-child(3){animation-delay:1.2s}
+  .al-orb:after{content:"";position:absolute;inset:6px;border-radius:50%;background:#46D6C8;box-shadow:0 0 10px #46D6C8}
+  .al-txt em{font-style:normal;animation:alDot 1.2s infinite}.al-txt em:nth-child(2){animation-delay:.2s}.al-txt em:nth-child(3){animation-delay:.4s}
+  .al-sk{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+  .al-sk>div{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+  .al-sk b,.al-sk i{display:block;height:9px;border-radius:6px;background:rgba(255,255,255,.07)}.al-sk b{width:45%;height:11px}.al-sk i:last-child{width:70%}
+  @keyframes alSweep{to{transform:translateX(100%)}}@keyframes alRing{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.6);opacity:0}}@keyframes alDot{0%,100%{opacity:.2}50%{opacity:1}}
+  @media(prefers-reduced-motion:reduce){.ai-load:after,.al-orb i,.al-txt em{animation:none}}
+  .g-insight .g-h h3{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.g-insight .nt-t{font-size:16px;font-weight:600}.g-insight .nt-s{font-size:12px;font-weight:400;color:var(--mute)}
   .g-insight .g-h h3 svg{align-self:center;color:#46D6C8}
   .g-insight .g-tag{display:inline-flex;align-items:center;gap:6px}.ai-dot{width:6px;height:6px;border-radius:50%;background:#46D6C8;box-shadow:0 0 8px #46D6C8}
   .g-ins li .nj{display:block;margin-top:8px;font-size:13.5px;color:var(--ink)}.g-ins li .nj+p{margin-top:4px}
