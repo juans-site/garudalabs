@@ -224,7 +224,8 @@ async function render() {
     const tone = S.nsi <= -10 ? ['negatif', 'neg'] : S.nsi >= 10 ? ['positif', 'pos'] : ['cenderung netral', 'neu'];
     const posT = count(P, 'topik')[0];
     const lead = tone[1] === 'neg' ? 'Percakapan tentang Bank Mandiri cenderung' : tone[1] === 'pos' ? 'Percakapan tentang Bank Mandiri cenderung' : 'Percakapan tentang Bank Mandiri';
-    const why = tone[1] === 'pos' ? (posT ? `, didorong oleh <em>${esc(posT[0])}</em>.` : '.') : (negTop[0] ? `, dipicu isu <em>${esc(negTop[0][0])}</em>.` : '.');
+    const shortT = t => { t = t.replace(/⚠️?\s*Terindikasi buzzer/i, '').replace(/\s*\([^)]*\)/g, '').replace(/^Isu\s+/i, '').trim(); return t.length > 42 ? t.slice(0, 40).replace(/\s+\S*$/, '') + '…' : t; };
+    const why = tone[1] === 'pos' ? (posT ? `, didorong oleh <em>${esc(shortT(posT[0]))}</em>.` : '.') : (negTop[0] ? `, dipicu isu <em title="${esc(negTop[0][0])}">${esc(shortT(negTop[0][0]))}</em>.` : '.');
     $('headline').innerHTML = `${lead} <b class="t-${tone[1]}">${tone[0]}</b>${why}`;
     $('periode').insertAdjacentHTML('beforeend', `<span class="chip-m lv-${lvl.toLowerCase()}">Risiko ${lvl[0] + lvl.slice(1).toLowerCase()}</span><span class="chip-m">NSI ${S.nsi > 0 ? '+' : ''}${S.nsi}</span>`);
   }
