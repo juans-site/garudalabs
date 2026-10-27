@@ -10,11 +10,14 @@
 
   function build() {
     const all = (typeof cache !== 'undefined' && cache.post) || []; if (!all.length) return null;
-    const latest = all.map(r => r.tgl).sort().at(-1);
-    const W = all.filter(r => r.tgl === latest);                        // fokus: hari terbaru di data
-    const prevDays = new Set([...new Set(all.map(r => r.tgl))].sort().filter(d => d < latest).slice(-7));
-    const Pv = all.filter(r => prevDays.has(r.tgl));
-    const lastJam = W.map(r => r.jamStr || '').sort().at(-1) || '';
+    // Ikut filter periode dashboard; pembanding = periode sebelumnya dengan jumlah hari sama
+    const rg = (typeof state !== 'undefined' && state.range) || {}, days = [...new Set(all.map(r => r.tgl))].sort();
+    const from = rg.from || days[0], to = rg.to || days.at(-1), latest = to;
+    const W = all.filter(r => r.tgl >= from && r.tgl <= to);
+    const span = Math.max(1, Math.round((new Date(to) - new Date(from)) / 864e5) + 1);
+    const pTo = new Date(new Date(from) - 864e5).toISOString().slice(0, 10), pFrom = new Date(new Date(from) - span * 864e5).toISOString().slice(0, 10);
+    const Pv = all.filter(r => r.tgl >= pFrom && r.tgl <= pTo);
+    const lastJam = W.filter(r => r.tgl === W.map(x => x.tgl).sort().at(-1)).map(r => r.jamStr || '').sort().at(-1) || '', lastTgl = W.map(r => r.tgl).sort().at(-1) || to;
     const cnt = (a, f) => { const m = {}; a.forEach(x => { const k = f(x); if (k) m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((x, y) => y[1] - x[1]); };
     // amplifikasi: teks (dinormalisasi) identik dari >=3 akun berbeda
     const groups = {}; W.forEach(r => { const k = norm(r.text).slice(0, 160); if (k.length < 40) return; (groups[k] = groups[k] || []).push(r); });
@@ -22,25 +25,28 @@
     // topik baru: tidak muncul di 7 hari sebelumnya / naik tajam
     const prevT = Object.fromEntries(cnt(Pv, r => r.topik));
     const topics = cnt(W, r => r.topik !== 'Lainnya' && r.topik);
-    const newT = topics.filter(([t, n]) => !prevT[t] || n / Math.max(1, prevT[t] / 7) >= 3).slice(0, 3);
+    const newT = topics.filter(([t, n]) => !prevT[t] || n / Math.max(1, prevT[t] || 0) >= 3).slice(0, 3);
     const sample = (arr, n) => { const seen = new Set(), out = []; arr.slice().sort((a, b) => b.eng - a.eng).forEach(r => { const k = norm(r.text).slice(0, 80); if (!seen.has(k) && out.length < n) { seen.add(k); out.push(r); } }); return out; };
     const line = r => `- [${r.platform}] ${r.sent}: "${r.text.replace(/\s+/g, ' ').slice(0, 220)}"`;
-    let ctx = `Tanggal: ${latest} (data s/d pukul ${lastJam} WIB) | ${W.length} postingan hari ini\n\nKELOMPOK TOPIK HARI INI:\n`;
+    let ctx = `Periode: ${from} s/d ${lastTgl} pukul ${lastJam} WIB (${span} hari) | ${W.length} postingan\n\nKELOMPOK TOPIK PADA PERIODE INI:\n`;
     topics.slice(0, 6).forEach(([t, n]) => { const R = W.filter(r => r.topik === t); ctx += `\n## ${t}: ${n} postingan (neg ${R.filter(r => r.sent === 'negatif').length}, pos ${R.filter(r => r.sent === 'positif').length})\n${sample(R, 6).map(line).join('\n')}\n`; });
     const other = W.filter(r => r.topik === 'Lainnya'); if (other.length) ctx += `\n## Lainnya/belum berlabel: ${other.length}\n${sample(other, 4).map(line).join('\n')}\n`;
     ctx += `\nINDIKASI AMPLIFIKASI (teks identik dari banyak akun):\n${amp.map(a => `- ${a.g.length} postingan dari ${a.acc} akun berbeda: "${a.g[0].text.slice(0, 160)}"`).join('\n') || '- tidak ada'}\n`;
-    ctx += `\nTOPIK BARU / MELONJAK:\n${newT.map(([t, n]) => `- ${t}: ${n} hari ini (rata-rata 7 hari sebelumnya ${((prevT[t] || 0) / 7).toFixed(1)}/hari)`).join('\n') || '- tidak ada'}\n`;
+    ctx += `\nTOPIK BARU / MELONJAK:\n${newT.map(([t, n]) => `- ${t}: ${n} hari ini (periode sebelumnya ${prevT[t] || 0})`).join('\n') || '- tidak ada'}\n`;
     const pos = W.filter(r => r.sent === 'positif'); ctx += `\nSINYAL POSITIF (${pos.length}):\n${sample(pos, 5).map(line).join('\n')}\n`;
     // buang emoji/karakter khusus: model AI menolak input berisi surrogate/emoji
     ctx = ctx.replace(/[\uD800-\uDFFF]/g, '').replace(/[^\x09\x0A\x0D\x20-\x7E\u00A0-\u024F\u2010-\u2027]/g, '');
-    return { ctx, key: `${latest}-${W.length}`, latest, lastJam, n: W.length, amp };
+    return { ctx, key: `${from}_${to}-${W.length}`, from, to: lastTgl, span, lastJam, n: W.length, amp };
   }
 
   function render(box, data, meta, state) {
     const tag = box.querySelector('.g-h .g-tag'), list = box.querySelector('.g-ins'), h3 = box.querySelector('.g-h h3');
-    if (h3 && !h3.dataset.n) { h3.dataset.n = 1; h3.lastChild.textContent = ' Narasi yang Menonjol'; }
-    if (tag) tag.textContent = meta ? `AI · ${meta.latest.split('-').reverse().slice(0, 2).join('/')} s/d ${meta.lastJam} WIB · ${meta.n} postingan` : 'AI';
-    if (state === 'loading') { list.innerHTML = '<li class="md" style="grid-column:1/-1"><span class="g-lv md">Menganalisis</span><p>Garuda AI sedang membaca percakapan terbaru…</p></li>'; return; }
+    const BL = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'], d = t => { const [y, m, dd] = t.split('-'); return { d: +dd, m: BL[m - 1], y }; };
+    if (h3 && meta) { const a = d(meta.from), b = d(meta.to);
+      const per = meta.from === meta.to ? `${b.d} ${b.m} ${b.y}` : a.m === b.m && a.y === b.y ? `${a.d}–${b.d} ${b.m} ${b.y}` : `${a.d} ${a.m} – ${b.d} ${b.m} ${b.y}`;
+      h3.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/></svg><span class="nt-t">Narasi per ${esc(per)}</span><span class="nt-s">s/d pukul ${esc(meta.lastJam)} WIB</span>`; }
+    if (tag) tag.innerHTML = meta ? `<span class="ai-dot"></span>Garuda AI · ${meta.n.toLocaleString('id-ID')} postingan` : 'Garuda AI';
+    if (state === 'loading') { list.innerHTML = '<li class="md" style="grid-column:1/-1"><span class="g-lv md">Menganalisis</span><p>Garuda AI sedang membaca percakapan pada periode ini…</p></li>'; return; }
     if (state === 'error' || !data) return;   // tetap tampilkan insight angka bawaan
     list.innerHTML = data.poin.map(p => { const lv = LV[p.level] || LV.md;
       return `<li class="${lv[0]}"><span class="g-lv ${lv[0]}">${esc(lv[1])}${p.jumlah ? ` · ${esc(p.jumlah)}` : ''}</span><b class="nj">${esc(p.judul || '')}</b><p>${esc(p.isi || '')}</p></li>`; }).join('');
@@ -56,12 +62,15 @@
       const r = await fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'narasi', key: m.key, context: m.ctx }) });
       const j = await r.json(); if (!r.ok || !j.poin) throw new Error(j.error || r.status);
       cached = j; lastKey = m.key; render(box, j, m);
-    } catch (e) { box.querySelector('.g-ins').innerHTML = fallback; const t = box.querySelector('.g-h .g-tag'); if (t) t.textContent = 'Otomatis dari data (AI tidak tersedia)'; }
+    } catch (e) { box.querySelector('.g-ins').innerHTML = fallback; const t = box.querySelector('.g-h .g-tag'); if (t) t.textContent = 'Ringkasan angka (AI sedang tidak tersedia)'; }
     busy = false;
   }
 
   const css = document.createElement('style');
-  css.textContent = `.g-ins li .nj{display:block;margin-top:8px;font-size:13.5px;color:var(--ink)}.g-ins li .nj+p{margin-top:4px}
+  css.textContent = `.g-insight .g-h h3{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.g-insight .nt-t{font-size:16px;font-weight:600}.g-insight .nt-s{font-size:12px;font-weight:400;color:var(--mute)}
+  .g-insight .g-h h3 svg{align-self:center;color:#46D6C8}
+  .g-insight .g-tag{display:inline-flex;align-items:center;gap:6px}.ai-dot{width:6px;height:6px;border-radius:50%;background:#46D6C8;box-shadow:0 0 8px #46D6C8}
+  .g-ins li .nj{display:block;margin-top:8px;font-size:13.5px;color:var(--ink)}.g-ins li .nj+p{margin-top:4px}
   @media(min-width:1281px){.g-ins{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))!important}}`;
   document.head.append(css);
   // jalankan setiap kali console digambar ulang (render ulang menimpa card, jadi pakai cache)
