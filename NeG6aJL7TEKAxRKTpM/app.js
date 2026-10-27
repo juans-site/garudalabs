@@ -38,7 +38,7 @@ const PLATFORM_COLOR = { twitter: '#1d9bf0', x: '#1d9bf0', facebook: '#1877f2', 
 const pColor = p => PLATFORM_COLOR[p.toLowerCase().split(/[ /]/)[0]] || '#94a3b8';
 const SENT = { positif: '#22C55E', negatif: '#F05252', netral: '#94A3B8' };
 
-const state = { gran: 'harian', cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'all' }; // from/to = 'yyyy-mm-dd', null = semua
+const state = { gran: 'harian', cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'last30' }; // from/to = 'yyyy-mm-dd', null = semua
 const cache = {}, charts = {};
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
