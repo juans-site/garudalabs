@@ -721,3 +721,12 @@ body:before{background-position:center bottom!important;background-size:cover!im
 .headline em{font-weight:600;border-bottom-width:1.5px}
 @media(max-width:900px){.hero h1.headline{font-size:24px}}
 @media(max-width:640px){.hero h1.headline{font-size:20px}}
+
+/* v0.53: judul ringkas + chip status */
+.hl-wrap.a{display:flex;align-items:center;flex-wrap:wrap;gap:14px 22px;max-width:none}
+.ttl{display:flex;align-items:baseline;gap:12px}
+.hero h1.t-main{font-family:"Urbanist",sans-serif;font-size:30px;font-weight:600;letter-spacing:-.3px;text-transform:none;line-height:1.1;margin:0;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+.t-sub{font-size:13px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);padding-left:12px;border-left:1px solid var(--glass-line)}
+.lv-dot{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+[data-theme=light] .hero h1.t-main{text-shadow:none}
+@media(max-width:640px){.hero h1.t-main{font-size:24px}.t-sub{font-size:11px;letter-spacing:.14em}.hl-wrap.a{gap:12px}}
