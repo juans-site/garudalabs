@@ -67,12 +67,22 @@ export default {
       if (env.RATE) { const c = await env.RATE.get(key); if (c) return json(JSON.parse(c)); }   // cache 20 menit, hemat kuota
       const sys = `Kamu analis media monitoring karhutla. Dari DATA (kelompok topik, contoh postingan, kelompok teks identik/amplifikasi, topik baru, sinyal positif), tulis 4-5 poin NARASI YANG MENONJOL dalam Bahasa Indonesia.
 Aturan: tiap poin = judul pendek + 1-2 kalimat konkret yang menyebut peristiwa/aktor/tempat/tanggal SPESIFIK dari contoh postingan, dan jumlah postingan dari data. Jika ada kelompok teks identik dari banyak akun, sebutkan sebagai indikasi amplifikasi. Sertakan 1 poin kabar positif jika ada dan 1 poin topik baru jika ada. Jangan mengarang fakta di luar data. Tanpa pembuka/penutup.
-Balas HANYA JSON valid: {"poin":[{"judul":"...","jumlah":angka,"level":"hi|md|lo|new","isi":"..."}]}  (hi=kritik/risiko, md=perlu dipantau, lo=positif, new=topik baru).`;
+Format jawaban WAJIB: satu poin per baris, tanpa nomor/bullet, dengan pemisah ' || ' persis seperti ini:
+LEVEL || JUMLAH || JUDUL || ISI
+LEVEL salah satu: hi, md, lo, new (hi=kritik/risiko, md=perlu dipantau/amplifikasi, lo=kabar positif, new=topik baru). JUMLAH = angka postingan dari data (atau 0). Contoh:
+hi || 41 || Kritik ke pemerintah || BEM UI berencana demo di Bundaran HI 28 Okt menuntut karhutla jadi bencana nasional.`;
       try {
         const out = await env.AI.run(env.MODEL || DEFAULT_MODEL, { max_tokens: 900, temperature: 0.2, messages: [{ role: 'system', content: sys }, { role: 'user', content: 'DATA:\n' + ctx }] });
-        const txt = String(out?.response ?? (typeof out === 'string' ? out : JSON.stringify(out)));
-        const m = txt.match(/\{[\s\S]*\}/); const parsed = m ? JSON.parse(m[0]) : null;
-        if (!parsed || !Array.isArray(parsed.poin) || !parsed.poin.length) return json({ error: 'Format narasi tidak valid' }, 502);
+        const raw = out?.response; let poin = [];
+        if (raw && typeof raw === 'object' && Array.isArray(raw.poin)) poin = raw.poin;
+        else {
+          const txt = String(raw ?? out ?? '');
+          poin = txt.split('\n').map(l => l.replace(/^[\s\-*•\d.)]+/, '').split('||').map(s => s.trim())).filter(p => p.length >= 4 && p[3])
+            .map(([lv, n, judul, ...isi]) => ({ level: (lv.toLowerCase().match(/hi|md|lo|new/) || ['md'])[0], jumlah: parseInt(n) || 0, judul: judul.replace(/\*/g, ''), isi: isi.join(' ').replace(/\*/g, '') }));
+          if (!poin.length) { const m = txt.match(/\{[\s\S]*\}/); try { poin = JSON.parse(m[0]).poin || []; } catch (_) {} }
+        }
+        if (!poin.length) return json({ error: 'Format narasi tidak valid' }, 502);
+        const parsed = { poin };
         const res = { poin: parsed.poin.slice(0, 5), at: new Date().toISOString() };
         if (env.RATE) await env.RATE.put(key, JSON.stringify(res), { expirationTtl: 1200 });
         return json(res);

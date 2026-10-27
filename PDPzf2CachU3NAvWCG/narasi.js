@@ -26,11 +26,13 @@
     const sample = (arr, n) => { const seen = new Set(), out = []; arr.slice().sort((a, b) => b.eng - a.eng).forEach(r => { const k = norm(r.text).slice(0, 80); if (!seen.has(k) && out.length < n) { seen.add(k); out.push(r); } }); return out; };
     const line = r => `- [${r.platform}] ${r.sent}: "${r.text.replace(/\s+/g, ' ').slice(0, 220)}"`;
     let ctx = `Tanggal: ${latest} (data s/d pukul ${lastJam} WIB) | ${W.length} postingan hari ini\n\nKELOMPOK TOPIK HARI INI:\n`;
-    topics.slice(0, 6).forEach(([t, n]) => { const R = W.filter(r => r.topik === t); ctx += `\n## ${t}: ${n} postingan (neg ${R.filter(r => r.sent === 'negatif').length}, pos ${R.filter(r => r.sent === 'positif').length})\n${sample(R, 5).map(line).join('\n')}\n`; });
+    topics.slice(0, 6).forEach(([t, n]) => { const R = W.filter(r => r.topik === t); ctx += `\n## ${t}: ${n} postingan (neg ${R.filter(r => r.sent === 'negatif').length}, pos ${R.filter(r => r.sent === 'positif').length})\n${sample(R, 6).map(line).join('\n')}\n`; });
     const other = W.filter(r => r.topik === 'Lainnya'); if (other.length) ctx += `\n## Lainnya/belum berlabel: ${other.length}\n${sample(other, 4).map(line).join('\n')}\n`;
     ctx += `\nINDIKASI AMPLIFIKASI (teks identik dari banyak akun):\n${amp.map(a => `- ${a.g.length} postingan dari ${a.acc} akun berbeda: "${a.g[0].text.slice(0, 160)}"`).join('\n') || '- tidak ada'}\n`;
     ctx += `\nTOPIK BARU / MELONJAK:\n${newT.map(([t, n]) => `- ${t}: ${n} hari ini (rata-rata 7 hari sebelumnya ${((prevT[t] || 0) / 7).toFixed(1)}/hari)`).join('\n') || '- tidak ada'}\n`;
     const pos = W.filter(r => r.sent === 'positif'); ctx += `\nSINYAL POSITIF (${pos.length}):\n${sample(pos, 5).map(line).join('\n')}\n`;
+    // buang emoji/karakter khusus: model AI menolak input berisi surrogate/emoji
+    ctx = ctx.replace(/[\uD800-\uDFFF]/g, '').replace(/[^\x09\x0A\x0D\x20-\x7E\u00A0-\u024F\u2010-\u2027]/g, '');
     return { ctx, key: `${latest}-${W.length}`, latest, lastJam, n: W.length, amp };
   }
 
