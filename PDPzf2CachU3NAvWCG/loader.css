@@ -3,12 +3,12 @@
 #loader::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(83,149,194,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(83,149,194,.035) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at center,#000 4%,transparent 83%)}
 #loader::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at center,transparent 37%,rgba(3,7,12,.33) 100%)}
 #loader #network{position:absolute;inset:0;width:100%;height:100%;z-index:1}
-#loader .glow{position:absolute;left:50%;top:45%;width:min(920px,85vw);aspect-ratio:2.7;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(31,131,210,.14),rgba(19,95,163,.047) 46%,transparent 73%);filter:blur(25px);pointer-events:none;z-index:1;animation:gl-ambientPulse 5.8s ease-in-out infinite}
-#loader .brand{position:absolute;z-index:4;top:45%;left:50%;width:min(760px,76vw);transform:translate(-50%,-50%);user-select:none;pointer-events:none;filter:drop-shadow(0 0 28px rgba(44,154,226,.075));animation:gl-logoIn 1.7s cubic-bezier(.2,.64,.17,1) both,gl-logoFloat 6s ease-in-out 1.7s infinite}
+#loader .glow{position:absolute;left:50%;top:45%;width:min(920px,85vw);aspect-ratio:2.7;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(31,131,210,.14),rgba(19,95,163,.047) 46%,transparent 73%);pointer-events:none;z-index:1;animation:gl-ambientPulse 5.8s ease-in-out infinite}
+#loader .brand{position:absolute;z-index:4;top:45%;left:50%;width:min(760px,76vw);transform:translate(-50%,-50%);user-select:none;pointer-events:none;animation:gl-logoIn 1.7s cubic-bezier(.2,.64,.17,1) both,gl-logoFloat 6s ease-in-out 1.7s infinite}
 #loader .brand img{width:100%;height:auto;display:block;object-fit:contain}
-#loader .brand-shine{position:absolute;inset:0;width:100%;height:100%;background-image:url("loader-logo.png");background-size:100% 100%;mask-image:linear-gradient(108deg,transparent 30%,#000 47%,transparent 63%);mask-size:320% 100%;mask-position:120% 0;filter:brightness(1.7) drop-shadow(0 0 9px rgba(52,185,255,.45));opacity:.0;animation:gl-shine 6.4s ease-in-out 1.5s infinite}
+#loader .brand-shine{position:absolute;inset:0;width:100%;height:100%;background-image:url("loader-logo.png");background-size:100% 100%;mask-image:linear-gradient(108deg,transparent 30%,#000 47%,transparent 63%);mask-size:320% 100%;mask-position:120% 0;filter:brightness(1.4);opacity:.0;animation:gl-shine 6.4s ease-in-out 1.5s infinite}
 #loader .brand-halo{position:absolute;top:45%;left:50%;width:min(840px,84vw);height:min(315px,34vw);border:1px solid rgba(46,139,207,.055);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 40px rgba(25,115,205,.028),inset 0 0 60px rgba(25,115,205,.015);pointer-events:none;z-index:2}
-#loader .brand-halo::before{content:"";position:absolute;inset:-36px -78px;border:1px dashed rgba(37,131,204,.056);border-radius:50%;animation:gl-haloTurn 70s linear infinite}
+#loader .brand-halo::before{content:"";position:absolute;inset:-36px -78px;border:1px dashed rgba(37,131,204,.056);border-radius:50%;animation:none}
 #loader .top{position:absolute;z-index:6;top:clamp(26px,5vh,52px);left:clamp(24px,5vw,84px);font-size:10px;letter-spacing:.23em;font-weight:600;color:rgba(174,195,213,.55);text-transform:uppercase}
 #loader .top b{color:#4fbcf0;font-weight:600}
 #loader .replay{position:absolute;z-index:6;top:clamp(22px,4.2vh,44px);right:clamp(24px,5vw,84px);color:#8fb4ce;background:transparent;border:1px solid rgba(102,159,204,.25);border-radius:5px;padding:9px 16px;letter-spacing:.16em;font-size:10px;cursor:pointer;transition:.2s}
@@ -28,7 +28,7 @@
 #loader .signal span:nth-child(4){animation-delay:.2s}
 #loader .signal span:nth-child(5){animation-delay:.48s}
 @keyframes gl-ambientPulse{50%{opacity:.62;transform:translate(-50%,-50%) scale(1.13)}}
-@keyframes gl-logoIn{0%{opacity:0;transform:translate(-50%,-49%) scale(.935);filter:blur(9px)}100%{opacity:1;transform:translate(-50%,-50%) scale(1);filter:blur(0)}}
+@keyframes gl-logoIn{0%{opacity:0;transform:translate(-50%,-49%) scale(.935)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 @keyframes gl-logoFloat{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,-50.75%)}}
 @keyframes gl-shine{0%,27%{opacity:0;mask-position:120% 0}32%{opacity:.23}48%{opacity:.18;mask-position:-65% 0}51%,100%{opacity:0;mask-position:-65% 0}}
 @keyframes gl-haloTurn{to{transform:rotate(360deg)}}

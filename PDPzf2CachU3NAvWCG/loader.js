@@ -10,10 +10,10 @@ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const preview=false;
 const rng=(()=>{let s=37271;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}})();
 function rebuild(){
-  dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;
+  dpr=1;W=innerWidth;H=innerHeight;
   canvas.width=Math.max(1,Math.round(W*dpr));canvas.height=Math.max(1,Math.round(H*dpr));canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
   nodes=[];edges=[];
-  const count=Math.max(45,Math.min(91,Math.round(W*H/15500)));
+  const count=Math.max(30,Math.min(55,Math.round(W*H/26000)));
   for(let i=0;i<count;i++){
     let nx,ny,k=0;
     do {nx=.04+rng()*.92;ny=.065+rng()*.85;k++} while(k<35&&Math.abs(nx-.5)<(W>700?.235:.28)&&Math.abs(ny-.45)<(W>700?.125:.09));
@@ -27,7 +27,9 @@ function rebuild(){
     nearest.forEach(({j,d})=>{const a=Math.min(i,j),b=Math.max(i,j),key=a+'-'+b;if(!seen.has(key)){seen.add(key);edges.push({a,b,d,phase:rng(),speed:.10+rng()*.13})}});
   });
 }
+let lastF=0;
 function draw(time){
+  if(time-lastF<33){if(!reduced&&document.body.contains(canvas))requestAnimationFrame(draw);return}lastF=time;
   ctx.clearRect(0,0,W,H);
   const t=(time-born)/1000, cx=W*.5,cy=H*(W<700?.43:.45);
   let a=progress/100;
@@ -40,13 +42,13 @@ function draw(time){
     ctx.beginPath();ctx.moveTo(p.px,p.py);ctx.lineTo(q.px,q.py);ctx.strokeStyle=`rgba(56,159,221,${(.07+fade*.18)*centerFade*enter})`;ctx.lineWidth=.8;ctx.stroke();
     const k=((t*e.speed+e.phase)%1);const s=Math.sin(Math.PI*k);
     if(s>.06){const x=p.px+(q.px-p.px)*k,y=p.py+(q.py-p.py)*k;
-      ctx.beginPath();ctx.arc(x,y,1.1+s*.85,0,Math.PI*2);ctx.fillStyle=`rgba(94,208,255,${s*.73*enter*centerFade})`;ctx.shadowColor='#38aff0';ctx.shadowBlur=7;ctx.fill();ctx.shadowBlur=0;}
+      ctx.beginPath();ctx.arc(x,y,1.1+s*.85,0,Math.PI*2);ctx.fillStyle=`rgba(94,208,255,${s*.73*enter*centerFade})`;ctx.fill();}
   });
   nodes.forEach(n=>{
     const bright=(.5+.5*Math.sin(t*n.tw+n.phase));const cxGap=Math.abs(n.px-cx)<W*.215&&Math.abs(n.py-cy)<H*.097;
     ctx.beginPath();ctx.arc(n.px,n.py,n.r+(bright*.8),0,Math.PI*2);
     ctx.fillStyle=`rgba(91,201,246,${(.31+bright*.63)*(cxGap?.17:1)*enter})`;
-    ctx.shadowColor='#25a9ee';ctx.shadowBlur=bright*10;ctx.fill();ctx.shadowBlur=0;
+    ctx.fill();
   });
   // Neural signals converge just outside the actual logo; nothing obscures its lettering.
   const orbitN=12, rx=Math.min(W*.352,475),ry=Math.min(H*.22,178);
