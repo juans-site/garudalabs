@@ -117,7 +117,7 @@ async function render() {
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
   const unit = { post: 'post', komentar: 'komentar', all: 'mention' }[state.src];
-  $('periode').textContent = `Pemantauan media sosial · Bank Mandiri · ${periode} · ${unit}`;
+  $('periode').innerHTML = `<span class="chip-m">${ICON('<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/>', 14)}${periode}</span><span class="chip-m">Sumber: ${unit === 'mention' ? 'Post + Komentar' : unit[0].toUpperCase() + unit.slice(1)}</span>`;
 
   const S = stats(D), N = D.filter(r => r.sent === 'negatif'), P = D.filter(r => r.sent === 'positif');
 
@@ -220,6 +220,14 @@ async function render() {
   /* Penyebab */
   const bars = (arr, c) => { const mx = arr[0]?.[1] || 1; return arr.slice(0, 6).map(([k, v], x) => `<li><span class="num">${x + 1}</span><div class="cb"><div class="t"><span>${esc(k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${v / mx * 100}%;background:${c}"></i></div></div></li>`).join('') || '<li>–</li>'; };
   const negTop = count(N, 'topik');
+  { // Headline editorial otomatis
+    const tone = S.nsi <= -10 ? ['negatif', 'neg'] : S.nsi >= 10 ? ['positif', 'pos'] : ['cenderung netral', 'neu'];
+    const posT = count(P, 'topik')[0];
+    const lead = tone[1] === 'neg' ? 'Percakapan tentang Bank Mandiri cenderung' : tone[1] === 'pos' ? 'Percakapan tentang Bank Mandiri cenderung' : 'Percakapan tentang Bank Mandiri';
+    const why = tone[1] === 'pos' ? (posT ? `, didorong oleh <em>${esc(posT[0])}</em>.` : '.') : (negTop[0] ? `, dipicu isu <em>${esc(negTop[0][0])}</em>.` : '.');
+    $('headline').innerHTML = `${lead} <b class="t-${tone[1]}">${tone[0]}</b>${why}`;
+    $('periode').insertAdjacentHTML('beforeend', `<span class="chip-m lv-${lvl.toLowerCase()}">Risiko ${lvl[0] + lvl.slice(1).toLowerCase()}</span><span class="chip-m">NSI ${S.nsi > 0 ? '+' : ''}${S.nsi}</span>`);
+  }
   $('causePos').innerHTML = bars(count(P, 'topik'), SENT.positif);
   $('causeNeg').innerHTML = bars(negTop, SENT.negatif);
   $('causeHint').textContent = periode;
