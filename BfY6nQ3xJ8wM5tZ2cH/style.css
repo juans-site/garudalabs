@@ -424,8 +424,8 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
 @media(max-width:640px){.raw-bar .dl{width:100%}}
 
 /* ===== Desain v3: panggung gedung + kartu kaca ===== */
-:root{--stage-img:url("stage-dark.jpg?v=220")}
-[data-theme=light]{--stage-img:url("stage-light.jpg?v=220")}
+:root{--stage-img:url("stage-dark.jpg?v=240")}
+[data-theme=light]{--stage-img:url("stage-light.jpg?v=240")}
 [data-theme=dark]{--glass:rgba(30,31,34,.62);--glass-line:rgba(255,255,255,.08)}
 [data-theme=light]{--glass:rgba(255,255,255,.72);--glass-line:rgba(13,43,91,.10)}
 /* latar halaman: foto yang sama, diburamkan */
@@ -736,3 +736,7 @@ body:before{background-position:center bottom!important;background-size:cover!im
 .topbar{z-index:1000!important}
 .dr{z-index:1001}
 .dr-pop{z-index:1002!important;opacity:1!important}
+
+/* v2.4: tombol logout */
+.logout-btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:inherit}
+.logout-btn:hover{color:var(--neg,#F05252)}
