@@ -424,8 +424,8 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
 @media(max-width:640px){.raw-bar .dl{width:100%}}
 
 /* ===== Desain v3: panggung gedung + kartu kaca ===== */
-:root{--stage-img:url("stage-dark.jpg?v=210")}
-[data-theme=light]{--stage-img:url("stage-light.jpg?v=210")}
+:root{--stage-img:url("stage-dark.jpg?v=220")}
+[data-theme=light]{--stage-img:url("stage-light.jpg?v=220")}
 [data-theme=dark]{--glass:rgba(30,31,34,.62);--glass-line:rgba(255,255,255,.08)}
 [data-theme=light]{--glass:rgba(255,255,255,.72);--glass-line:rgba(13,43,91,.10)}
 /* latar halaman: foto yang sama, diburamkan */
@@ -731,4 +731,8 @@ body:before{background-position:center bottom!important;background-size:cover!im
 [data-theme=light] .hero h1.t-main{text-shadow:none}
 @media(max-width:640px){.hero h1.t-main{font-size:24px}.t-sub{font-size:11px;letter-spacing:.14em}.hl-wrap.a{gap:12px}}
 /* v2.1: dropdown tanggal lebih solid & blur kuat agar terbaca */
-.dr-pop{background:color-mix(in srgb,var(--card) 97%,transparent)!important;backdrop-filter:blur(40px) saturate(1.4)!important;-webkit-backdrop-filter:blur(40px) saturate(1.4)!important;box-shadow:0 20px 60px rgba(0,0,0,.45)!important}
+.dr-pop{background:var(--card)!important;backdrop-filter:blur(40px) saturate(1.4)!important;-webkit-backdrop-filter:blur(40px) saturate(1.4)!important;box-shadow:0 20px 60px rgba(0,0,0,.45)!important}
+/* v2.2: dropdown tanggal selalu di atas kartu (bukan tertutup konten) */
+.topbar{z-index:1000!important}
+.dr{z-index:1001}
+.dr-pop{z-index:1002!important;opacity:1!important}
