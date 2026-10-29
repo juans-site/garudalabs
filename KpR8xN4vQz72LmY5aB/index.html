@@ -14,7 +14,7 @@ background-image:radial-gradient(1200px 600px at 85% -10%,rgba(70,214,200,.08),t
 a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
 .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 28px;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:14px}
-.logo{font-family:var(--fd);font-size:18px;letter-spacing:4px;line-height:1}
+.logo{display:block;height:44px;width:auto}
 .logo small{display:block;font-size:9px;letter-spacing:6px;color:var(--mut);margin-top:6px;text-align:center}
 .beta{display:inline-flex;align-items:center;font:800 10px var(--fb);letter-spacing:.8px;text-transform:uppercase;color:var(--amber);background:rgba(255,196,107,.12);border:.8px solid rgba(255,196,107,.35);border-radius:20px;padding:3px 8px}
 .beta .ver{font-style:normal;font-weight:600;letter-spacing:.2px;text-transform:none;margin-left:6px;padding-left:6px;border-left:.8px solid var(--amber);opacity:.75}
@@ -86,7 +86,7 @@ h1 span{font-size:.62em;color:#c9d6db}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
 </style></head><body>
 <div class="top">
- <div class="brand"><div class="logo">GARUDA<small>LABS</small></div><span class="beta">Beta<i class="ver">v0.1</i></span></div>
+ <div class="brand"><img class="logo" src="logo.png" alt="Garuda Labs" width="169" height="44"><span class="beta">Beta<i class="ver">v0.1</i></span></div>
  <div class="live"><i></i><span id="clock">Live</span></div>
 </div>
 <div class="wrap">
