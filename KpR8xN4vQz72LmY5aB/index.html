@@ -16,8 +16,8 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
 .brand{display:flex;align-items:center;gap:14px}
 .logo{font-family:var(--fd);font-size:18px;letter-spacing:4px;line-height:1}
 .logo small{display:block;font-size:9px;letter-spacing:6px;color:var(--mut);margin-top:6px;text-align:center}
-.pill{font-size:12px;font-weight:700;color:var(--amber);border:1px solid rgba(255,196,107,.45);border-radius:999px;padding:4px 10px;background:rgba(255,196,107,.08)}
-.pill b{font-weight:600;opacity:.75;border-left:1px solid rgba(255,196,107,.4);margin-left:6px;padding-left:6px}
+.beta{display:inline-flex;align-items:center;font:800 10px var(--fb);letter-spacing:.8px;text-transform:uppercase;color:var(--amber);background:rgba(255,196,107,.12);border:.8px solid rgba(255,196,107,.35);border-radius:20px;padding:3px 8px}
+.beta .ver{font-style:normal;font-weight:600;letter-spacing:.2px;text-transform:none;margin-left:6px;padding-left:6px;border-left:.8px solid var(--amber);opacity:.75}
 .live{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:9px 14px}
 .live i{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:p 1.6s infinite}
 @keyframes p{50%{opacity:.35}}
@@ -86,14 +86,14 @@ h1 span{font-size:.62em;color:#c9d6db}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
 </style></head><body>
 <div class="top">
- <div class="brand"><div class="logo">GARUDA<small>LABS</small></div><span class="pill">BETA<b>v1.0</b></span></div>
+ <div class="brand"><div class="logo">GARUDA<small>LABS</small></div><span class="beta">Beta<i class="ver">v0.1</i></span></div>
  <div class="live"><i></i><span id="clock">Live</span></div>
 </div>
 <div class="wrap">
  <div class="hero">
   <div>
    <p class="kicker" id="kick">Pemantauan Lalu Lintas</p>
-   <h1>GARUDA'S EYE <span>CCTV PUBLIK DKI JAKARTA</span></h1>
+   <h1>GARUDA'S EYE</h1>
    <p class="lead">Sumber: <a href="https://jakcctv.jakarta.go.id/publik" target="_blank" rel="noopener">jakcctv.jakarta.go.id/publik</a></p>
   </div>
   <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="Cari lokasi CCTV..."></label>
