@@ -1,97 +1,166 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Garuda's Eye</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Michroma&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e1116;--card:#171b22;--line:#262c36;--mut:#8b95a5;--acc:#3b82f6}
+:root{--teal:#46D6C8;--amber:#FFC46B;--orange:#FF7F3B;--red:#FF5A5A;--black:#04070A;--txt:#EAF2F4;--mut:#8A97A6;
+--line:rgba(160,200,210,.12);--glass:rgba(255,255,255,.035);--r:22px;
+--fd:"Michroma","Orbitron",system-ui,sans-serif;--fb:"Outfit","Plus Jakarta Sans",system-ui,sans-serif}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:#e6e9ee}
-a{color:#7fb3ff;text-decoration:none}a:hover{text-decoration:underline}
-header{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--line)}
-header h1{margin:0;font-size:26px;letter-spacing:.3px}
-header .sub{margin:2px 0 4px;color:#c4cad4;font-size:15px}
-header .src{margin:0;font-size:12px;color:var(--mut)}
-#q{padding:9px 12px;width:280px;max-width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;color:#e6e9ee}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;padding:16px 24px 24px;align-items:start}
+html{color-scheme:dark}
+body{margin:0;font-family:var(--fb);font-size:14px;letter-spacing:.07px;color:var(--txt);background:var(--black);
+background-image:radial-gradient(1200px 600px at 85% -10%,rgba(70,214,200,.08),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(255,127,59,.06),transparent 60%);background-attachment:fixed;min-height:100vh}
+a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 28px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{font-family:var(--fd);font-size:18px;letter-spacing:4px;line-height:1}
+.logo small{display:block;font-size:9px;letter-spacing:6px;color:var(--mut);margin-top:6px;text-align:center}
+.pill{font-size:12px;font-weight:700;color:var(--amber);border:1px solid rgba(255,196,107,.45);border-radius:999px;padding:4px 10px;background:rgba(255,196,107,.08)}
+.pill b{font-weight:600;opacity:.75;border-left:1px solid rgba(255,196,107,.4);margin-left:6px;padding-left:6px}
+.live{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:9px 14px}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:p 1.6s infinite}
+@keyframes p{50%{opacity:.35}}
+.wrap{max-width:1600px;margin:0 auto;padding:24px 28px 40px}
+.kicker{font-size:11.5px;font-weight:500;letter-spacing:3.7px;color:var(--mut);text-transform:uppercase;margin:0 0 8px}
+h1{font-family:var(--fd);font-weight:400;font-size:clamp(24px,3.2vw,38px);letter-spacing:1.5px;margin:0;line-height:1.15}
+h1 span{font-size:.62em;color:#c9d6db}
+.lead{color:var(--mut);font-size:15px;line-height:1.6;margin:8px 0 0;max-width:720px}
+.hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}
+.search{position:relative;width:320px;max-width:100%}
+.search input{width:100%;padding:12px 16px 12px 40px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--txt);font:inherit;outline:none}
+.search input:focus{border-color:rgba(70,214,200,.55)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.6}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:22px}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:var(--r);border:1px solid var(--line);background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.015))}
+.stat .ic{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;border:1px solid currentColor;background:color-mix(in srgb,currentColor 12%,transparent)}
+.stat .v{font-size:22px;font-weight:600;line-height:1.1;color:var(--txt)}.stat .v small{font-size:13px;color:var(--mut);font-weight:400}
+.stat .l{font-size:13px;color:var(--mut)}
+.t{color:var(--teal)}.a{color:var(--amber)}.o{color:var(--orange)}.rd{color:var(--red)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
 @media(max-width:1200px){.layout{grid-template-columns:1fr}}
-.pg{display:flex;gap:4px;flex-wrap:wrap;align-items:center;justify-content:center;margin:0 0 12px}
-.pg button{min-width:34px;height:32px;padding:0 8px;background:var(--card);color:#cfd5de;border:1px solid var(--line);border-radius:6px;cursor:pointer;font-size:13px}
-.pg button.on{background:var(--acc);border-color:var(--acc);color:#fff}.pg button:disabled{opacity:.35;cursor:default}
-.pg .info{width:100%;text-align:center;font-size:12px;color:var(--mut);margin-top:4px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:calc((100vh - 400px)/2*16/9*2 + 12px);margin:0 auto}
-@media(max-width:800px){.grid{grid-template-columns:1fr;max-width:none}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
-iframe{width:100%;aspect-ratio:16/9;border:0;display:block;background:#000}
-.cap{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 10px 6px;font-size:12px}
-.cap b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cap span{flex:none;color:#7fb3ff;background:#1e2a3d;padding:2px 6px;border-radius:4px;font-size:11px}
-.st{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 10px 10px}
-.st button{padding:5px;border:1px solid var(--line);background:transparent;color:#cfd5de;border-radius:6px;cursor:pointer;font-size:12px}
-.st button:hover{background:#202631}
-.st button.on[data-s=Lancar]{background:#16a34a;border-color:#16a34a;color:#fff}.st button.on[data-s=Padat]{background:#ca8a04;border-color:#ca8a04;color:#fff}.st button.on[data-s=Macet]{background:#dc2626;border-color:#dc2626;color:#fff}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;position:sticky;top:16px}
-.panel h2{margin:0 0 4px;font-size:16px}.panel h3{font-size:13px;margin:16px 0 6px;color:#c4cad4}
-.panel .hint{font-size:12px;color:var(--mut);margin:0 0 12px}
-#sum{font-size:13px;line-height:1.6}
-.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:#2a303a;margin:10px 0 6px}
-.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--mut)}
-.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
-table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:5px 4px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--mut);font-weight:500}
-#reset{margin-top:12px;width:100%;padding:7px;background:transparent;border:1px solid var(--line);color:#cfd5de;border-radius:6px;cursor:pointer}
+.pg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:14px}
+.pg button{min-width:38px;height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--mut);font:600 13px var(--fb);cursor:pointer}
+.pg button:hover:not(:disabled){color:var(--txt)}
+.pg button.on{color:var(--txt);border-color:rgba(70,214,200,.55);background:linear-gradient(rgba(70,214,200,.32),rgba(70,214,200,.14))}
+.pg button:disabled{opacity:.3;cursor:default}
+.pg .info{margin-left:auto;font-size:12px;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:calc((100vh - 230px)/2*16/9*2 + 14px)}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.pg .info{width:100%;margin:4px 0 0}}
+.card{border-radius:var(--r);border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.012));overflow:hidden;transition:border-color .2s}
+.card:hover{border-color:rgba(70,214,200,.35)}
+.vid{position:relative;margin:8px 8px 0;border-radius:16px;overflow:hidden;background:#000}
+.vid iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
+.vid .tag{position:absolute;top:10px;left:10px;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;background:rgba(4,7,10,.7);backdrop-filter:blur(6px);border:1px solid var(--line);display:flex;align-items:center;gap:6px;pointer-events:none}
+.vid .tag i{width:6px;height:6px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px 10px}
+.meta b{font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta span{flex:none;font-size:11px;color:var(--teal);border:1px solid rgba(70,214,200,.35);border-radius:999px;padding:3px 9px}
+.st{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 14px 14px}
+.st button{padding:8px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--mut);font:600 12px var(--fb);cursor:pointer;transition:.15s}
+.st button:hover{color:var(--txt)}
+.st button.on[data-s=Lancar]{color:var(--txt);border-color:rgba(70,214,200,.6);background:rgba(70,214,200,.2)}
+.st button.on[data-s=Padat]{color:var(--txt);border-color:rgba(255,196,107,.6);background:rgba(255,196,107,.2)}
+.st button.on[data-s=Macet]{color:var(--txt);border-color:rgba(255,127,59,.7);background:rgba(255,127,59,.25)}
+.panel{position:sticky;top:20px;border-radius:var(--r);border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.012));padding:20px}
+.panel h2{font-size:17px;font-weight:600;margin:0 0 4px}
+.hint{font-size:12.5px;color:var(--mut);margin:0 0 16px;line-height:1.5}
+.gauge{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.gauge .n{font-family:var(--fd);font-size:30px}
+.gauge .lv{font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid var(--line)}
+.scale{height:8px;border-radius:99px;background:linear-gradient(90deg,var(--teal),var(--amber),var(--orange));position:relative;margin:14px 0 4px}
+.scale i{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--black);transform:translate(-50%,-50%);box-shadow:0 0 0 1px #fff;transition:left .3s}
+.sl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mut)}
+.bar{display:flex;height:8px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.07);margin:18px 0 8px}
+.bar div{transition:width .3s}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--mut)}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.panel h3{font-size:12px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--mut);margin:22px 0 8px}
+.hot{list-style:none;margin:0;padding:0;max-height:260px;overflow:auto}
+.hot li{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.hot li em{font-style:normal;flex:none;font-weight:600}
+.hot li small{color:var(--mut)}
+#reset{margin-top:16px;width:100%;padding:10px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--mut);font:600 13px var(--fb);cursor:pointer}
+#reset:hover{color:var(--txt)}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
 </style></head><body>
-<header>
- <div><h1>Garuda's Eye</h1><p class="sub">CCTV Publik DKI Jakarta</p>
- <p class="src">Sumber: <a href="https://jakcctv.jakarta.go.id/publik" target="_blank">jakcctv.jakarta.go.id/publik</a></p></div>
- <input id="q" placeholder="Cari lokasi...">
-</header>
-<div class="layout">
-<main><div class="pg" id="pg1"></div><div class="grid" id="grid"></div></main>
-<aside class="panel">
-<h2>Analisis Traffic</h2>
-<p class="hint">Nilai kondisi tiap kamera. Tersimpan di browser ini.</p>
-<div id="sum"></div>
-<div class="bar" id="bar"></div>
-<div class="legend"><span><i style="background:#16a34a"></i>Lancar</span><span><i style="background:#ca8a04"></i>Padat</span><span><i style="background:#dc2626"></i>Macet</span><span><i style="background:#2a303a"></i>Belum</span></div>
-<h3>Titik Padat / Macet</h3>
-<table><thead><tr><th>Lokasi</th><th>Status</th><th>Jam</th></tr></thead><tbody id="hot"></tbody></table>
-<button id="reset">Reset penilaian</button>
-</aside></div>
+<div class="top">
+ <div class="brand"><div class="logo">GARUDA<small>LABS</small></div><span class="pill">BETA<b>v1.0</b></span></div>
+ <div class="live"><i></i><span id="clock">Live</span></div>
+</div>
+<div class="wrap">
+ <div class="hero">
+  <div>
+   <p class="kicker" id="kick">Pemantauan Lalu Lintas</p>
+   <h1>GARUDA'S EYE <span>CCTV PUBLIK DKI JAKARTA</span></h1>
+   <p class="lead">Sumber: <a href="https://jakcctv.jakarta.go.id/publik" target="_blank" rel="noopener">jakcctv.jakarta.go.id/publik</a></p>
+  </div>
+  <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="Cari lokasi CCTV..."></label>
+ </div>
+ <div class="stats">
+  <div class="stat"><div class="ic t"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/></svg></div><div><div class="v" id="sTot">0</div><div class="l">Kamera aktif</div></div></div>
+  <div class="stat"><div class="ic t"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5"/></svg></div><div><div class="v" id="sRat">0</div><div class="l">Sudah dinilai</div></div></div>
+  <div class="stat"><div class="ic a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><div class="v" id="sPad">0</div><div class="l">Titik padat</div></div></div>
+  <div class="stat"><div class="ic o"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg></div><div><div class="v" id="sMac">0</div><div class="l">Titik macet</div></div></div>
+ </div>
+ <div class="layout">
+  <main><div class="pg" id="pg"></div><div class="grid" id="grid"></div></main>
+  <aside class="panel">
+   <h2>Analisis Traffic</h2>
+   <p class="hint">Nilai kondisi tiap kamera (Lancar / Padat / Macet). Penilaian tersimpan di browser ini.</p>
+   <div class="gauge"><span class="n" id="idx">–</span><span style="color:var(--mut)">/100</span><span class="lv" id="lvl">Belum ada data</span></div>
+   <div class="scale"><i id="knob" style="left:0%"></i></div>
+   <div class="sl"><span>Lancar</span><span>Macet</span></div>
+   <div class="bar" id="bar"></div>
+   <div class="legend"><span><i style="background:var(--teal)"></i>Lancar <b id="cL">0</b></span><span><i style="background:var(--amber)"></i>Padat <b id="cP">0</b></span><span><i style="background:var(--orange)"></i>Macet <b id="cM">0</b></span></div>
+   <h3>Titik Padat / Macet</h3>
+   <ul class="hot" id="hot"></ul>
+   <button id="reset">Reset penilaian</button>
+  </aside>
+ </div>
+</div>
+<footer>Garuda's Eye · Garuda Labs</footer>
 <script>
 const CAMS=[{"n": "JKP POLDA JPO JL. GATOT SUBROTO 7", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502045_JKP_POLDA_JPO-JL.-GATOT-SUBROTO-7_CCTV-01/embed.html"}, {"n": "JKP POLDA JPO JL. GATOT SUBROTO 7", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502045_JKP_POLDA_JPO-JL.-GATOT-SUBROTO-7_CCTV-02/embed.html"}, {"n": "JKP POLDA JL. GERBANG PEMUDA C02", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502155_JKP_POLDA_JL.-GERBANG-PEMUDA-C02_CCTV-01/embed.html"}, {"n": "JKP POLDA JL. GERBANG PEMUDA C02", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502155_JKP_POLDA_JL.-GERBANG-PEMUDA-C02_CCTV-02/embed.html"}, {"n": "JKP POLDA JL. GERBANG PEMUDA C03", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502160_JKP_POLDA_JL.-GERBANG-PEMUDA-C03_CCTV-01/embed.html"}, {"n": "JKP POLDA JL. GERBANG PEMUDA C03", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502160_JKP_POLDA_JL.-GERBANG-PEMUDA-C03_CCTV-02/embed.html"}, {"n": "JKP SATPOL PP JL. GERBANG PEMUDA C04", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502506_JKP_SATPOL-PP_JL.-GERBANG-PEMUDA-C04_CCTV-01/embed.html"}, {"n": "JKP SATPOL PP JL. GERBANG PEMUDA C04", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502506_JKP_SATPOL-PP_JL.-GERBANG-PEMUDA-C04_CCTV-02/embed.html"}, {"n": "JKP SATPOL PP JL. JEND. GATOT SUBROTO C11", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502507_JKP_SATPOL-PP_JL.-JEND.-GATOT-SUBROTO-C11_CCTV-01/embed.html"}, {"n": "JKP SATPOL PP JL. JEND. GATOT SUBROTO C11", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502507_JKP_SATPOL-PP_JL.-JEND.-GATOT-SUBROTO-C11_CCTV-02/embed.html"}, {"n": "JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C07", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502535_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C07_CCTV-01/embed.html"}, {"n": "JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C07", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502535_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C07_CCTV-02/embed.html"}, {"n": "JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C08", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502645_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C08_CCTV-01/embed.html"}, {"n": "JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C08", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502645_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C08_CCTV-02/embed.html"}, {"n": "JKP POLDA JL. JEND. GATOT SUBROTO C13", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503300_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C13_CCTV-01/embed.html"}, {"n": "JKP POLDA JL. JEND. GATOT SUBROTO C13", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/503300_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C13_CCTV-02/embed.html"}, {"n": "JKP POLDA JL. TENTARA PELAJAR C04", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503301_JKP_POLDA_JL.-TENTARA-PELAJAR-C04_CCTV-01/embed.html"}, {"n": "JKP POLDA JL. TENTARA PELAJAR C04", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/503301_JKP_POLDA_JL.-TENTARA-PELAJAR-C04_CCTV-02/embed.html"}, {"n": "JKP POLDA JL. JEND. GATOT SUBROTO C14", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503303_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C14_CCTV-01/embed.html"}, {"n": "JKP POLDA JL. JEND. GATOT SUBROTO C14", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/503303_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C14_CCTV-02/embed.html"}, {"n": "JKP DBM FLYOVER LADOKGI C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503536_JKP_DBM_FLYOVER-LADOKGI-C01_CCTV-01/embed.html"}, {"n": "JKP DBM FLYOVER LADOKGI C01", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/503536_JKP_DBM_FLYOVER-LADOKGI-C01_CCTV-02/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C07", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502491_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C07_CCTV-01/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C07", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502491_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C07_CCTV-02/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C08", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502492_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C08_CCTV-01/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C08", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502492_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C08_CCTV-02/embed.html"}, {"n": "JKP DISHUB JL. MH. THAMRIN C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501844_JKP_DISHUB_JL.-MH.-THAMRIN-C01_CCTV-01/embed.html"}, {"n": "JKP DISHUB JL. MH. THAMRIN C01", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/501844_JKP_DISHUB_JL.-MH.-THAMRIN-C01_CCTV-02/embed.html"}, {"n": "JKP SATPOLPP JL. MH. THAMRIN C02", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501941_JKP_SATPOLPP_JL.-MH.-THAMRIN-C02_CCTV-01/embed.html"}, {"n": "JKP SATPOLPP JL. MH. THAMRIN C02", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/501941_JKP_SATPOLPP_JL.-MH.-THAMRIN-C02_CCTV-02/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C09", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502493_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C09_CCTV-01/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C09", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502493_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C09_CCTV-02/embed.html"}, {"n": "JKP POLRI UOB PLAZA C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/504866_JKP_POLRI_UOB-PLAZA-C01_CCTV-01/embed.html"}, {"n": "JKP POLRI UOB PLAZA C01", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/504866_JKP_POLRI_UOB-PLAZA-C01_CCTV-02/embed.html"}, {"n": "JKP POLRI UOB PLAZA C01", "b": "CCTV-03", "u": "https://dki-jkt.balitower.co.id:7028/504866_JKP_POLRI_UOB-PLAZA-C01_CCTV-03/embed.html"}, {"n": "Taman Literasi-C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501478_JKS_SATPOLPP_TAMAN-LITERASI-C01_CCTV-01/embed.html"}, {"n": "Simpang Jl. Panglima Polim-C01", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/501493_JKP_SATPOLPP_PASAR-TANAH-ABANG-C02_CCTV-02/embed.html"}, {"n": "Jl. Sultan Agung-C03", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501594_JKS_DISGULKARMAT_JL.-MANGGARAI-UTARA-2-C01_CCTV-01/embed.html"}, {"n": "Simpang Jl. Sultan Agung-C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501862_JKB_DISHUB_JL.-LETJEN.-S.-PARMAN-C01_CCTV-01/embed.html"}, {"n": "Simpang Jl. Sultan Agung-C01", "b": "CCTV-03", "u": "https://dki-jkt.balitower.co.id:7028/501862_JKB_DISHUB_JL.-LETJEN.-S.-PARMAN-C01_CCTV-03/embed.html"}, {"n": "Simpang Jl. Sultan Agung-C02", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502041_JKP_POLDA_JL.-KH.-MAS-MANSYUR-C02_CCTV-02/embed.html"}, {"n": "Pasar Tanah Abang-C02", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502540_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C02_CCTV-01/embed.html"}, {"n": "Pasar Tanah Abang-C02", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502540_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C02_CCTV-02/embed.html"}, {"n": "Jl. KH. Mas Mansyur-C02", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503343_JKP_DBM_JPO-JL.-CIDENG-TIMUR-C02_CCTV-01/embed.html"}, {"n": "Jl. KH. Mas Mansyur-C02", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/503343_JKP_DBM_JPO-JL.-CIDENG-TIMUR-C02_CCTV-02/embed.html"}, {"n": "Jl. Jati Baru Raya-C02", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503675_JKP_BAKESBANGPOL_JL.-JATI-BARU-RAYA-C02_CCTV-01/embed.html"}, {"n": "Simpang Jl Nurdin Raya C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501968-Simpang-Jl-Nurdin-Raya-C01_CCTV-01/embed.html"}, {"n": "Simpang Jl Nurdin Raya C01", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/501968-Simpang-Jl-Nurdin-Raya-C01_CCTV-02/embed.html"}, {"n": "Senayan 018", "b": "CCTV-2", "u": "https://jakcctv.jakarta.go.id/Senayan-018-705979_2?proto=hls"}, {"n": "Senayan 001", "b": "CCTV-2", "u": "https://jakcctv.jakarta.go.id/Senayan-001-705084_2?proto=hls"}, {"n": "Bendungan Hilir 003", "b": "CCTV-1", "u": "https://jakcctv.jakarta.go.id/Bendungan-Hilir-003-700014_1?proto=hls"}, {"n": "Kebon Melati 010", "b": "CCTV-2", "u": "https://jakcctv.jakarta.go.id/Kebon-Melati-010-700332_2?proto=hls"}];
-const PER=4, KEY='cctv-traffic';
-let page=1, q='';
-let S={}; try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
+const PER=4,KEY='cctv-traffic';let page=1,q='';
+let S={};try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-const id=c=>c.u;
 const esc=s=>s.replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-function list(){return CAMS.filter(c=>c.n.toLowerCase().includes(q))}
+const COL={Lancar:'var(--teal)',Padat:'var(--amber)',Macet:'var(--orange)'};
+const list=()=>CAMS.filter(c=>c.n.toLowerCase().includes(q));
+function pages(cur,n){const a=[];for(let i=1;i<=n;i++){a.push(i)}return a}
 function render(){
-  const L=list(), pages=Math.max(1,Math.ceil(L.length/PER)); if(page>pages)page=pages;
-  const sl=L.slice((page-1)*PER,page*PER);
-  document.getElementById('grid').innerHTML=sl.map(c=>{const s=S[id(c)]?.s;return `<div class="card">
-   <iframe src="${c.u}" allowfullscreen referrerpolicy="no-referrer"></iframe>
-   <div class="cap"><b>${esc(c.n)}</b> <span>${c.b}</span></div>
-   <div class="st">${['Lancar','Padat','Macet'].map(x=>`<button data-s="${x}" data-id="${c.u}" class="${s===x?'on':''}">${x}</button>`).join('')}</div></div>`}).join('')||'<p>Tidak ada hasil.</p>';
-  const pg=`<button data-p="${page-1}" ${page<=1?'disabled':''}>&laquo;</button>`+
-    Array.from({length:pages},(_,i)=>`<button data-p="${i+1}" class="${i+1===page?'on':''}">${i+1}</button>`).join('')+
-    `<button data-p="${page+1}" ${page>=pages?'disabled':''}>&raquo;</button><div class="info">${L.length} kamera • Hal. ${page}/${pages}</div>`;
-  pg1.innerHTML=pg; analyse();
+ const L=list(),n=Math.max(1,Math.ceil(L.length/PER));if(page>n)page=n;
+ grid.innerHTML=L.slice((page-1)*PER,page*PER).map(c=>{const s=S[c.u]?.s;return `<div class="card">
+  <div class="vid"><iframe src="${c.u}" allowfullscreen referrerpolicy="no-referrer"></iframe><div class="tag"><i></i>LIVE</div></div>
+  <div class="meta"><b title="${esc(c.n)}">${esc(c.n)}</b><span>${c.b}</span></div>
+  <div class="st">${['Lancar','Padat','Macet'].map(x=>`<button data-s="${x}" data-id="${c.u}" class="${s===x?'on':''}">${x}</button>`).join('')}</div></div>`}).join('')||'<p style="color:var(--mut)">Tidak ada kamera yang cocok.</p>';
+ pg.innerHTML=`<button data-p="${page-1}" ${page<=1?'disabled':''}>‹</button>`+pages(page,n).map(i=>i==='…'?'<span style="color:var(--mut);padding:0 4px">…</span>':`<button data-p="${i}" class="${i===page?'on':''}">${i}</button>`).join('')+`<button data-p="${page+1}" ${page>=n?'disabled':''}>›</button><span class="info">${L.length} kamera · Hal. ${page}/${n}</span>`;
+ analyse();
 }
 function analyse(){
-  const c={Lancar:0,Padat:0,Macet:0}; CAMS.forEach(x=>{const s=S[id(x)]?.s;if(s)c[s]++});
-  const n=CAMS.length, rated=c.Lancar+c.Padat+c.Macet, none=n-rated;
-  const idx=rated?Math.round((c.Padat*50+c.Macet*100)/rated):0;
-  const lvl=!rated?'-':idx<25?'Lancar':idx<60?'Ramai/Padat':'Macet';
-  sum.innerHTML=`Dinilai <b>${rated}/${n}</b> kamera<br>Lancar <b>${c.Lancar}</b> · Padat <b>${c.Padat}</b> · Macet <b>${c.Macet}</b><br>Indeks kepadatan: <b>${rated?idx:'-'}</b>/100 → kondisi umum: <b>${lvl}</b>`;
-  const w=v=>(v/n*100)+'%';
-  bar.innerHTML=`<div style="width:${w(c.Lancar)};background:#1b7f3b"></div><div style="width:${w(c.Padat)};background:#b8860b"></div><div style="width:${w(c.Macet)};background:#b22222"></div><div style="width:${w(none)};background:#444"></div>`;
-  const hotL=CAMS.filter(x=>['Macet','Padat'].includes(S[id(x)]?.s)).sort((a,b)=>(S[id(b)].s==='Macet')-(S[id(a)].s==='Macet'));
-  hot.innerHTML=hotL.map(x=>`<tr><td>${esc(x.n)} <span style="color:#8b95a5">${x.b}</span></td><td>${S[id(x)].s}</td><td>${new Date(S[id(x)].t).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</td></tr>`).join('')||'<tr><td colspan=3>Belum ada.</td></tr>';
+ const c={Lancar:0,Padat:0,Macet:0};CAMS.forEach(x=>{const s=S[x.u]?.s;if(s)c[s]++});
+ const n=CAMS.length,r=c.Lancar+c.Padat+c.Macet;
+ const idx=r?Math.round((c.Padat*50+c.Macet*100)/r):null;
+ const lv=idx===null?'Belum ada data':idx<25?'Lancar':idx<60?'Padat':'Macet';
+ sTot.textContent=n;sRat.innerHTML=`${r}<small> / ${n}</small>`;sPad.textContent=c.Padat;sMac.textContent=c.Macet;
+ cL.textContent=c.Lancar;cP.textContent=c.Padat;cM.textContent=c.Macet;
+ document.getElementById('idx').textContent=idx===null?'–':idx;
+ lvl.textContent=lv;lvl.style.color=COL[lv]||'var(--mut)';lvl.style.borderColor=COL[lv]||'';
+ knob.style.left=(idx||0)+'%';
+ const w=v=>v/n*100+'%';
+ bar.innerHTML=`<div style="width:${w(c.Lancar)};background:var(--teal)"></div><div style="width:${w(c.Padat)};background:var(--amber)"></div><div style="width:${w(c.Macet)};background:var(--orange)"></div>`;
+ const H=CAMS.filter(x=>['Macet','Padat'].includes(S[x.u]?.s)).sort((a,b)=>(S[b.u].s==='Macet')-(S[a.u].s==='Macet'));
+ hot.innerHTML=H.map(x=>`<li><span>${esc(x.n)} <small>${x.b}</small></span><em style="color:${COL[S[x.u].s]}">${S[x.u].s} <small>${new Date(S[x.u].t).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</small></em></li>`).join('')||'<li><small>Belum ada titik padat atau macet.</small></li>';
 }
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
-  if(b.dataset.p){page=+b.dataset.p;render();}
-  else if(b.dataset.s){const k=b.dataset.id;S[k]?.s===b.dataset.s?delete S[k]:S[k]={s:b.dataset.s,t:Date.now()};save();
-    b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',S[k]?.s===x.dataset.s));analyse()}
-  else if(b.id==='reset'&&confirm('Hapus semua penilaian?')){S={};save();render()}});
-document.getElementById('q').oninput=e=>{q=e.target.value.toLowerCase();page=1;render()};
-render();
+ if(b.dataset.p){page=+b.dataset.p;render()}
+ else if(b.dataset.s){const k=b.dataset.id;S[k]?.s===b.dataset.s?delete S[k]:S[k]={s:b.dataset.s,t:Date.now()};save();
+  b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',S[k]?.s===x.dataset.s));analyse()}
+ else if(b.id==='reset'&&confirm('Hapus semua penilaian?')){S={};save();render()}});
+const qEl=document.getElementById('q');qEl.oninput=e=>{q=e.target.value.toLowerCase();page=1;render()};
+function tick(){const d=new Date();clock.textContent='Live · '+d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' WIB';
+ kick.textContent='Pemantauan Lalu Lintas · '+d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}
+tick();setInterval(tick,1000);render();
 </script></body></html>
