@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CCTV Jakarta</title>
+<title>Garuda's Eye</title>
 <style>
 body{font-family:sans-serif;margin:16px;background:#111;color:#eee}
 a{color:#9cf} input{padding:8px;width:100%;max-width:400px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px;margin:12px 0}
-@media(max-width:480px){.grid{grid-template-columns:1fr}}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);max-width:1400px;gap:12px;margin:12px 0}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
 .card{background:#222;border-radius:6px;overflow:hidden}
 iframe{width:100%;aspect-ratio:16/9;border:0;display:block;background:#000}
 .cap{padding:8px;font-size:13px}.cap span{color:#9cf}
@@ -21,8 +21,9 @@ iframe{width:100%;aspect-ratio:16/9;border:0;display:block;background:#000}
 .legend span{margin-right:14px;font-size:13px}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:4px;border-bottom:1px solid #333;text-align:left}
 </style></head><body>
-<h1>CCTV Publik DKI Jakarta</h1>
-<p>Sumber: <a href="https://jakcctv.jakarta.go.id/publik">jakcctv.jakarta.go.id/publik</a></p>
+<h1 style="margin-bottom:4px">Garuda's Eye</h1>
+<h2 style="margin:0 0 8px;font-weight:normal;color:#bbb">CCTV Publik DKI Jakarta</h2>
+<p style="margin-top:0">Sumber: <a href="https://jakcctv.jakarta.go.id/publik">jakcctv.jakarta.go.id/publik</a></p>
 <input id="q" placeholder="Cari lokasi...">
 <div class="pg" id="pg1"></div>
 <div class="grid" id="grid"></div>
