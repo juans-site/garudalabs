@@ -3,222 +3,78 @@
 <title>CCTV Jakarta</title>
 <style>
 body{font-family:sans-serif;margin:16px;background:#111;color:#eee}
-input{padding:8px;width:100%;max-width:400px;margin-bottom:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+a{color:#9cf} input{padding:8px;width:100%;max-width:400px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px;margin:12px 0}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
 .card{background:#222;border-radius:6px;overflow:hidden}
 iframe{width:100%;aspect-ratio:16/9;border:0;display:block;background:#000}
-.cap{padding:8px;font-size:13px} .cap span{color:#9cf}
+.cap{padding:8px;font-size:13px}.cap span{color:#9cf}
+.st{display:flex;gap:6px;padding:0 8px 8px}
+.st button{flex:1;padding:6px;border:1px solid #444;background:#333;color:#eee;border-radius:4px;cursor:pointer}
+.st button.on[data-s=Lancar]{background:#1b7f3b}.st button.on[data-s=Padat]{background:#b8860b}.st button.on[data-s=Macet]{background:#b22222}
+.pg{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pg button{padding:6px 12px;background:#333;color:#eee;border:1px solid #444;border-radius:4px;cursor:pointer}
+.pg button.on{background:#2a6fdb}.pg button:disabled{opacity:.4}
+.panel{background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:12px;margin:12px 0}
+.bar{display:flex;height:22px;border-radius:4px;overflow:hidden;background:#333;margin:8px 0}
+.bar div{transition:width .3s}
+.legend span{margin-right:14px;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:4px;border-bottom:1px solid #333;text-align:left}
 </style></head><body>
-<h1>CCTV Publik DKI Jakarta (52)</h1>
-<p>Sumber: <a style="color:#9cf" href="https://jakcctv.jakarta.go.id/publik">jakcctv.jakarta.go.id/publik</a></p>
-<input id="q" placeholder="Cari lokasi..." oninput="document.querySelectorAll('.card').forEach(c=>c.style.display=c.dataset.name.includes(this.value.toLowerCase())?'':'none')">
-<div class="grid">
-  <div class="card" data-name="jkp polda jpo jl. gatot subroto 7">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502045_JKP_POLDA_JPO-JL.-GATOT-SUBROTO-7_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JPO JL. GATOT SUBROTO 7</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jpo jl. gatot subroto 7">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502045_JKP_POLDA_JPO-JL.-GATOT-SUBROTO-7_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JPO JL. GATOT SUBROTO 7</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jl. gerbang pemuda c02">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502155_JKP_POLDA_JL.-GERBANG-PEMUDA-C02_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JL. GERBANG PEMUDA C02</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jl. gerbang pemuda c02">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502155_JKP_POLDA_JL.-GERBANG-PEMUDA-C02_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JL. GERBANG PEMUDA C02</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jl. gerbang pemuda c03">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502160_JKP_POLDA_JL.-GERBANG-PEMUDA-C03_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JL. GERBANG PEMUDA C03</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jl. gerbang pemuda c03">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502160_JKP_POLDA_JL.-GERBANG-PEMUDA-C03_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JL. GERBANG PEMUDA C03</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp satpol pp jl. gerbang pemuda c04">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502506_JKP_SATPOL-PP_JL.-GERBANG-PEMUDA-C04_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOL PP JL. GERBANG PEMUDA C04</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp satpol pp jl. gerbang pemuda c04">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502506_JKP_SATPOL-PP_JL.-GERBANG-PEMUDA-C04_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOL PP JL. GERBANG PEMUDA C04</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp satpol pp jl. jend. gatot subroto c11">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502507_JKP_SATPOL-PP_JL.-JEND.-GATOT-SUBROTO-C11_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOL PP JL. JEND. GATOT SUBROTO C11</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp satpol pp jl. jend. gatot subroto c11">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502507_JKP_SATPOL-PP_JL.-JEND.-GATOT-SUBROTO-C11_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOL PP JL. JEND. GATOT SUBROTO C11</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkb satpol pp simpang jl. letjen. s. parman c07">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502535_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C07_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C07</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkb satpol pp simpang jl. letjen. s. parman c07">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502535_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C07_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C07</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkb satpol pp simpang jl. letjen. s. parman c08">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502645_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C08_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C08</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkb satpol pp simpang jl. letjen. s. parman c08">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502645_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C08_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C08</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jl. jend. gatot subroto c13">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503300_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C13_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JL. JEND. GATOT SUBROTO C13</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jl. jend. gatot subroto c13">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503300_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C13_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JL. JEND. GATOT SUBROTO C13</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jl. tentara pelajar c04">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503301_JKP_POLDA_JL.-TENTARA-PELAJAR-C04_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JL. TENTARA PELAJAR C04</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jl. tentara pelajar c04">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503301_JKP_POLDA_JL.-TENTARA-PELAJAR-C04_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JL. TENTARA PELAJAR C04</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jl. jend. gatot subroto c14">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503303_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C14_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JL. JEND. GATOT SUBROTO C14</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp polda jl. jend. gatot subroto c14">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503303_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C14_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLDA JL. JEND. GATOT SUBROTO C14</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp dbm flyover ladokgi c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503536_JKP_DBM_FLYOVER-LADOKGI-C01_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP DBM FLYOVER LADOKGI C01</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp dbm flyover ladokgi c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503536_JKP_DBM_FLYOVER-LADOKGI-C01_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP DBM FLYOVER LADOKGI C01</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp satpol pp simpang jl. mh. thamrin c07">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502491_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C07_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOL PP SIMPANG JL. MH. THAMRIN C07</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp satpol pp simpang jl. mh. thamrin c07">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502491_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C07_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOL PP SIMPANG JL. MH. THAMRIN C07</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp satpol pp simpang jl. mh. thamrin c08">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502492_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C08_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOL PP SIMPANG JL. MH. THAMRIN C08</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp satpol pp simpang jl. mh. thamrin c08">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502492_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C08_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOL PP SIMPANG JL. MH. THAMRIN C08</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp dishub jl. mh. thamrin c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501844_JKP_DISHUB_JL.-MH.-THAMRIN-C01_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP DISHUB JL. MH. THAMRIN C01</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp dishub jl. mh. thamrin c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501844_JKP_DISHUB_JL.-MH.-THAMRIN-C01_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP DISHUB JL. MH. THAMRIN C01</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp satpolpp jl. mh. thamrin c02">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501941_JKP_SATPOLPP_JL.-MH.-THAMRIN-C02_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOLPP JL. MH. THAMRIN C02</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp satpolpp jl. mh. thamrin c02">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501941_JKP_SATPOLPP_JL.-MH.-THAMRIN-C02_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOLPP JL. MH. THAMRIN C02</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp satpol pp simpang jl. mh. thamrin c09">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502493_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C09_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOL PP SIMPANG JL. MH. THAMRIN C09</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp satpol pp simpang jl. mh. thamrin c09">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502493_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C09_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP SATPOL PP SIMPANG JL. MH. THAMRIN C09</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp polri uob plaza c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/504866_JKP_POLRI_UOB-PLAZA-C01_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLRI UOB PLAZA C01</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jkp polri uob plaza c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/504866_JKP_POLRI_UOB-PLAZA-C01_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLRI UOB PLAZA C01</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jkp polri uob plaza c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/504866_JKP_POLRI_UOB-PLAZA-C01_CCTV-03/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>JKP POLRI UOB PLAZA C01</b> <span>CCTV-03</span></div>
-  </div>
-  <div class="card" data-name="taman literasi-c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501478_JKS_SATPOLPP_TAMAN-LITERASI-C01_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Taman Literasi-C01</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="simpang jl. panglima polim-c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501493_JKP_SATPOLPP_PASAR-TANAH-ABANG-C02_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Simpang Jl. Panglima Polim-C01</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jl. sultan agung-c03">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501594_JKS_DISGULKARMAT_JL.-MANGGARAI-UTARA-2-C01_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Jl. Sultan Agung-C03</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="simpang jl. sultan agung-c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501862_JKB_DISHUB_JL.-LETJEN.-S.-PARMAN-C01_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Simpang Jl. Sultan Agung-C01</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="simpang jl. sultan agung-c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501862_JKB_DISHUB_JL.-LETJEN.-S.-PARMAN-C01_CCTV-03/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Simpang Jl. Sultan Agung-C01</b> <span>CCTV-03</span></div>
-  </div>
-  <div class="card" data-name="simpang jl. sultan agung-c02">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502041_JKP_POLDA_JL.-KH.-MAS-MANSYUR-C02_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Simpang Jl. Sultan Agung-C02</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="pasar tanah abang-c02">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502540_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C02_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Pasar Tanah Abang-C02</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="pasar tanah abang-c02">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/502540_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C02_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Pasar Tanah Abang-C02</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jl. kh. mas mansyur-c02">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503343_JKP_DBM_JPO-JL.-CIDENG-TIMUR-C02_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Jl. KH. Mas Mansyur-C02</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="jl. kh. mas mansyur-c02">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503343_JKP_DBM_JPO-JL.-CIDENG-TIMUR-C02_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Jl. KH. Mas Mansyur-C02</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="jl. jati baru raya-c02">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/503675_JKP_BAKESBANGPOL_JL.-JATI-BARU-RAYA-C02_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Jl. Jati Baru Raya-C02</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="simpang jl nurdin raya c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501968-Simpang-Jl-Nurdin-Raya-C01_CCTV-01/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Simpang Jl Nurdin Raya C01</b> <span>CCTV-01</span></div>
-  </div>
-  <div class="card" data-name="simpang jl nurdin raya c01">
-    <iframe src="https://dki-jkt.balitower.co.id:7028/501968-Simpang-Jl-Nurdin-Raya-C01_CCTV-02/embed.html" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Simpang Jl Nurdin Raya C01</b> <span>CCTV-02</span></div>
-  </div>
-  <div class="card" data-name="senayan 018">
-    <iframe src="https://jakcctv.jakarta.go.id/Senayan-018-705979_2?proto=hls" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Senayan 018</b> <span>CCTV-2</span></div>
-  </div>
-  <div class="card" data-name="senayan 001">
-    <iframe src="https://jakcctv.jakarta.go.id/Senayan-001-705084_2?proto=hls" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Senayan 001</b> <span>CCTV-2</span></div>
-  </div>
-  <div class="card" data-name="bendungan hilir 003">
-    <iframe src="https://jakcctv.jakarta.go.id/Bendungan-Hilir-003-700014_1?proto=hls" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Bendungan Hilir 003</b> <span>CCTV-1</span></div>
-  </div>
-  <div class="card" data-name="kebon melati 010">
-    <iframe src="https://jakcctv.jakarta.go.id/Kebon-Melati-010-700332_2?proto=hls" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    <div class="cap"><b>Kebon Melati 010</b> <span>CCTV-2</span></div>
-  </div>
-</div></body></html>
+<h1>CCTV Publik DKI Jakarta</h1>
+<p>Sumber: <a href="https://jakcctv.jakarta.go.id/publik">jakcctv.jakarta.go.id/publik</a></p>
+<input id="q" placeholder="Cari lokasi...">
+<div class="pg" id="pg1"></div>
+<div class="grid" id="grid"></div>
+<div class="pg" id="pg2"></div>
+
+<div class="panel">
+<h2>Analisis Traffic</h2>
+<p style="font-size:13px;color:#aaa">Tandai kondisi tiap kamera (Lancar / Padat / Macet) setelah melihat videonya. Penilaian tersimpan di browser ini dan dirangkum di sini.</p>
+<div id="sum"></div>
+<div class="bar" id="bar"></div>
+<div class="legend"><span>🟩 Lancar</span><span>🟨 Padat</span><span>🟥 Macet</span><span>⬛ Belum dinilai</span></div>
+<h3>Titik Padat / Macet</h3>
+<table><thead><tr><th>Lokasi</th><th>Kamera</th><th>Status</th><th>Dinilai</th></tr></thead><tbody id="hot"></tbody></table>
+<p><button id="reset">Reset penilaian</button></p>
+</div>
+<script>
+const CAMS=[{"n": "JKP POLDA JPO JL. GATOT SUBROTO 7", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502045_JKP_POLDA_JPO-JL.-GATOT-SUBROTO-7_CCTV-01/embed.html"}, {"n": "JKP POLDA JPO JL. GATOT SUBROTO 7", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502045_JKP_POLDA_JPO-JL.-GATOT-SUBROTO-7_CCTV-02/embed.html"}, {"n": "JKP POLDA JL. GERBANG PEMUDA C02", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502155_JKP_POLDA_JL.-GERBANG-PEMUDA-C02_CCTV-01/embed.html"}, {"n": "JKP POLDA JL. GERBANG PEMUDA C02", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502155_JKP_POLDA_JL.-GERBANG-PEMUDA-C02_CCTV-02/embed.html"}, {"n": "JKP POLDA JL. GERBANG PEMUDA C03", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502160_JKP_POLDA_JL.-GERBANG-PEMUDA-C03_CCTV-01/embed.html"}, {"n": "JKP POLDA JL. GERBANG PEMUDA C03", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502160_JKP_POLDA_JL.-GERBANG-PEMUDA-C03_CCTV-02/embed.html"}, {"n": "JKP SATPOL PP JL. GERBANG PEMUDA C04", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502506_JKP_SATPOL-PP_JL.-GERBANG-PEMUDA-C04_CCTV-01/embed.html"}, {"n": "JKP SATPOL PP JL. GERBANG PEMUDA C04", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502506_JKP_SATPOL-PP_JL.-GERBANG-PEMUDA-C04_CCTV-02/embed.html"}, {"n": "JKP SATPOL PP JL. JEND. GATOT SUBROTO C11", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502507_JKP_SATPOL-PP_JL.-JEND.-GATOT-SUBROTO-C11_CCTV-01/embed.html"}, {"n": "JKP SATPOL PP JL. JEND. GATOT SUBROTO C11", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502507_JKP_SATPOL-PP_JL.-JEND.-GATOT-SUBROTO-C11_CCTV-02/embed.html"}, {"n": "JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C07", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502535_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C07_CCTV-01/embed.html"}, {"n": "JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C07", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502535_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C07_CCTV-02/embed.html"}, {"n": "JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C08", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502645_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C08_CCTV-01/embed.html"}, {"n": "JKB SATPOL PP SIMPANG JL. LETJEN. S. PARMAN C08", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502645_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C08_CCTV-02/embed.html"}, {"n": "JKP POLDA JL. JEND. GATOT SUBROTO C13", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503300_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C13_CCTV-01/embed.html"}, {"n": "JKP POLDA JL. JEND. GATOT SUBROTO C13", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/503300_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C13_CCTV-02/embed.html"}, {"n": "JKP POLDA JL. TENTARA PELAJAR C04", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503301_JKP_POLDA_JL.-TENTARA-PELAJAR-C04_CCTV-01/embed.html"}, {"n": "JKP POLDA JL. TENTARA PELAJAR C04", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/503301_JKP_POLDA_JL.-TENTARA-PELAJAR-C04_CCTV-02/embed.html"}, {"n": "JKP POLDA JL. JEND. GATOT SUBROTO C14", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503303_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C14_CCTV-01/embed.html"}, {"n": "JKP POLDA JL. JEND. GATOT SUBROTO C14", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/503303_JKP_POLDA_JL.-JEND.-GATOT-SUBROTO-C14_CCTV-02/embed.html"}, {"n": "JKP DBM FLYOVER LADOKGI C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503536_JKP_DBM_FLYOVER-LADOKGI-C01_CCTV-01/embed.html"}, {"n": "JKP DBM FLYOVER LADOKGI C01", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/503536_JKP_DBM_FLYOVER-LADOKGI-C01_CCTV-02/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C07", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502491_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C07_CCTV-01/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C07", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502491_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C07_CCTV-02/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C08", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502492_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C08_CCTV-01/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C08", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502492_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C08_CCTV-02/embed.html"}, {"n": "JKP DISHUB JL. MH. THAMRIN C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501844_JKP_DISHUB_JL.-MH.-THAMRIN-C01_CCTV-01/embed.html"}, {"n": "JKP DISHUB JL. MH. THAMRIN C01", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/501844_JKP_DISHUB_JL.-MH.-THAMRIN-C01_CCTV-02/embed.html"}, {"n": "JKP SATPOLPP JL. MH. THAMRIN C02", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501941_JKP_SATPOLPP_JL.-MH.-THAMRIN-C02_CCTV-01/embed.html"}, {"n": "JKP SATPOLPP JL. MH. THAMRIN C02", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/501941_JKP_SATPOLPP_JL.-MH.-THAMRIN-C02_CCTV-02/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C09", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502493_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C09_CCTV-01/embed.html"}, {"n": "JKP SATPOL PP SIMPANG JL. MH. THAMRIN C09", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502493_JKP_SATPOL-PP_SIMPANG-JL.-MH.-THAMRIN-C09_CCTV-02/embed.html"}, {"n": "JKP POLRI UOB PLAZA C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/504866_JKP_POLRI_UOB-PLAZA-C01_CCTV-01/embed.html"}, {"n": "JKP POLRI UOB PLAZA C01", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/504866_JKP_POLRI_UOB-PLAZA-C01_CCTV-02/embed.html"}, {"n": "JKP POLRI UOB PLAZA C01", "b": "CCTV-03", "u": "https://dki-jkt.balitower.co.id:7028/504866_JKP_POLRI_UOB-PLAZA-C01_CCTV-03/embed.html"}, {"n": "Taman Literasi-C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501478_JKS_SATPOLPP_TAMAN-LITERASI-C01_CCTV-01/embed.html"}, {"n": "Simpang Jl. Panglima Polim-C01", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/501493_JKP_SATPOLPP_PASAR-TANAH-ABANG-C02_CCTV-02/embed.html"}, {"n": "Jl. Sultan Agung-C03", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501594_JKS_DISGULKARMAT_JL.-MANGGARAI-UTARA-2-C01_CCTV-01/embed.html"}, {"n": "Simpang Jl. Sultan Agung-C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501862_JKB_DISHUB_JL.-LETJEN.-S.-PARMAN-C01_CCTV-01/embed.html"}, {"n": "Simpang Jl. Sultan Agung-C01", "b": "CCTV-03", "u": "https://dki-jkt.balitower.co.id:7028/501862_JKB_DISHUB_JL.-LETJEN.-S.-PARMAN-C01_CCTV-03/embed.html"}, {"n": "Simpang Jl. Sultan Agung-C02", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502041_JKP_POLDA_JL.-KH.-MAS-MANSYUR-C02_CCTV-02/embed.html"}, {"n": "Pasar Tanah Abang-C02", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/502540_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C02_CCTV-01/embed.html"}, {"n": "Pasar Tanah Abang-C02", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/502540_JKB_SATPOL-PP_SIMPANG-JL.-LETJEN.-S.-PARMAN-C02_CCTV-02/embed.html"}, {"n": "Jl. KH. Mas Mansyur-C02", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503343_JKP_DBM_JPO-JL.-CIDENG-TIMUR-C02_CCTV-01/embed.html"}, {"n": "Jl. KH. Mas Mansyur-C02", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/503343_JKP_DBM_JPO-JL.-CIDENG-TIMUR-C02_CCTV-02/embed.html"}, {"n": "Jl. Jati Baru Raya-C02", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/503675_JKP_BAKESBANGPOL_JL.-JATI-BARU-RAYA-C02_CCTV-01/embed.html"}, {"n": "Simpang Jl Nurdin Raya C01", "b": "CCTV-01", "u": "https://dki-jkt.balitower.co.id:7028/501968-Simpang-Jl-Nurdin-Raya-C01_CCTV-01/embed.html"}, {"n": "Simpang Jl Nurdin Raya C01", "b": "CCTV-02", "u": "https://dki-jkt.balitower.co.id:7028/501968-Simpang-Jl-Nurdin-Raya-C01_CCTV-02/embed.html"}, {"n": "Senayan 018", "b": "CCTV-2", "u": "https://jakcctv.jakarta.go.id/Senayan-018-705979_2?proto=hls"}, {"n": "Senayan 001", "b": "CCTV-2", "u": "https://jakcctv.jakarta.go.id/Senayan-001-705084_2?proto=hls"}, {"n": "Bendungan Hilir 003", "b": "CCTV-1", "u": "https://jakcctv.jakarta.go.id/Bendungan-Hilir-003-700014_1?proto=hls"}, {"n": "Kebon Melati 010", "b": "CCTV-2", "u": "https://jakcctv.jakarta.go.id/Kebon-Melati-010-700332_2?proto=hls"}];
+const PER=4, KEY='cctv-traffic';
+let page=1, q='';
+let S={}; try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const id=c=>c.u;
+const esc=s=>s.replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+function list(){return CAMS.filter(c=>c.n.toLowerCase().includes(q))}
+function render(){
+  const L=list(), pages=Math.max(1,Math.ceil(L.length/PER)); if(page>pages)page=pages;
+  const sl=L.slice((page-1)*PER,page*PER);
+  document.getElementById('grid').innerHTML=sl.map(c=>{const s=S[id(c)]?.s;return `<div class="card">
+   <iframe src="${c.u}" allowfullscreen referrerpolicy="no-referrer"></iframe>
+   <div class="cap"><b>${esc(c.n)}</b> <span>${c.b}</span></div>
+   <div class="st">${['Lancar','Padat','Macet'].map(x=>`<button data-s="${x}" data-id="${c.u}" class="${s===x?'on':''}">${x}</button>`).join('')}</div></div>`}).join('')||'<p>Tidak ada hasil.</p>';
+  const pg=`<button data-p="${page-1}" ${page<=1?'disabled':''}>&laquo;</button>`+
+    Array.from({length:pages},(_,i)=>`<button data-p="${i+1}" class="${i+1===page?'on':''}">${i+1}</button>`).join('')+
+    `<button data-p="${page+1}" ${page>=pages?'disabled':''}>&raquo;</button><span style="margin-left:8px">${L.length} kamera • Hal. ${page}/${pages}</span>`;
+  pg1.innerHTML=pg2.innerHTML=pg; analyse();
+}
+function analyse(){
+  const c={Lancar:0,Padat:0,Macet:0}; CAMS.forEach(x=>{const s=S[id(x)]?.s;if(s)c[s]++});
+  const n=CAMS.length, rated=c.Lancar+c.Padat+c.Macet, none=n-rated;
+  const idx=rated?Math.round((c.Padat*50+c.Macet*100)/rated):0;
+  const lvl=!rated?'-':idx<25?'Lancar':idx<60?'Ramai/Padat':'Macet';
+  sum.innerHTML=`Dinilai <b>${rated}/${n}</b> kamera • Lancar <b>${c.Lancar}</b> • Padat <b>${c.Padat}</b> • Macet <b>${c.Macet}</b><br>Indeks kepadatan: <b>${rated?idx:'-'}</b>/100 → kondisi umum: <b>${lvl}</b>`;
+  const w=v=>(v/n*100)+'%';
+  bar.innerHTML=`<div style="width:${w(c.Lancar)};background:#1b7f3b"></div><div style="width:${w(c.Padat)};background:#b8860b"></div><div style="width:${w(c.Macet)};background:#b22222"></div><div style="width:${w(none)};background:#444"></div>`;
+  const hotL=CAMS.filter(x=>['Macet','Padat'].includes(S[id(x)]?.s)).sort((a,b)=>(S[id(b)].s==='Macet')-(S[id(a)].s==='Macet'));
+  hot.innerHTML=hotL.map(x=>`<tr><td>${esc(x.n)}</td><td>${x.b}</td><td>${S[id(x)].s}</td><td>${new Date(S[id(x)].t).toLocaleTimeString('id-ID')}</td></tr>`).join('')||'<tr><td colspan=4>Belum ada.</td></tr>';
+}
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.p){page=+b.dataset.p;render();scrollTo(0,0)}
+  else if(b.dataset.s){const k=b.dataset.id;S[k]?.s===b.dataset.s?delete S[k]:S[k]={s:b.dataset.s,t:Date.now()};save();
+    b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',S[k]?.s===x.dataset.s));analyse()}
+  else if(b.id==='reset'&&confirm('Hapus semua penilaian?')){S={};save();render()}});
+document.getElementById('q').oninput=e=>{q=e.target.value.toLowerCase();page=1;render()};
+render();
+</script></body></html>
