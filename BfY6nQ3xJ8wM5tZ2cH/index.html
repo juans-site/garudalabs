@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BTN Media Monitoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#070d1a;--panel:#0e1729;--panel2:#132039;--line:#1f2e4d;--text:#e6ecf7;--muted:#8a9bbb;
+  --blue:#1a73e8;--btn:#0057b8;--orange:#f7941d;--pos:#22c55e;--neu:#94a3b8;--neg:#ef4444;
+}
+:root[data-theme="light"]{--bg:#f3f6fb;--panel:#fff;--panel2:#f0f4fa;--line:#dbe3ef;--text:#0f1b33;--muted:#5b6b88}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif}
+a{color:var(--blue)}
+/* loader */
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99;gap:14px;transition:opacity .5s}
+#loader .logo{font-weight:800;font-size:34px;letter-spacing:4px}
+#loader .logo span{color:var(--orange)}
+#loader .sub{font:500 11px 'JetBrains Mono',monospace;letter-spacing:3px;color:var(--muted)}
+.bar{width:220px;height:3px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,var(--btn),var(--orange));animation:ld 1.2s infinite}
+@keyframes ld{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+/* header */
+header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.hwrap{max-width:1400px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.mark{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--btn),#003d82);display:grid;place-items:center;font-weight:800;color:#fff;font-size:13px;border:1px solid #2f6fd0}
+.brand b{display:block;font-size:15px}
+.brand small{color:var(--muted);font:500 10px 'JetBrains Mono',monospace;letter-spacing:2px}
+.tag{font-size:10px;font-weight:700;background:var(--orange);color:#111;padding:2px 6px;border-radius:4px;margin-left:6px}
+nav{display:flex;gap:4px;margin-left:auto;background:var(--panel);padding:4px;border-radius:10px;border:1px solid var(--line)}
+nav button{background:none;border:0;color:var(--muted);padding:7px 14px;border-radius:7px;font:600 13px Inter;cursor:pointer}
+nav button.on{background:var(--btn);color:#fff}
+.iconbtn{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:7px 10px;cursor:pointer}
+/* filters */
+.filters{max-width:1400px;margin:auto;padding:14px 20px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:500 13px Inter}
+.filters label{color:var(--muted);font-size:12px}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:none;border:0;color:var(--muted);padding:8px 12px;cursor:pointer;font:600 12px Inter}
+.seg button.on{background:var(--panel2);color:var(--text)}
+.meta{margin-left:auto;color:var(--muted);font:500 11px 'JetBrains Mono',monospace}
+main{max-width:1400px;margin:auto;padding:16px 20px 40px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(12,1fr)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.card h3{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.card h3 .seg{margin-left:auto}
+.c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
+@media(max-width:1000px){.c3{grid-column:span 6}.c4,.c5,.c6,.c7,.c8{grid-column:span 12}}
+@media(max-width:560px){.c3{grid-column:span 12}nav{margin-left:0;width:100%}.hwrap,.filters,main{padding-left:16px;padding-right:16px}}
+.kpi .v{font-size:30px;font-weight:800;letter-spacing:-.5px}
+.kpi .s{color:var(--muted);font-size:12px}
+.risk{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.gauge{width:130px;height:130px;border-radius:50%;display:grid;place-items:center;flex:none}
+.gauge div{width:100px;height:100px;border-radius:50%;background:var(--panel);display:grid;place-items:center;text-align:center}
+.gauge b{font-size:22px;display:block}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700}
+.p-Positif{background:#22c55e22;color:var(--pos)}.p-Netral{background:#94a3b822;color:var(--neu)}.p-Negatif{background:#ef444422;color:var(--neg)}
+.list{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto}
+.post{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:10px 12px}
+.post .h{display:flex;gap:8px;font-size:12px;color:var(--muted);align-items:center;flex-wrap:wrap}
+.post .h b{color:var(--text)}
+.post p{margin:6px 0 0;font-size:13px}
+.bars .row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin-bottom:10px;font-size:13px}
+.bars .track{grid-column:span 2;height:7px;background:var(--panel2);border-radius:4px;overflow:hidden}
+.bars .track i{display:block;height:100%;border-radius:4px}
+.cloud{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:center;min-height:260px;padding:10px}
+.cloud span{line-height:1.1;font-weight:700}
+.reco li{margin-bottom:8px}
+.summary{font-size:14px;line-height:1.7}
+.summary b{color:var(--orange)}
+.chartbox{position:relative;height:280px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;user-select:none;white-space:nowrap;position:sticky;top:0;background:var(--panel)}
+td.cap{max-width:520px}
+.tablewrap{overflow:auto;max-height:640px}
+.pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:10px;color:var(--muted);font-size:12px}
+.btnp{background:var(--btn);color:#fff;border:0;border-radius:8px;padding:8px 12px;font:600 12px Inter;cursor:pointer}
+.hide{display:none!important}
+.err{background:#ef444418;border:1px solid #ef444455;color:var(--text);padding:14px;border-radius:10px;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div id="loader"><div class="logo">BANK <span>BTN</span></div><div class="sub">MEDIA INTELLIGENCE ENGINE</div><div class="bar"><i></i></div><div class="sub" id="ldtxt">MENGHUBUNGKAN DATA…</div></div>
+
+<header><div class="hwrap">
+  <div class="brand"><div class="mark">BTN</div><div><b>BTN Media Monitoring<span class="tag">BETA</span></b><small>SOCIAL &amp; NEWS LISTENING</small></div></div>
+  <nav><button class="on" data-tab="dash">Dashboard</button><button data-tab="ana">Analytics</button><button data-tab="raw">Raw Data</button></nav>
+  <button class="iconbtn" id="theme" title="Ganti tema">◐</button>
+</div></header>
+
+<div class="filters">
+  <label>Platform</label><select id="fPlat"><option value="">Semua platform</option></select>
+  <label>Kategori</label><select id="fCat"><option value="">Semua kategori</option></select>
+  <label>Jenis akun</label><select id="fJenis"><option value="">Semua</option></select>
+  <label>Dari</label><input type="date" id="fFrom"><label>s/d</label><input type="date" id="fTo">
+  <button class="iconbtn" id="fReset">Reset</button>
+  <span class="meta" id="meta"></span>
+</div>
+
+<main>
+<div id="errbox"></div>
+
+<!-- DASHBOARD -->
+<section id="tab-dash" class="grid">
+  <div class="card kpi c3"><h3>Total Mention</h3><div class="v" id="kTotal">–</div><div class="s" id="kTotalS"></div></div>
+  <div class="card kpi c3"><h3>Positif</h3><div class="v" style="color:var(--pos)" id="kPos">–</div><div class="s" id="kPosS"></div></div>
+  <div class="card kpi c3"><h3>Netral</h3><div class="v" style="color:var(--neu)" id="kNeu">–</div><div class="s" id="kNeuS"></div></div>
+  <div class="card kpi c3"><h3>Negatif</h3><div class="v" style="color:var(--neg)" id="kNeg">–</div><div class="s" id="kNegS"></div></div>
+
+  <div class="card c5"><h3>Krisis / Alert</h3>
+    <div class="risk"><div class="gauge" id="gauge"><div><span><b id="rLvl">–</b><small style="color:var(--muted)">LEVEL RISIKO</small></span></div></div>
+    <div style="flex:1;min-width:200px"><div style="font-size:12px;color:var(--muted)">NARASI KRISIS UTAMA</div><div id="rNarr" style="font-weight:600;margin-top:4px"></div><div id="rDesc" style="color:var(--muted);font-size:13px;margin-top:6px"></div></div></div>
+  </div>
+  <div class="card c7"><h3>Tren Sentimen</h3><div class="chartbox"><canvas id="chTrend"></canvas></div></div>
+
+  <div class="card c4"><h3>Share of Voice per Kanal</h3><div class="chartbox"><canvas id="chSov"></canvas></div></div>
+  <div class="card c4"><h3>Summary</h3><div class="summary" id="summary"></div></div>
+  <div class="card c4"><h3>Rekomendasi Tindak Lanjut</h3><ol class="reco" id="reco"></ol></div>
+
+  <div class="card c6"><h3>Penyebab Utama Sentimen <div class="seg" data-g="drv"><button class="on" data-v="Negatif">Negatif</button><button data-v="Positif">Positif</button></div></h3><div class="bars" id="drivers"></div></div>
+  <div class="card c6"><h3>Postingan Negatif Teratas</h3><div class="list" id="topNeg"></div></div>
+
+  <div class="card c7"><h3>Word Cloud <div class="seg" data-g="wc"><button class="on" data-v="Negatif">Negatif</button><button data-v="Positif">Positif</button><button data-v="">All</button></div></h3><div class="cloud" id="cloud"></div></div>
+  <div class="card c5"><h3>Top 5 Akun <div class="seg" data-g="acc"><button class="on" data-v="Negatif">Negatif</button><button data-v="Positif">Positif</button><button data-v="">All</button></div></h3><div class="list" id="topAcc"></div></div>
+</section>
+
+<!-- ANALYTICS -->
+<section id="tab-ana" class="grid hide">
+  <div class="card c6"><h3>Sentimen per Platform</h3><div class="chartbox" style="height:320px"><canvas id="chPlatSent"></canvas></div></div>
+  <div class="card c6"><h3>Kategori Percakapan</h3><div class="chartbox" style="height:320px"><canvas id="chCat"></canvas></div></div>
+  <div class="card c6"><h3>Volume Harian per Platform</h3><div class="chartbox" style="height:320px"><canvas id="chDaily"></canvas></div></div>
+  <div class="card c6"><h3>Jenis Akun</h3><div class="chartbox" style="height:320px"><canvas id="chJenis"></canvas></div></div>
+  <div class="card c12"><h3>Engagement per Platform</h3><div class="tablewrap"><table id="engTbl"></table></div></div>
+</section>
+
+<!-- RAW -->
+<section id="tab-raw" class="hide">
+  <div class="card">
+    <h3>Raw Data <input id="q" placeholder="Cari caption / akun…" style="margin-left:auto;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 10px;text-transform:none;letter-spacing:0;min-width:200px">
+      <select id="fSent" style="background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px"><option value="">Semua sentimen</option><option>Positif</option><option>Netral</option><option>Negatif</option></select>
+      <button class="btnp" id="dl">Download .xlsx</button></h3>
+    <div class="tablewrap"><table id="rawTbl"></table></div>
+    <div class="pager"><span id="pinfo"></span><button class="iconbtn" id="prev">‹</button><button class="iconbtn" id="next">›</button></div>
+  </div>
+</section>
+</main>
+
+<script>
+/* ====== KONFIGURASI ====== */
+const SHEET_ID = '1ETKbNqO5euQGu-TgeehePeHviKDvWRg44u65RHDq3CU';
+const SHEET_NAME = 'Data Bersih';
+/* ======================== */
+
+const C = {Positif:'#22c55e',Netral:'#94a3b8',Negatif:'#ef4444'};
+const PLAT_C = ['#1a73e8','#f7941d','#a855f7','#06b6d4','#ec4899','#eab308','#10b981','#64748b'];
+const SENTS = ['Positif','Netral','Negatif'];
+let ALL = [], F = [], charts = {}, state = {drv:'Negatif',wc:'Negatif',acc:'Negatif',sort:{k:'date',d:-1},page:0};
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = n => Number(n||0).toLocaleString('id-ID');
+
+/* ---- load via JSONP (Google Visualization API, butuh sheet "Anyone with link") ---- */
+function loadSheet(){
+  return new Promise((res,rej)=>{
+    const cb = 'gv'+Date.now();
+    window[cb] = r => { delete window[cb]; r.status==='error' ? rej(new Error(r.errors?.[0]?.detailed_message||'Sheet error')) : res(r.table); };
+    const s = document.createElement('script');
+    s.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?headers=1&sheet=${encodeURIComponent(SHEET_NAME)}&tqx=responseHandler:${cb}`;
+    s.onerror = () => rej(new Error('Gagal memuat Google Sheet. Pastikan sheet dibagikan "Anyone with the link – Viewer".'));
+    document.body.appendChild(s);
+    setTimeout(()=>rej(new Error('Timeout memuat data')),20000);
+  });
+}
+function cellVal(c){
+  if(!c) return '';
+  if(typeof c.v==='string' && c.v.startsWith('Date(')){
+    const a = c.v.slice(5,-1).split(',').map(Number);
+    return new Date(a[0],a[1],a[2]||1,a[3]||0,a[4]||0);
+  }
+  return c.v ?? c.f ?? '';
+}
+function parseDate(v){
+  if(v instanceof Date) return v;
+  const m = String(v).match(/(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?/);
+  return m ? new Date(+m[1],m[2]-1,+m[3],+(m[4]||0),+(m[5]||0)) : null;
+}
+const num = v => { const n = parseFloat(String(v).replace(/[^\d.-]/g,'')); return isFinite(n)&&n>0?n:0; };
+
+function normalize(table){
+  const cols = table.cols.map(c=>(c.label||'').trim());
+  const idx = name => cols.findIndex(c=>c.toLowerCase().startsWith(name.toLowerCase()));
+  const I = {date:idx('Tanggal'),plat:idx('Platform'),acc:idx('Akun'),jenis:idx('Jenis Akun'),cap:idx('Konten'),url:idx('URL'),cat:idx('Kategori'),sent:idx('Sentimen'),likes:idx('Likes'),com:idx('Komentar'),sh:idx('Shares'),views:idx('Views'),fol:idx('Followers'),kw:idx('Kata Kunci'),note:idx('Catatan')};
+  return table.rows.map(r=>{
+    const g = k => I[k]<0 ? '' : cellVal(r.c[I[k]]);
+    const d = parseDate(g('date'));
+    const o = {date:d,plat:String(g('plat')).trim(),acc:String(g('acc')).trim(),jenis:String(g('jenis')).trim(),cap:String(g('cap')),url:String(g('url')),cat:String(g('cat')).trim(),sent:String(g('sent')).trim(),likes:num(g('likes')),com:num(g('com')),sh:num(g('sh')),views:num(g('views')),fol:num(g('fol')),kw:String(g('kw')),note:String(g('note')).trim()};
+    o.eng = o.likes+o.com*2+o.sh*3;
+    return o;
+  }).filter(o=>o.date && o.plat && SENTS.includes(o.sent));
+}
+const dkey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+function fillSelect(id,vals){ const s=$(id); [...new Set(vals)].filter(Boolean).sort().forEach(v=>s.insertAdjacentHTML('beforeend',`<option>${esc(v)}</option>`)); }
+
+function applyFilters(){
+  const p=$('#fPlat').value,c=$('#fCat').value,j=$('#fJenis').value,f=$('#fFrom').value,t=$('#fTo').value;
+  F = ALL.filter(o=>(!p||o.plat===p)&&(!c||o.cat===c)&&(!j||o.jenis===j)&&(!f||dkey(o.date)>=f)&&(!t||dkey(o.date)<=t));
+  state.page=0; render();
+}
+
+/* ---- charts helpers ---- */
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function chart(id,cfg){
+  charts[id]?.destroy();
+  Chart.defaults.color = css('--muted'); Chart.defaults.borderColor = css('--line'); Chart.defaults.font.family='Inter';
+  charts[id] = new Chart(document.getElementById(id),cfg);
+}
+const countBy = (arr,fn) => arr.reduce((m,o)=>{const k=fn(o);m[k]=(m[k]||0)+1;return m},{});
+
+/* ---- stopwords for word cloud ---- */
+const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada atau juga sudah saya kamu kami kita mereka ada tidak bisa akan karena jadi aja ya yg ga gak nggak tdk utk dgn dr sy aku kak min admin mau lagi sama apa kalau kalo kok sih dong nya the to of in for a an is are on and or you your my we it this that be at by as with https http www com co id amp btn bank bankbtn bale baleby by tapi masih belum lebih banyak hanya saat oleh agar bagi para semua setiap secara hal dalam tersebut adalah sebagai serta telah dapat bahwa harus hari pak bu buat udah emang pun lah kah nih tuh deh rp mas mbak gimana kenapa kapan dimana siapa berapa ok oke'.split(' '));
+function words(list){
+  const m={};
+  list.forEach(o=>o.cap.toLowerCase().replace(/https?:\S+|[@#]\S+/g,' ').replace(/[^a-zÀ-ɏ\s]/g,' ').split(/\s+/).forEach(w=>{if(w.length>3&&!STOP.has(w))m[w]=(m[w]||0)+1}));
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,60);
+}
+
+/* ---- render ---- */
+function render(){
+  const n=F.length, cnt=countBy(F,o=>o.sent); SENTS.forEach(s=>cnt[s]=cnt[s]||0);
+  const pct = x => n? (x/n*100).toFixed(1)+'%' : '0%';
+  const dates=F.map(o=>o.date).sort((a,b)=>a-b);
+  $('#meta').textContent = n ? `${fmt(n)} data • ${dates[0].toLocaleDateString('id-ID')} – ${dates[n-1].toLocaleDateString('id-ID')}` : 'Tidak ada data';
+  $('#kTotal').textContent=fmt(n); $('#kTotalS').textContent=`${Object.keys(countBy(F,o=>o.plat)).length} platform • ${fmt(new Set(F.map(o=>o.acc)).size)} akun`;
+  $('#kPos').textContent=fmt(cnt.Positif); $('#kPosS').textContent=pct(cnt.Positif)+' dari total';
+  $('#kNeu').textContent=fmt(cnt.Netral); $('#kNeuS').textContent=pct(cnt.Netral)+' dari total';
+  $('#kNeg').textContent=fmt(cnt.Negatif); $('#kNegS').textContent=pct(cnt.Negatif)+' dari total';
+
+  // risk
+  const negP = n? cnt.Negatif/n*100 : 0;
+  const fraud = F.filter(o=>/penipuan|impersonasi/i.test(o.cat)).length;
+  let lvl='RENDAH',col=C.Positif; if(negP>=10||fraud>=15){lvl='SEDANG';col=css('--orange')} if(negP>=20){lvl='TINGGI';col=C.Negatif}
+  $('#rLvl').textContent=lvl; $('#rLvl').style.color=col;
+  $('#gauge').style.background=`conic-gradient(${col} ${Math.min(negP*3,100)}%, ${css('--panel2')} 0)`;
+  const negCat = Object.entries(countBy(F.filter(o=>o.sent==='Negatif'),o=>o.cat)).sort((a,b)=>b[1]-a[1]);
+  $('#rNarr').innerHTML = negCat.length? `${esc(negCat[0][0])} <span class="pill p-Negatif">${negCat[0][1]} negatif</span>` : 'Tidak ada narasi negatif';
+  $('#rDesc').textContent = `Sentimen negatif ${negP.toFixed(1)}% dari total percakapan. ${fraud? fraud+' konten terindikasi penipuan/impersonasi akun BTN.':''}`;
+
+  // trend
+  const days=[...new Set(F.map(o=>dkey(o.date)))].sort();
+  const byDay=s=>days.map(d=>F.filter(o=>o.sent===s&&dkey(o.date)===d).length);
+  chart('chTrend',{type:'line',data:{labels:days.map(d=>d.slice(5)),datasets:SENTS.map(s=>({label:s,data:byDay(s),borderColor:C[s],backgroundColor:C[s]+'33',fill:true,tension:.35,pointRadius:2}))},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true}}}});
+
+  // SOV
+  const plat=Object.entries(countBy(F,o=>o.plat)).sort((a,b)=>b[1]-a[1]);
+  chart('chSov',{type:'doughnut',data:{labels:plat.map(p=>p[0]),datasets:[{data:plat.map(p=>p[1]),backgroundColor:PLAT_C,borderWidth:0}]},options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right'},tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${pct(c.raw)})`}}}}});
+
+  // summary
+  const topCat=Object.entries(countBy(F,o=>o.cat)).sort((a,b)=>b[1]-a[1]);
+  $('#summary').innerHTML = n? `Selama periode ini tercatat <b>${fmt(n)}</b> percakapan relevan tentang Bank BTN. Kanal terbesar adalah <b>${esc(plat[0][0])}</b> (${pct(plat[0][1])}). Topik dominan: <b>${esc(topCat[0][0])}</b> (${topCat[0][1]} konten). Sentimen didominasi <b>${SENTS.reduce((a,b)=>cnt[a]>=cnt[b]?a:b)}</b>, dengan negatif ${pct(cnt.Negatif)}.` : '–';
+
+  // reco
+  const reco=[];
+  if(negCat[0]) reco.push(`Prioritaskan respons untuk isu <b>${esc(negCat[0][0])}</b> — ${negCat[0][1]} konten negatif.`);
+  if(fraud) reco.push(`Tindaklanjuti ${fraud} akun/konten penipuan: laporkan ke platform & sebar edukasi anti-fraud.`);
+  const negPlat=Object.entries(countBy(F.filter(o=>o.sent==='Negatif'),o=>o.plat)).sort((a,b)=>b[1]-a[1]);
+  if(negPlat[0]) reco.push(`Perkuat customer care di <b>${esc(negPlat[0][0])}</b> (kanal dengan keluhan terbanyak).`);
+  if(topCat.find(c=>/digital|bale/i.test(c[0]))) reco.push('Amplifikasi konten positif promo/fitur <b>bale by BTN</b> melalui kolaborasi merchant & KOL.');
+  reco.push('Pantau lonjakan harian sentimen negatif & siapkan holding statement.');
+  $('#reco').innerHTML=reco.map(r=>`<li>${r}</li>`).join('');
+
+  renderDrivers(); renderTopNeg(); renderCloud(); renderAcc(); renderAnalytics(); renderTable();
+}
+function renderDrivers(){
+  const s=state.drv, sub=F.filter(o=>o.sent===s);
+  const m=countBy(sub,o=>o.note||o.cat); const arr=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,8); const max=arr[0]?.[1]||1;
+  $('#drivers').innerHTML = arr.map(([k,v])=>`<div class="row"><span>${esc(k)}</span><b>${v}</b><div class="track"><i style="width:${v/max*100}%;background:${C[s]}"></i></div></div>`).join('')||'<span style="color:var(--muted)">Tidak ada data</span>';
+}
+function postHtml(o){return `<div class="post"><div class="h"><b>${esc(o.acc)}</b>· ${esc(o.plat)} · ${o.date.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})} <span class="pill p-${o.sent}">${o.sent}</span>${o.url?`<a href="${esc(o.url)}" target="_blank" rel="noopener" style="margin-left:auto">Buka ↗</a>`:''}</div><p>${esc(o.cap.slice(0,240))}${o.cap.length>240?'…':''}</p><div class="h" style="margin-top:6px">❤ ${fmt(o.likes)} · 💬 ${fmt(o.com)} · ↻ ${fmt(o.sh)} · ${esc(o.cat)}</div></div>`}
+function renderTopNeg(){
+  const l=F.filter(o=>o.sent==='Negatif').sort((a,b)=>b.eng-a.eng||b.date-a.date).slice(0,10);
+  $('#topNeg').innerHTML=l.map(postHtml).join('')||'<span style="color:var(--muted)">Tidak ada postingan negatif 🎉</span>';
+}
+function renderCloud(){
+  const s=state.wc, w=words(s?F.filter(o=>o.sent===s):F); const max=w[0]?.[1]||1;
+  const col = s?C[s]:css('--blue');
+  $('#cloud').innerHTML=w.sort(()=>Math.random()-.5).map(([k,v])=>{const r=v/max;return `<span title="${v}x" style="font-size:${12+r*26}px;color:${col};opacity:${.45+r*.55}">${esc(k)}</span>`}).join('')||'<span style="color:var(--muted)">–</span>';
+}
+function renderAcc(){
+  const s=state.acc, sub=s?F.filter(o=>o.sent===s):F; const m={};
+  sub.forEach(o=>{(m[o.acc]??={acc:o.acc,plat:o.plat,jenis:o.jenis,n:0,eng:0}).n++;m[o.acc].eng+=o.eng});
+  const arr=Object.values(m).sort((a,b)=>b.n-a.n||b.eng-a.eng).slice(0,5);
+  $('#topAcc').innerHTML=arr.map((a,i)=>`<div class="post" style="display:flex;align-items:center;gap:12px"><div style="font-weight:800;font-size:20px;color:var(--muted);width:22px">${i+1}</div><div style="flex:1;min-width:0"><b style="overflow-wrap:anywhere">${esc(a.acc)}</b><div class="h">${esc(a.plat)} · ${esc(a.jenis)}</div></div><div style="text-align:right"><b>${a.n}</b><div class="h">konten</div></div></div>`).join('')||'<span style="color:var(--muted)">–</span>';
+}
+function renderAnalytics(){
+  const plats=[...new Set(F.map(o=>o.plat))].sort();
+  chart('chPlatSent',{type:'bar',data:{labels:plats,datasets:SENTS.map(s=>({label:s,data:plats.map(p=>F.filter(o=>o.plat===p&&o.sent===s).length),backgroundColor:C[s],borderRadius:4}))},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true}}}});
+  const cats=Object.entries(countBy(F,o=>o.cat)).sort((a,b)=>b[1]-a[1]);
+  chart('chCat',{type:'bar',data:{labels:cats.map(c=>c[0]),datasets:SENTS.map(s=>({label:s,data:cats.map(c=>F.filter(o=>o.cat===c[0]&&o.sent===s).length),backgroundColor:C[s],borderRadius:4}))},options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true}}}});
+  const days=[...new Set(F.map(o=>dkey(o.date)))].sort();
+  chart('chDaily',{type:'bar',data:{labels:days.map(d=>d.slice(5)),datasets:plats.map((p,i)=>({label:p,data:days.map(d=>F.filter(o=>o.plat===p&&dkey(o.date)===d).length),backgroundColor:PLAT_C[i%8]}))},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true}}}});
+  const jen=Object.entries(countBy(F,o=>o.jenis||'—'));
+  chart('chJenis',{type:'doughnut',data:{labels:jen.map(j=>j[0]),datasets:[{data:jen.map(j=>j[1]),backgroundColor:['#0057b8','#f7941d','#06b6d4','#a855f7'],borderWidth:0}]},options:{maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right'}}}});
+  const rows=plats.map(p=>{const s=F.filter(o=>o.plat===p);const sum=k=>s.reduce((a,o)=>a+o[k],0);const neg=s.filter(o=>o.sent==='Negatif').length;return `<tr><td><b>${esc(p)}</b></td><td>${s.length}</td><td>${fmt(sum('likes'))}</td><td>${fmt(sum('com'))}</td><td>${fmt(sum('sh'))}</td><td>${fmt(sum('views'))}</td><td><span class="pill p-Negatif">${(neg/s.length*100).toFixed(1)}%</span></td></tr>`});
+  $('#engTbl').innerHTML=`<thead><tr><th>Platform</th><th>Konten</th><th>Likes</th><th>Komentar</th><th>Shares</th><th>Views</th><th>% Negatif</th></tr></thead><tbody>${rows.join('')}</tbody>`;
+}
+const PER=50;
+function tableRows(){
+  const q=$('#q').value.toLowerCase(), s=$('#fSent').value;
+  const r=F.filter(o=>(!s||o.sent===s)&&(!q||(o.cap+' '+o.acc).toLowerCase().includes(q)));
+  const {k,d}=state.sort; return r.sort((a,b)=>(a[k]>b[k]?1:a[k]<b[k]?-1:0)*d);
+}
+function renderTable(){
+  const r=tableRows(), pages=Math.max(1,Math.ceil(r.length/PER)); state.page=Math.min(state.page,pages-1);
+  const cols=[['date','Tanggal & Jam'],['acc','Akun / Platform'],['cap','Caption'],['cat','Kategori'],['sent','Sentimen'],['com','Komentar'],['url','Link']];
+  $('#rawTbl').innerHTML=`<thead><tr>${cols.map(([k,l])=>`<th data-k="${k}">${l}${state.sort.k===k?(state.sort.d>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>${r.slice(state.page*PER,(state.page+1)*PER).map(o=>`<tr><td style="white-space:nowrap">${o.date.toLocaleString('id-ID',{dateStyle:'short',timeStyle:'short'})}</td><td><b>${esc(o.acc)}</b><div style="color:var(--muted);font-size:12px">${esc(o.plat)} · ${esc(o.jenis)}</div></td><td class="cap">${esc(o.cap)}</td><td>${esc(o.cat)}</td><td><span class="pill p-${o.sent}">${o.sent}</span></td><td>${fmt(o.com)}</td><td>${o.url?`<a href="${esc(o.url)}" target="_blank" rel="noopener">↗</a>`:''}</td></tr>`).join('')}</tbody>`;
+  $('#pinfo').textContent=`${fmt(r.length)} baris • hal ${state.page+1}/${pages}`;
+  document.querySelectorAll('#rawTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;state.sort={k,d:state.sort.k===k?-state.sort.d:-1};renderTable()});
+}
+
+/* ---- events ---- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['dash','ana','raw'].forEach(t=>$('#tab-'+t).classList.toggle('hide',t!==b.dataset.tab))});
+document.querySelectorAll('.seg[data-g]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));state[g.dataset.g]=b.dataset.v;({drv:renderDrivers,wc:renderCloud,acc:renderAcc})[g.dataset.g]()}));
+['#fPlat','#fCat','#fJenis','#fFrom','#fTo'].forEach(id=>$(id).onchange=applyFilters);
+$('#fReset').onclick=()=>{['#fPlat','#fCat','#fJenis','#fFrom','#fTo'].forEach(id=>$(id).value='');applyFilters()};
+$('#q').oninput=()=>{state.page=0;renderTable()}; $('#fSent').onchange=()=>{state.page=0;renderTable()};
+$('#prev').onclick=()=>{state.page=Math.max(0,state.page-1);renderTable()}; $('#next').onclick=()=>{state.page++;renderTable()};
+$('#dl').onclick=()=>{const ws=XLSX.utils.json_to_sheet(tableRows().map(o=>({Tanggal:dkey(o.date)+' '+o.date.toTimeString().slice(0,5),Platform:o.plat,Akun:o.acc,'Jenis Akun':o.jenis,Konten:o.cap,URL:o.url,Kategori:o.cat,Sentimen:o.sent,Likes:o.likes,Komentar:o.com,Shares:o.sh,Views:o.views,Catatan:o.note})));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data');XLSX.writeFile(wb,'btn-monitoring.xlsx')};
+$('#theme').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light';try{localStorage.setItem('btn-theme',r.dataset.theme)}catch(e){}render()};
+try{const t=localStorage.getItem('btn-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}
+
+/* ---- boot ---- */
+loadSheet().then(t=>{
+  ALL=normalize(t);
+  fillSelect('#fPlat',ALL.map(o=>o.plat)); fillSelect('#fCat',ALL.map(o=>o.cat)); fillSelect('#fJenis',ALL.map(o=>o.jenis));
+  F=ALL.slice(); render();
+}).catch(e=>{ $('#errbox').innerHTML=`<div class="err"><b>Data tidak dapat dimuat.</b> ${esc(e.message)}</div>`; })
+.finally(()=>{ const l=$('#loader'); l.style.opacity=0; setTimeout(()=>l.remove(),500); });
+</script>
+</body>
+</html>
