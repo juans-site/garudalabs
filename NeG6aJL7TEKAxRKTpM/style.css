@@ -730,3 +730,10 @@ body:before{background-position:center bottom!important;background-size:cover!im
 .lv-dot{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
 [data-theme=light] .hero h1.t-main{text-shadow:none}
 @media(max-width:640px){.hero h1.t-main{font-size:24px}.t-sub{font-size:11px;letter-spacing:.14em}.hl-wrap.a{gap:12px}}
+
+/* v0.55: tombol sign out */
+.icon-btn.logout{display:grid;place-items:center;color:var(--ink);text-decoration:none}
+.icon-btn.logout:hover{color:#ff6b6b;border-color:rgba(255,107,107,.5)!important}
+@media(max-width:640px){#themeBtn{grid-column:3}.icon-btn.logout{grid-column:4;grid-row:1}.topbar{grid-template-columns:1fr auto auto auto!important}}
+@media(max-width:400px){.topbar{column-gap:6px!important;padding:10px 14px!important}.topbar .dr{margin-right:0!important}.icon-btn,.icon-btn.logout{width:38px!important;height:38px!important}.topbar .dr-btn{height:38px!important;padding:0 8px!important}.beta-ver{margin-left:4px}}
+.dr-btn,.dr-btn b{white-space:nowrap}
