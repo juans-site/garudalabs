@@ -737,3 +737,14 @@ body:before{background-position:center bottom!important;background-size:cover!im
 @media(max-width:640px){#themeBtn{grid-column:3}.icon-btn.logout{grid-column:4;grid-row:1}.topbar{grid-template-columns:1fr auto auto auto!important}}
 @media(max-width:400px){.topbar{column-gap:6px!important;padding:10px 14px!important}.topbar .dr{margin-right:0!important}.icon-btn,.icon-btn.logout{width:38px!important;height:38px!important}.topbar .dr-btn{height:38px!important;padding:0 8px!important}.beta-ver{margin-left:4px}}
 .dr-btn,.dr-btn b{white-space:nowrap}
+
+/* v0.56: dropdown tanggal pekat (tidak tembus) */
+.dr-pop{background:color-mix(in srgb,var(--bg) 94%,transparent)!important;backdrop-filter:blur(28px)!important;-webkit-backdrop-filter:blur(28px)!important;
+  border:1px solid var(--glass-line)!important;box-shadow:0 24px 60px rgba(0,0,0,.55)!important;z-index:60!important}
+[data-theme=light] .dr-pop{background:rgba(255,255,255,.97)!important;box-shadow:0 20px 50px rgba(15,27,45,.18)!important}
+.topbar{z-index:50!important}
+.dates input{color-scheme:var(--scheme)}
+[data-theme=dark] .dates input::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.75}
+/* blur bertingkat (navbar + dropdown) membuat dropdown tembus di Chrome: pakai latar solid */
+.dr-pop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#14161b!important}
+[data-theme=light] .dr-pop{background:#ffffff!important}
