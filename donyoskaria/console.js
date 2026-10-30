@@ -129,7 +129,7 @@
     const earth = root.querySelector('.g-earth'), stage = root.querySelector('.g-stage');
     { const it = root.querySelector('.g-int'); if (it) { const er = document.createElement('div'); er.className = 'g-emorow'; er.append(it); stage.after(er); } }
     const fit = () => { const hero = root.querySelector('.g-hero'), hh = innerWidth >= 1101 && hero ? hero.offsetHeight + 18 : 0;
-      stage.style.marginTop = hh ? -hh + 'px' : ''; stage.style.setProperty('--heroH', hh + 'px'); const gi = [...root.querySelectorAll('.g-prio')].sort((a, b) => b.getBoundingClientRect().bottom - a.getBoundingClientRect().bottom)[0], nx = stage.nextElementSibling; stage.style.minHeight = '';
+      stage.style.marginTop = hh ? -hh + 'px' : ''; { const kp = root.querySelector('.g-kpis'), pr = root.querySelector('.g-prio'); if (kp && pr) pr.style.width = hh ? kp.offsetWidth + 'px' : ''; } stage.style.setProperty('--heroH', hh + 'px'); const gi = [...root.querySelectorAll('.g-prio')].sort((a, b) => b.getBoundingClientRect().bottom - a.getBoundingClientRect().bottom)[0], nx = stage.nextElementSibling; stage.style.minHeight = '';
       if (hh && gi && nx) { const need = gi.getBoundingClientRect().bottom + 24 - nx.getBoundingClientRect().top; if (need > 0) stage.style.minHeight = (stage.offsetHeight + need) + 'px'; }
       const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
       if (!wide) { earth.style.cssText = ''; return; }
