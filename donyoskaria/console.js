@@ -89,7 +89,7 @@
           <ol class="g-pl">${prio.list.map((t, i) => `<li class="${t.np >= 45 ? 'hi' : t.np >= 25 ? 'md' : 'lo'}">
             <div class="h"><span class="n">${i + 1}</span><b>${esc(t.kk)}</b><span class="v">${k(t.v)}</span>${dChip(t.d, true)}</div>
             <div class="m"><span class="g-lv ${t.np >= 45 ? 'hi' : t.np >= 25 ? 'md' : 'lo'}">${pc(t.n, t.v, 0)} negatif</span><span class="sh">${pc(t.v, prio.T, 0)} dari percakapan</span></div>
-            ${t.top ? `<p class="q">"${esc(t.top.text.slice(0, 120))}${t.top.text.length > 120 ? '…' : ''}"<span class="src">— ${esc(t.top.user || t.top.platform)} · ${esc(t.top.platform)}${t.top.link ? ` · <a href="${esc(t.top.link)}" target="_blank" rel="noopener">buka ${ic('ext', 11, 2)}</a>` : ''}</span></p>` : ''}
+            ${t.top ? `<p class="q">"${esc(t.top.text.slice(0, 220))}${t.top.text.length > 220 ? '…' : ''}"<span class="src">— ${esc(t.top.user || t.top.platform)} · ${esc(t.top.platform)}${t.top.link ? ` · <a href="${esc(t.top.link)}" target="_blank" rel="noopener">buka ${ic('ext', 11, 2)}</a>` : ''}</span></p>` : ''}
           </li>`).join('') || '<li class="lo"><p class="q">Belum ada isu menonjol.</p></li>'}</ol>
         </div>
         <div class="g-ctrl">
@@ -127,9 +127,15 @@
     const GEO = window.PETA_GEO, IW = 1672, IH = 1051, mx = Math.max(1, ...prv.map(x => x[1]));
     const PIN = Object.fromEntries((GEO?.prov || []).map(p => [p.n, p.c]));
     const earth = root.querySelector('.g-earth'), stage = root.querySelector('.g-stage');
+    // ---- Executive Brief: KPI sejajar + baris Isu Prioritas & Emosi di bawah banner ----
+    { const kp = root.querySelector('.g-kpis'), pr = root.querySelector('.g-prio'), it = root.querySelector('.g-int');
+      const sum = document.createElement('p'); sum.className = 'g-sum'; sum.innerHTML = `${ic('spark', 14)}<span>${esc(ins[0]?.[2] || '')}</span>`;
+      root.querySelector('.g-kw')?.before(sum);
+      const kr = document.createElement('div'); kr.className = 'g-kpirow'; kp && kr.append(kp);
+      const br = document.createElement('div'); br.className = 'g-brief'; pr && br.append(pr); it && br.append(it);
+      stage.after(kr); kr.after(br); }
     const fit = () => { const hero = root.querySelector('.g-hero'), hh = innerWidth >= 1101 && hero ? hero.offsetHeight + 18 : 0;
-      stage.style.marginTop = hh ? -hh + 'px' : ''; stage.style.setProperty('--heroH', hh + 'px'); const gi = [...root.querySelectorAll('.g-int,.g-prio')].sort((a, b) => b.getBoundingClientRect().bottom - a.getBoundingClientRect().bottom)[0], nx = stage.nextElementSibling; stage.style.minHeight = '';
-      if (hh && gi && nx) { const need = gi.getBoundingClientRect().bottom + 24 - nx.getBoundingClientRect().top; if (need > 0) stage.style.minHeight = (stage.offsetHeight + need) + 'px'; }
+      stage.style.marginTop = hh ? -hh + 'px' : ''; stage.style.setProperty('--heroH', hh + 'px'); stage.style.minHeight = hh ? Math.max(hh + 40, innerHeight * .42) + 'px' : '';
       const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
       if (!wide) { earth.style.cssText = ''; return; }
       // ukuran globe dibatasi seperti tata letak awal (lebar konten 1500px), lalu diletakkan di tengah area kanan

@@ -191,6 +191,17 @@
 .g-pl .q{margin:8px 0 0;font-size:12px;line-height:1.45;color:var(--ink);opacity:.85}
 .g-pl .q .src{display:block;margin-top:3px;font-size:11px;color:var(--mute)}.g-pl .q a{color:#46D6C8;text-decoration:none}
 @media(max-width:1100px){.g-prio{position:relative;width:auto;left:auto!important;top:auto!important}}
+.g-sum{display:flex;gap:8px;align-items:flex-start;max-width:640px;margin:10px 0 0;padding:10px 14px;border-radius:14px;background:rgba(70,214,200,.08);border:1px solid rgba(70,214,200,.25);font-size:13.5px;line-height:1.5;color:var(--ink)}.g-sum svg{flex:none;margin-top:3px;color:#46D6C8}
+.g-kpirow{position:relative;z-index:3;margin:16px 0 14px}.g-kpirow .g-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px}
+.g-brief{position:relative;z-index:3;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:14px;margin-bottom:14px;align-items:stretch}
+.g-brief .g-prio,.g-brief .g-int{position:relative!important;left:auto!important;top:auto!important;width:auto!important;transform:none!important;opacity:1!important;visibility:visible!important}
+.g-brief .g-pl{grid-template-columns:1fr;flex:1;align-content:space-between}.g-brief .g-prio{display:flex;flex-direction:column}.g-brief .g-pl li{display:flex;flex-direction:column}.g-brief .g-pl .q{font-size:12.8px;-webkit-line-clamp:6}
+@media(min-width:1101px){#gConsole .g-stage.g-stage{height:auto!important}}
+.g-brief .g-int{display:flex;flex-direction:column}.g-brief .g-int .g-btn{margin-top:auto}
+@media(min-width:1101px){.g-insight{margin-top:0!important}}
+@media(max-width:1280px){.g-kpirow .g-kpis{grid-template-columns:1fr 1fr!important}.g-brief{grid-template-columns:1fr}}
+@media(max-width:900px){.g-brief .g-pl{grid-template-columns:1fr}}
+[data-theme=light] .g-sum{background:rgba(11,127,116,.08);border-color:rgba(11,127,116,.25)}
 .g-photo .ph-l{display:none}[data-theme=light] .g-photo .ph-l{display:block}[data-theme=light] .g-photo .ph-d{display:none}
 .g-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(1,4,10,.55),transparent 28%),linear-gradient(0deg,rgba(1,4,10,.7),transparent 22%)}
 .g-int,.g-ctrl{z-index:2}
