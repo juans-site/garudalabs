@@ -64,13 +64,14 @@ html,body{overflow-x:clip}
     const root = document.getElementById('gConsole'), view = document.getElementById('viewDash');
     if (!root || !view || view.hidden) return;
     if (innerWidth < 1100 || reduce) { // layar sempit: kembalikan semua ke posisi normal
-      root.querySelectorAll('.g-earth,.g-pins,.g-int,.g-ctrl').forEach(el => { el.style.transform = ''; el.style.opacity = ''; el.style.filter = ''; });
+      root.querySelectorAll('.g-earth,.g-pins,.g-int,.g-ctrl,.g-hero').forEach(el => { el.style.transform = ''; el.style.opacity = ''; el.style.filter = ''; el.style.clipPath = ''; });
       return; }
     const stage = root.querySelector('.g-stage'), earth = root.querySelector('.g-earth'), pins = root.querySelector('.g-pins'); if (!stage || !earth) return;
     const r = stage.getBoundingClientRect(), y = Math.max(0, -r.top + 90), p = Math.min(1, y / (r.height * .55));
-    earth.style.transform = `translate3d(0,${(y * .42).toFixed(1)}px,0) scale(${(1 + p * .04).toFixed(3)})`;
+    if (earth.classList.contains('g-photo')) { const fy = Math.max(0, -r.top); earth.style.setProperty('transform', `translate3d(0,${fy.toFixed(1)}px,0)`, 'important'); earth.style.clipPath = `inset(0 0 ${fy.toFixed(1)}px 0)`; }
+    else earth.style.transform = `translate3d(0,${(y * .42).toFixed(1)}px,0) scale(${(1 + p * .04).toFixed(3)})`;
     if (pins) { pins.style.opacity = (1 - p * 1.4).toFixed(3); pins.style.filter = p > .02 ? `blur(${(p * 6).toFixed(1)}px)` : ''; pins.style.transform = `translate3d(0,${(-p * 30).toFixed(1)}px,0)`; }
-    const side = root.querySelectorAll('.g-int,.g-ctrl');
+    const side = root.querySelectorAll('.g-int,.g-ctrl,.g-hero');
     side.forEach(el => { el.style.opacity = (1 - p * 1.1).toFixed(3); el.style.transform = `translate3d(0,${(-y * .12).toFixed(1)}px,0)`; });
   }
   const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(parallax); } };
