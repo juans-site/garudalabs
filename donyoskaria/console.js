@@ -15,6 +15,7 @@
     const negShareL = Ls.t ? Ls.n / Ls.t * 100 : 0, negShareP = Ps.t ? Ps.n / Ps.t * 100 : 0;
     const per = rg.from ? (rg.from === rg.to ? tgY(rg.from) : `${tg(rg.from)} – ${tgY(rg.to)}`) : '';
     const maxIsl = isl[0]?.[1] || 1;
+    const repOf = s => s.t ? Math.round((s.p - s.n) / s.t * 100) : 0, rep = repOf(S), repD = Pv.length ? rep - repOf(Ps) : null;
     const prv = cnt(D.filter(r => r.prov), 'prov'), prvL = Object.fromEntries(cnt(L.filter(r => r.prov), 'prov')), prvP = Object.fromEntries(cnt(Pv.filter(r => r.prov), 'prov'));
     const emo = cnt(D.filter(r => r.emosi && !/^netral$/i.test(r.emosi)), 'emosi'), maxEmo = emo[0]?.[1] || 1;
     const emoL = Object.fromEntries(cnt(L.filter(r => r.emosi), 'emosi')), emoP = Object.fromEntries(cnt(Pv.filter(r => r.emosi), 'emosi'));
@@ -52,12 +53,12 @@
     root.innerHTML = `
       <div class="g-hero">
         <div><div class="g-eyebrow">Pemantauan Nasional · ${esc(per)}</div>
-          <h1 class="g-title"><b>Dony Oskaria</b> <span>&amp; Danantara</span></h1>
-          <p class="g-sub">Pemantauan percakapan media sosial secara berkala dengan analitik AI untuk deteksi dini, pemetaan risiko, dan respons cepat.</p></div>
+          <h1 class="g-title"><b>Danantara &amp; SOE</b> <span>Issue Intelligence</span></h1>
+          <p class="g-sub">Pemantauan percakapan media sosial secara berkala dengan analitik AI untuk deteksi dini, pemetaan risiko, dan respons cepat.</p><div class="g-kw" role="group" aria-label="Filter topik">${KATA_KUNCI.map(([v]) => `<button type="button" data-kw="${v}" class="${state.kw === v ? 'on' : ''}">${v}</button>`).join('')}</div></div>
         <div class="g-kpis" title="Perubahan (%) dibanding periode sebelumnya dengan jumlah hari yang sama">
           <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('chat', 22)}</span><div><b>${f(S.t)}</b><small>Total postingan</small></div>${dChip(delta(Ls.t, Ps.t), false)}</div>
           <div class="g-kpi" style="--c:${RED}"><span class="gi">${ic('frown', 22)}</span><div><b>${pc(S.n, S.t)}</b><small>Sentimen negatif</small></div>${dChip(negShareP ? Math.round((negShareL - negShareP) / negShareP * 100) : null, true)}</div>
-          <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('pin', 22)}</span><div><b>${prv.length}<small style="font-size:13px"> / 38</small></b><small>Provinsi disebut</small></div></div>
+          <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('spark', 22)}</span><div><b>${rep > 0 ? '+' : ''}${rep}</b><small title="(% positif − % negatif), skala −100 s/d +100">Indeks Reputasi</small></div>${dChip(repD, false, ' poin')}</div>
           <div class="g-kpi" style="--c:${ORANGE}"><span class="gi">${ic('alert', 22)}</span><div><b>${f(S.n)}</b><small>Postingan negatif</small></div>${dChip(delta(Ls.n, Ps.n), true)}</div>
         </div>
       </div>

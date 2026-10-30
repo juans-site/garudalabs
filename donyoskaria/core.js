@@ -82,6 +82,7 @@
 .g-btn:hover{border-color:rgba(70,214,200,.45)}
 .g-btn.pri{border:0;color:#04201D;background:linear-gradient(180deg,#5EE3D6,#2FB3A6);box-shadow:0 0 18px rgba(70,214,200,.3)}
 .g-int .g-btn{width:100%;margin-top:14px}
+.g-kw{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.g-kw button{font:600 12.5px var(--f-body);padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--mute);cursor:pointer;transition:.2s}.g-kw button:hover{color:var(--ink)}.g-kw button.on{background:#46D6C8;border-color:#46D6C8;color:#04121A}
 .g-ctrl{position:absolute;left:310px;right:20px;bottom:16px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
 .g-seg{display:inline-flex;padding:4px;border-radius:14px;gap:2px}
 .g-seg button{height:32px;padding:0 14px;border:0;border-radius:10px;background:none;color:var(--mute);font:500 12.5px var(--f-body);cursor:pointer}

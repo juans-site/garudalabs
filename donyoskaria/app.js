@@ -6,7 +6,7 @@ const REFRESH_MENIT = 5;
 // Akun resmi Danantara/BUMN/pemerintah (huruf besar/kecil diabaikan). Kolom 'Jenis Akun' berisi "Resmi" juga otomatis dihitung resmi.
 const AKUN_RESMI = []; // kosong: akun resmi cukup dari label 'Resmi' di kolom Jenis Akun
 // Filter Kata Kunci (kolom 'Kata Kunci'). Teks komentar dicocokkan dengan pola regex.
-const KATA_KUNCI = [['Semua', null], ['Dony Oskaria', /dony|oskaria/i], ['Danantara', /danantara|patriot bond/i], ['BUMN', /bumn|pelat merah|state-owned|soe/i]];
+const KATA_KUNCI = [['Semua', null], ['Dony Oskaria', /dony|oskaria/i], ['Danantara', /danantara|patriot bond/i], ['SOE', /bumn|pelat merah|state-owned|\bsoe\b/i]];
 // Top 5 Akun tidak memasukkan akun media/berita (Tipe "Media" di sheet),
 // KECUALI homeless media di daftar ini (huruf besar/kecil diabaikan) — silakan tambah/kurangi.
 const HOMELESS_MEDIA = ['putrapostdaily', 'mojiupdates', 'volleyballidn', 'democrazymedia', 'updatenusantaracom', 'mediakonsumenid'];
@@ -57,17 +57,49 @@ async function load(src) {
 const kwFilter = R => { const re = (KATA_KUNCI.find(k => k[0] === state.kw) || [])[1]; return re ? R.filter(r => re.test(r.kw || r.text)) : R; };
 function setKw(v) { state.kw = v; ['post', 'komentar'].forEach(s => { if (cache['_' + s]) cache[s] = kwFilter(cache['_' + s]); }); delete cache.all;
   document.querySelectorAll('[data-kw]').forEach(b => b.classList.toggle('on', b.dataset.kw === v)); render(); }
-// Lokasi profil (teks bebas) -> pulau besar untuk peta
-function pulau(l) { l = (l || '').toLowerCase();
-  if (!l || /tidak diketahui|unknown/.test(l)) return 'Tidak menyebutkan lokasi';
-  if (/papua|jayapura|sorong|merauke|timika/.test(l)) return 'Papua';
-  if (/maluku|ambon|ternate/.test(l)) return 'Maluku';
-  if (/sulawesi|makassar|manado|palu|kendari|gorontalo/.test(l)) return 'Sulawesi';
-  if (/kalimantan|balikpapan|samarinda|banjarmasin|pontianak|palangka|sampit/.test(l)) return 'Kalimantan';
-  if (/bali|denpasar|uluwatu|lombok|mataram|kupang|nusa tenggara|bima\b/.test(l)) return 'Bali & Nusa Tenggara';
-  if (/sumatera|sumatra|medan|padang|palembang|jambi|riau|pekanbaru|lampung|aceh|bengkulu|siantar|batipuh|musirawas|kayu tanam|bukittinggi|batam/.test(l)) return 'Sumatera';
-  if (/jakarta|jkt|bandung|bekasi|bogor|depok|tangerang|banten|jawa|java|jabar|semarang|surabaya|malang|yogya|jogja|solo|salatiga|kediri|karawang|kendal|sukabumi|senayan|senen|kebayoran|kemang|cipondoh|jagakarsa|kelapa gading|bojonggede|pancoran|lowokwaru|bulaksumur|kasihan|jepara|juanda|ckr/.test(l)) return 'Jawa';
-  return 'Tidak menyebutkan lokasi'; }
+// [nama, ibukota lon, lat, regex kata kunci (kota/provinsi), pulau]
+const PROV = [
+['Aceh',95.32,5.55,'aceh|banda aceh|lhokseumawe|sabang|meulaboh','Sumatera'],
+['Sumatera Utara',98.67,3.59,'sumatera utara|sumut|north sumatra|medan|siantar|binjai|deli serdang|toba|nias|sibolga|tebing tinggi|padang sidempuan','Sumatera'],
+['Sumatera Barat',100.35,-0.95,'sumatera barat|sumbar|west sumatra|padang(?! sidempuan)|bukittinggi|payakumbuh|batipuh|kayu tanam|pariaman|solok|minang','Sumatera'],
+['Riau',101.45,0.51,'(?<!kepulauan )riau(?! islands)|pekanbaru|dumai|siak','Sumatera'],
+['Kepulauan Riau',104.45,0.92,'kepulauan riau|kepri|riau islands|batam|tanjung ?pinang|bintan|natuna|karimun','Sumatera'],
+['Jambi',103.61,-1.61,'jambi|mendalo','Sumatera'],
+['Sumatera Selatan',104.76,-2.98,'sumatera selatan|sumsel|south sumatra|palembang|musi ?rawas|lubuklinggau|prabumulih|ogan','Sumatera'],
+['Kepulauan Bangka Belitung',106.11,-2.13,'bangka|belitung|pangkal ?pinang|babel','Sumatera'],
+['Bengkulu',102.27,-3.8,'bengkulu','Sumatera'],
+['Lampung',105.26,-5.43,'lampung','Sumatera'],
+['DKI Jakarta',106.83,-6.18,'jakarta|jkt|dki|senayan|senen|kebayoran|kemang|jagakarsa|kelapa gading|pancoran|menteng|kuningan|sudirman|thamrin|monas|tanjung priok|cilandak','Jawa'],
+['Banten',106.15,-6.12,'banten|tangerang|cipondoh|serang|cilegon|bsd|bintaro|pandeglang|lebak','Jawa'],
+['Jawa Barat',107.61,-6.91,'jawa barat|jabar|west java|bandung|bekasi|bogor|depok|bojonggede|karawang|sukabumi|cirebon|tasikmalaya|cimahi|garut|purwakarta|cianjur','Jawa'],
+['Jawa Tengah',110.42,-6.99,'jawa tengah|jateng|central java|semarang|solo|surakarta|salatiga|kendal|jepara|kudus|pekalongan|tegal|magelang|purwokerto|cilacap','Jawa'],
+['DI Yogyakarta',110.37,-7.8,'yogya|jogja|diy|sleman|bantul|kasihan|bulaksumur|gunung ?kidul','Jawa'],
+['Jawa Timur',112.75,-7.25,'jawa timur|jatim|east java|surabaya|malang|lowokwaru|kediri|sidoarjo|juanda|gresik|madura|banyuwangi|jember|mojokerto|blitar|pasuruan|probolinggo','Jawa'],
+['Bali',115.22,-8.65,'bali|denpasar|uluwatu|badung|gianyar|ubud|nusa dua','Bali & Nusa Tenggara'],
+['Nusa Tenggara Barat',116.12,-8.58,'nusa tenggara barat|ntb|lombok|mataram|sumbawa|bima','Bali & Nusa Tenggara'],
+['Nusa Tenggara Timur',123.6,-10.17,'nusa tenggara timur|ntt|kupang|flores|labuan bajo|sumba|maumere','Bali & Nusa Tenggara'],
+['Kalimantan Barat',109.33,-0.03,'kalimantan barat|kalbar|west kalimantan|pontianak|singkawang|ketapang','Kalimantan'],
+['Kalimantan Tengah',113.92,-2.21,'kalimantan tengah|kalteng|central kalimantan|palangka ?raya|sampit|kotawaringin','Kalimantan'],
+['Kalimantan Selatan',114.59,-3.32,'kalimantan selatan|kalsel|south kalimantan|banjarmasin|banjarbaru|kotabaru','Kalimantan'],
+['Kalimantan Timur',117.15,-0.5,'kalimantan timur|kaltim|east kalimantan|samarinda|balikpapan|bontang|ikn|nusantara capital|kutai|penajam','Kalimantan'],
+['Kalimantan Utara',117.36,2.84,'kalimantan utara|kaltara|tarakan|tanjung selor|nunukan','Kalimantan'],
+['Sulawesi Utara',124.84,1.47,'sulawesi utara|sulut|manado|bitung|tomohon|minahasa','Sulawesi'],
+['Gorontalo',123.06,0.54,'gorontalo','Sulawesi'],
+['Sulawesi Tengah',119.87,-0.9,'sulawesi tengah|sulteng|palu|morowali|poso|luwuk','Sulawesi'],
+['Sulawesi Barat',118.89,-2.68,'sulawesi barat|sulbar|mamuju|majene','Sulawesi'],
+['Sulawesi Selatan',119.43,-5.15,'sulawesi selatan|sulsel|south sulawesi|makassar|pare-?pare|gowa|maros|palopo|toraja','Sulawesi'],
+['Sulawesi Tenggara',122.51,-3.97,'sulawesi tenggara|sultra|kendari|baubau|konawe|kolaka','Sulawesi'],
+['Maluku',128.18,-3.7,'(?<!utara )maluku(?! utara)|ambon|tual','Maluku'],
+['Maluku Utara',127.38,0.79,'maluku utara|malut|ternate|tidore|halmahera|sofifi','Maluku'],
+['Papua Barat',134.06,-0.86,'papua barat(?! daya)|manokwari|fakfak|teluk bintuni','Papua'],
+['Papua Barat Daya',131.25,-0.88,'papua barat daya|sorong|raja ampat','Papua'],
+['Papua',140.7,-2.53,'jayapura|(?<!\\w )papua(?! barat| tengah| selatan| pegunungan)|sentani|biak','Papua'],
+['Papua Tengah',135.5,-3.37,'papua tengah|nabire|timika|mimika|freeport|grasberg','Papua'],
+['Papua Pegunungan',138.95,-4.1,'papua pegunungan|wamena|jayawijaya','Papua'],
+['Papua Selatan',140.4,-8.5,'papua selatan|merauke','Papua']];
+const PROV_RE = PROV.map(p => [p[0], new RegExp('\\b(' + p[3] + ')', 'i'), p[4]]);
+// Provinsi: dari lokasi profil; bila kosong/tidak jelas, dari nama kota/provinsi yang disebut di isi postingan
+function provinsi(lok, teks) { for (const s of [lok, teks]) { if (!s || /^(tidak diketahui|unknown)$/i.test(s.trim())) continue; const m = PROV_RE.find(p => p[1].test(s)); if (m) return m; } return null; }
 // Tanggal: "dd/mm/yyyy", serial angka, atau "yyyy-mm-dd". Jam: "HH:MM" atau pecahan hari.
 function norm(r, kind) {
   const t = r['Waktu'] || r['Tanggal (WIB)'] || ''; let tgl = '';
@@ -86,12 +118,13 @@ function norm(r, kind) {
   if (!r['Tipe']) r['Tipe'] = r['Jenis Akun'] || '';
   const user = (r['Username'] || r['Akun / Sumber'] || r['Akun Komentator'] || '').trim().replace(/^@/, '');
   const resmi = /resmi/i.test(r['Tipe'] || '') || AKUN_RESMI.includes(user.toLowerCase());
+  const pv = provinsi(r['Lokasi (estimasi)'] || r['Lokasi (Pulau)'], r['Konten'] || r['Caption'] || (isK ? (r['Komentar'] || '') + ' ' + (r['Ringkasan Postingan'] || '') : ''));
   return {
     platform: (r['Platform'] || 'Lainnya').trim(), user, kw: r['Kata Kunci'] || '', emosi: (r['Emosi'] || '').trim(), nama: (r['Nama Akun'] || '').trim(), tgl, jam,
     text: r['Caption'] || r['Teks Postingan'] || r['Text Komentar'] || r['Konten'] || (isK ? r['Komentar'] : '') || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || r['Kategori'] || 'Lainnya').trim().replace(/^Umum \/ Lainnya$/, 'Lainnya'),
     sent: !s ? '' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
-    link: r['Link'] || r['URL'] || (/^http/.test(r['URL Postingan'] || '') ? r['URL Postingan'] : ''), lokasi: r['Lokasi (Pulau)'] ? (() => { const l = r['Lokasi (Pulau)'].trim(); return /^(lainnya|-|tidak ada|n\/?a)$/i.test(l) ? 'Tidak menyebutkan lokasi' : l; })() : pulau(r['Lokasi (estimasi)']), jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), lk: parseInt(String(r['Likes/Reaksi'] || r['Likes'] || r['Likes Komentar'] || '0').replace(/[.,]/g, '')) || 0, km: isK ? 0 : parseInt(String(r['Komentar'] || '0').replace(/[.,]/g, '')) || 0, sh: parseInt(String(r['Share/Repost'] || r['Shares'] || '0').replace(/[.,]/g, '')) || 0, eng: (isK ? ['Likes Komentar'] : ['Likes/Reaksi', 'Likes', 'Komentar', 'Share/Repost', 'Shares']).reduce((s, k) => s + (parseInt(String(r[k] || '0').replace(/[.,]/g, '')) || 0), 0), kind
+    link: r['Link'] || r['URL'] || (/^http/.test(r['URL Postingan'] || '') ? r['URL Postingan'] : ''), prov: pv ? pv[0] : '', lokasi: pv ? pv[2] : 'Tidak menyebutkan lokasi', jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), lk: parseInt(String(r['Likes/Reaksi'] || r['Likes'] || r['Likes Komentar'] || '0').replace(/[.,]/g, '')) || 0, km: isK ? 0 : parseInt(String(r['Komentar'] || '0').replace(/[.,]/g, '')) || 0, sh: parseInt(String(r['Share/Repost'] || r['Shares'] || '0').replace(/[.,]/g, '')) || 0, eng: (isK ? ['Likes Komentar'] : ['Likes/Reaksi', 'Likes', 'Komentar', 'Share/Repost', 'Shares']).reduce((s, k) => s + (parseInt(String(r[k] || '0').replace(/[.,]/g, '')) || 0), 0), kind
   };
 }
 const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
@@ -134,7 +167,7 @@ async function render() {
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
   const unit = { post: 'post', komentar: 'komentar', all: 'mention' }[state.src];
-  $('periode').textContent = `Monitoring Dony Oskaria (Kepala BP BUMN) & Danantara${state.kw !== 'Semua' ? ' · filter: ' + state.kw : ''} · ${periode} · ${unit}`;
+  $('periode').textContent = `Danantara & SOE Issue Intelligence${state.kw !== 'Semua' ? ' · filter: ' + state.kw : ''} · ${periode} · ${unit}`;
 
   const S = stats(D), N = D.filter(r => r.sent === 'negatif'), P = D.filter(r => r.sent === 'positif');
 
@@ -630,4 +663,4 @@ $('snaQ').onchange = e => { const id = e.target.value.trim().toLowerCase(); if (
 
 let snaRT; addEventListener('resize', () => { clearTimeout(snaRT); snaRT = setTimeout(() => { if (!$('viewSna').hidden) sna.fitAll?.(); }, 200); });
 
-$('fKw').onclick = e => { const b = e.target.closest('[data-kw]'); if (b) setKw(b.dataset.kw); };
+document.addEventListener('click', e => { const b = e.target.closest('[data-kw]'); if (b) setKw(b.dataset.kw); });

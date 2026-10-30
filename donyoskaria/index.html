@@ -4,22 +4,22 @@
 <meta charset="utf-8">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dony Oskaria &amp; Danantara - Garuda Labs Intelligent Media Monitoring</title>
-<link rel="icon" href="favicon.ico?v=71" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=71">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=71">
+<title>Danantara &amp; SOE Issue Intelligence - Garuda Labs Intelligent Media Monitoring</title>
+<link rel="icon" href="favicon.ico?v=72" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=72">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=72">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Dashboard monitoring percakapan media sosial terkait Dony Oskaria (Kepala BP BUMN), Danantara, dan BUMN: sentimen, emosi, kanal, isu utama, dan level risiko.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Garuda Labs">
-<meta property="og:title" content="Dony Oskaria &amp; Danantara - Garuda Labs Intelligent Media Monitoring">
+<meta property="og:title" content="Danantara &amp; SOE Issue Intelligence - Garuda Labs Intelligent Media Monitoring">
 <meta property="og:description" content="Dashboard monitoring percakapan media sosial terkait Dony Oskaria (Kepala BP BUMN), Danantara, dan BUMN: sentimen, emosi, kanal, isu utama, dan level risiko.">
 <meta property="og:url" content="https://garudalabs.co.id/donyoskaria/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Dony Oskaria &amp; Danantara - Garuda Labs Intelligent Media Monitoring">
+<meta name="twitter:title" content="Danantara &amp; SOE Issue Intelligence - Garuda Labs Intelligent Media Monitoring">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&family=Michroma&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=71">
+<link rel="stylesheet" href="style.css?v=72">
 <style>
 /* Perbaikan mobile: tombol tema & topbar */
 .icon-btn{flex:none;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;font-size:19px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;text-align:center}
@@ -37,10 +37,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
-<link rel="stylesheet" href="theme.css?v=90">
-<link rel="preload" as="image" href="earth.jpg?v=5" imagesrcset="earth-sm.jpg?v=5 836w, earth.jpg?v=5 1672w" imagesizes="(max-width:700px) 100vw, 1400px">
+<link rel="stylesheet" href="theme.css?v=91">
 <style>.beta{display:inline-flex!important;align-items:center;gap:6px}.beta .ver{font-style:normal;font-weight:600;opacity:.75;padding-left:6px;border-left:1px solid currentColor;letter-spacing:.02em;text-transform:none}</style>
-<link rel="stylesheet" href="loader.css?v=96">
+<link rel="stylesheet" href="loader.css?v=97">
 <style>#loading .spinner{display:none}</style>
 </head>
 <body>
@@ -56,15 +55,15 @@
   <div class="footer"><em>SYS.01</em> / GARUDA NEURAL INTERFACE<br>DATA STREAM INITIALIZING</div>
   <div class="signal" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
 </div>
-<script src="loader.js?v=96"></script>
+<script src="loader.js?v=97"></script>
 <script>(function(){var done=false,fin=function(){if(done)return;done=true;try{GarudaLoader.complete()}catch(e){}};addEventListener("lok:update",fin,{once:true});setTimeout(function(){var l=document.getElementById("loading");if(l&&/Gagal/.test(l.textContent))fin()},4000);setTimeout(fin,20000);})();</script>
 
 <header class="topbar">
   <div class="brand">
-    <img class="logo logo-dark" src="logo-dark.png?v=71" alt="Logo">
-    <img class="logo logo-light" src="logo-light.png?v=71" alt="Logo">
+    <img class="logo logo-dark" src="logo-dark.png?v=72" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png?v=72" alt="Logo">
     <span class="divider"></span>
-    <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="beta" title="Versi 0.4 · diperbarui 30 Okt 2026">Beta<i class="ver">v0.4</i></span>
+    <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="beta" title="Versi 0.6 · diperbarui 30 Okt 2026">Beta<i class="ver">v0.6</i></span>
   </div>
   <div class="top-r">
       <div class="dr">
@@ -83,8 +82,7 @@
 
 <main class="content">
   <div class="page-head hero">
-    <div><h1>Analisis Media Monitoring</h1><p id="periode">Memuat data…</p>
-      <div class="seg" id="fKw" role="group" aria-label="Filter kata kunci" style="margin-top:10px"><button data-kw="Semua" class="on">Semua</button><button data-kw="Dony Oskaria">Dony Oskaria</button><button data-kw="Danantara">Danantara</button><button data-kw="BUMN">BUMN</button></div></div>
+    <div><h1>Analisis Media Monitoring</h1><p id="periode">Memuat data…</p></div>
     </div>
   </div>
 
@@ -209,14 +207,13 @@
     <footer>© 2026 Garuda Labs Intelligent Media Monitoring</footer>
   </div>
 </main>
-<script src="app.js?v=96"></script>
-<script src="map.js?v=71"></script>
-<script src="core.js?v=92"></script>
-<script src="globe.js?v=77"></script>
-<script src="analitik.js?v=82"></script>
-<script src="console.js?v=92"></script>
-<script src="narasi.js?v=100"></script>
-<script src="fx.js?v=95"></script>
-<script src="chat.js?v=71"></script>
+<script src="app.js?v=97"></script>
+<script src="map.js?v=72"></script>
+<script src="core.js?v=93"></script>
+<script src="analitik.js?v=83"></script>
+<script src="console.js?v=93"></script>
+<script src="narasi.js?v=101"></script>
+<script src="fx.js?v=96"></script>
+<script src="chat.js?v=72"></script>
 </body>
 </html>
