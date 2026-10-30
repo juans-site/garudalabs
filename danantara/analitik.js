@@ -115,8 +115,7 @@
     charts2.d = new Chart(document.getElementById('gcDonut'), { type: 'doughnut', data: { labels: ['Negatif', 'Netral', 'Positif'], datasets: [{ data: [S.n, S.z, S.p], backgroundColor: [RED, GREY, TEAL], borderWidth: 0, spacing: 3, borderRadius: 6 }] },
       options: { maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false }, tooltip: base.plugins.tooltip } } });
     const tCol = [ORANGE, RED, AMBER, TEAL, '#7FB8FF'];
-    charts2.p = new Chart(document.getElementById('gcTopic'), { type: 'line', data: { labels, datasets: T5.map((t, i) => ({ label: t, data: perDay.map(x => D.filter(r => r.tgl === x.d && r.topik === t).length), borderColor: tCol[i], borderWidth: 2, tension: .35, pointRadius: 0 })) },
-      options: { ...base, plugins: { ...base.plugins, legend: { display: true, position: 'top', align: 'start', labels: { color: tick, boxWidth: 8, boxHeight: 8, usePointStyle: true, font: { size: 11 } } }, tooltip: { ...base.plugins.tooltip, callbacks: {} } } } });
+    charts2.p = window.G.hiLines(document.getElementById('gcTopic'), perDay.map(x => x.d), T5.map((t, i) => ({ label: t, color: tCol[i], data: perDay.map(x => D.filter(r => r.tgl === x.d && r.topik === t).length) })));
   }
 
   window.G.buildAnalitik = buildAnalitik;

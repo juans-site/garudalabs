@@ -36,5 +36,24 @@
         scales: { x: { grid: { display: false }, ticks: { color: tick, maxRotation: 0, autoSkip: true, maxTicksLimit: opt.ticks || 8, font: { size: 10.5 } }, border: { color: grid } },
           y: { beginAtZero: true, grid: { color: grid }, ticks: { color: tick, maxTicksLimit: 5, font: { size: 10.5 } }, border: { display: false } } } } });
   }
-  window.G = Object.assign(window.G || {}, { hiTrend });
+  // Versi umum: banyak seri bebas (mis. tren topik)
+  function hiLines(canvas, dates, series) {
+    if (!canvas || !window.Chart) return null;
+    Chart.getChart(canvas)?.destroy();
+    const L = light(), tick = L ? '#5B6873' : '#8A97A6', grid = L ? 'rgba(4,7,10,.08)' : 'rgba(255,255,255,.07)';
+    const fill = c => ctx => { const ar = ctx.chart.chartArea; if (!ar) return c + '18';
+      const g = ctx.chart.ctx.createLinearGradient(0, ar.top, 0, ar.bottom); g.addColorStop(0, c + '30'); g.addColorStop(1, c + '00'); return g; };
+    return new Chart(canvas, { type: 'line', plugins: [glow],
+      data: { labels: dates.map(tgS), datasets: series.map((s, i) => ({ label: s.label, data: s.data, borderColor: s.color, borderWidth: i === 0 ? 2.4 : 1.9, tension: .42, fill: true,
+        backgroundColor: fill(s.color), pointRadius: 2.4, pointBackgroundColor: s.color, pointBorderColor: s.color, pointHoverRadius: 6, pointHoverBorderWidth: 3, pointHoverBorderColor: '#fff', _glow: i === 0 ? 12 : 8 })) },
+      options: { maintainAspectRatio: false, responsive: true, animation: { duration: 700 }, interaction: { mode: 'index', intersect: false }, layout: { padding: { top: 6 } },
+        plugins: { legend: { position: 'top', align: 'start', labels: { color: tick, usePointStyle: true, pointStyle: 'circle', boxWidth: 7, boxHeight: 7, padding: 12, font: { size: 11 } } },
+          tooltip: { backgroundColor: L ? 'rgba(255,255,255,.97)' : 'rgba(6,14,26,.94)', borderColor: L ? 'rgba(4,7,10,.12)' : 'rgba(80,160,255,.35)', borderWidth: 1, padding: 10,
+            titleColor: L ? '#0F1A24' : '#fff', bodyColor: L ? '#334155' : '#C9D6E2', titleFont: { size: 13, weight: '700' }, bodyFont: { size: 11.5 }, boxWidth: 7, boxHeight: 7, usePointStyle: true,
+            itemSort: (a, b) => b.raw - a.raw,
+            callbacks: { title: it => tgL(dates[it[0].dataIndex]), label: i => ` ${i.dataset.label}: ${i.raw.toLocaleString('id-ID')}` } } },
+        scales: { x: { grid: { display: false }, ticks: { color: tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 8, font: { size: 10.5 } }, border: { color: grid } },
+          y: { beginAtZero: true, grid: { color: grid }, ticks: { color: tick, maxTicksLimit: 5, font: { size: 10.5 } }, border: { display: false } } } } });
+  }
+  window.G = Object.assign(window.G || {}, { hiTrend, hiLines });
 })();
