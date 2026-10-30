@@ -219,9 +219,9 @@ async function render() {
     options: baseOpts({ indexAxis: 'y', plugins: { ...baseOpts().plugins, legend: { display: false }, tooltip: { ...baseOpts().plugins.tooltip, callbacks: { label: c => ` ${fmt(c.raw)} mention (${pct(c.raw, S.T)})` } } },
       layout: { padding: { right: 56 } }, scales: { x: { display: false, beginAtZero: true }, y: { grid: { display: false }, ticks: { color: css('--ink'), font: { weight: 600 } }, border: { display: false } } } }) });
   $('sovNote').textContent = kanal[0] ? `${kanal[0][0]} dominan (${pct(kanal[0][1], S.T)})` : '';
-  co('coKanal', 'Kanal Dominan', kanal[0] ? esc(kanal[0][0]) : '–', kanal[0] ? `${pct(kanal[0][1], S.T)} dari total ${unit}` : '');
+  co('coKanal', 'Platform Dominan', kanal[0] ? esc(kanal[0][0]) : '–', kanal[0] ? `${pct(kanal[0][1], S.T)} dari total ${unit}` : '');
 
-  /* Sentimen per kanal: grouped bar */
+  /* Sentimen per platform: grouped bar */
   const pf = kanal.map(k => k[0]);
   const by = s => pf.map(p => D.filter(r => r.platform === p && r.sent === s).length);
   $('kanalSent').innerHTML = `<div class="ks-h"><span></span><span></span><span>Negatif</span><span>Netral</span><span>Positif</span></div>` + pf.map((p, i) => {
@@ -286,12 +286,12 @@ async function render() {
   $('impact').textContent = negTop.length ? `${t3} dari ${N.length} mention negatif (${pct(t3, N.length)}) berasal dari 3 topik teratas. Dampak: reputasi, kepercayaan nasabah, dan sentimen investor.` : '';
 
   /* Rekomendasi (template otomatis) */
-  const negPf = negK[0]?.[0] || 'kanal utama';
+  const negPf = negK[0]?.[0] || 'platform utama';
   // Rekomendasi taktis untuk tim PR / campaign (3–5 poin, dari data)
   const posTopR = count(P, 'topik')[0]?.[0];
   const reco = [
-    negTop[0] && ['Klarifikasi isu utama', `Rilis holding statement singkat untuk isu "${negTop[0][0]}" (${fmt(negTop[0][1])} mention negatif), lalu pin di kanal resmi.`],
-    negPf && ['Fokus kanal', `Prioritaskan respons di ${negPf}, kanal dengan keluhan terbanyak; targetkan balasan < 1 jam pada jam sibuk.`],
+    negTop[0] && ['Klarifikasi isu utama', `Rilis holding statement singkat untuk isu "${negTop[0][0]}" (${fmt(negTop[0][1])} mention negatif), lalu pin di akun resmi.`],
+    negPf && ['Fokus platform', `Prioritaskan respons di ${negPf}, platform dengan keluhan terbanyak; targetkan balasan < 1 jam pada jam sibuk.`],
     negTop[1] && ['Siapkan jawaban baku', `Buat FAQ & template balasan untuk "${negTop[1][0]}" agar respons admin konsisten.`],
     posTopR && ['Dorong narasi positif', `Perbanyak konten tentang "${posTopR}" dan ajak akun pendukung ikut menyebarkannya.`],
     ['Pantau & laporkan', `Level risiko ${lvl.toLowerCase()} (NSI ${S.nsi > 0 ? '+' : ''}${S.nsi}). Laporkan perkembangan harian ke manajemen.`]
@@ -306,7 +306,7 @@ async function render() {
     ['Net Sentiment Index', `${S.nsi > 0 ? '+' : ''}${S.nsi}`],
     negTop[0] && ['Isu negatif utama', esc(negTop.slice(0, 2).map(x => `${x[0]} (${fmt(x[1])})`).join('; '))],
     posTop[0] && ['Isu positif utama', esc(posTop.slice(0, 2).map(x => `${x[0]} (${fmt(x[1])})`).join('; '))],
-    kanal[0] && ['Kanal dominan', `${esc(kanal[0][0])} (${pct(kanal[0][1], S.T)})${negK[0] ? `; negatif terbanyak di ${esc(negK[0][0])}` : ''}`],
+    kanal[0] && ['Platform dominan', `${esc(kanal[0][0])} (${pct(kanal[0][1], S.T)})${negK[0] ? `; negatif terbanyak di ${esc(negK[0][0])}` : ''}`],
     ['Level risiko', `<b style="color:${lvlColor}">${lvl}</b>`]
   ].filter(Boolean);
   $('summaryText').innerHTML = pts.map(([k, v]) => `<li><span class="sk">${k}</span><span class="sv">${v}</span></li>`).join('');

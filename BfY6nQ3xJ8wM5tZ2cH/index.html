@@ -4,23 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bank BTN - Garuda Labs Intelligent Media Monitoring</title>
-<link rel="icon" href="favicon.ico?v=250" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=250">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=250">
+<link rel="icon" href="favicon.ico?v=260" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=260">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=260">
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Dashboard monitoring percakapan media sosial terkait Bank BTN: sentimen, kanal, isu utama, dan level risiko.">
+<meta name="description" content="Dashboard monitoring percakapan media sosial terkait Bank BTN: sentimen, platform, isu utama, dan level risiko.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Garuda Labs">
 <meta property="og:title" content="Bank BTN - Garuda Labs Intelligent Media Monitoring">
-<meta property="og:description" content="Dashboard monitoring percakapan media sosial terkait Bank BTN: sentimen, kanal, isu utama, dan level risiko.">
+<meta property="og:description" content="Dashboard monitoring percakapan media sosial terkait Bank BTN: sentimen, platform, isu utama, dan level risiko.">
 <meta property="og:url" content="https://garudalabs.co.id/BfY6nQ3xJ8wM5tZ2cH/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Bank BTN - Garuda Labs Intelligent Media Monitoring">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light'}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=250">
-<link rel="stylesheet" href="loader.css?v=250">
+<link rel="stylesheet" href="style.css?v=260">
+<link rel="stylesheet" href="loader.css?v=260">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
@@ -39,13 +39,13 @@
   <div class="footer"><em>SYS.01</em> / GARUDA NEURAL INTERFACE<br>DATA STREAM INITIALIZING</div>
   <div class="signal" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
 </div>
-<script src="loader.js?v=250"></script>
+<script src="loader.js?v=260"></script>
 <header class="topbar">
   <div class="brand">
-    <img class="logo logo-dark" src="logo-dark.png?v=250" alt="Logo">
-    <img class="logo logo-light" src="logo-light.png?v=250" alt="Logo">
+    <img class="logo logo-dark" src="logo-dark.png?v=260" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png?v=260" alt="Logo">
     <span class="divider"></span>
-    <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><!-- versi: v2.5 -->
+    <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><!-- versi: v2.6 -->
   </div>
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="dash" class="on">Dashboard</button>
@@ -108,7 +108,7 @@
     </div>
     <div class="row dash2">
       <section class="card glass"><div class="card-h"><div class="th"><h2 id="trendTitle">Tren Sentimen</h2><span class="lg"><i style="background:var(--neg)"></i>Negatif<i style="background:var(--neu)"></i>Netral<i style="background:var(--pos)"></i>Positif</span></div><span class="th-r"><span class="hint" id="trendNote"></span><select class="gran" id="fGran" aria-label="Rentang waktu grafik"></select></span></div><div class="chart h300"><canvas id="cTrend"></canvas></div></section>
-      <section class="card glass"><div class="card-h"><h2>Share of Voice per Kanal</h2><span class="hint" id="sovNote"></span></div><div class="chart h300"><canvas id="cSov"></canvas></div></section>
+      <section class="card glass"><div class="card-h"><h2>Share of Voice per Platform</h2><span class="hint" id="sovNote"></span></div><div class="chart h300"><canvas id="cSov"></canvas></div></section>
     </div>
     <div class="row">
       <section class="card glass"><div class="card-h"><h2>Rekomendasi Tindak Lanjut</h2></div><div class="reco" id="reco"></div></section>
@@ -118,7 +118,7 @@
 
     <div id="viewAna" hidden>
     <div class="row first">
-      <section class="card"><div class="card-h"><h2>Sentimen per Kanal</h2><span class="hint" id="negNote"></span></div><div class="kanal-sent" id="kanalSent"></div></section>
+      <section class="card"><div class="card-h"><h2>Sentimen per Platform</h2><span class="hint" id="negNote"></span></div><div class="kanal-sent" id="kanalSent"></div></section>
       <section class="card"><div class="card-h"><h2>Topik Utama Sentimen</h2><span class="hint" id="causeHint"></span></div>
         <div class="cause"><div><h3 class="pos">Positif</h3><ul id="causePos"></ul></div><div><h3 class="neg">Negatif</h3><ul id="causeNeg"></ul></div></div>
       </section>
@@ -204,6 +204,6 @@
     <footer>© 2026 Garuda Labs Intelligent Media Monitoring</footer>
   </div>
 </main>
-<script src="app.js?v=250"></script>
+<script src="app.js?v=260"></script>
 </body>
 </html>
