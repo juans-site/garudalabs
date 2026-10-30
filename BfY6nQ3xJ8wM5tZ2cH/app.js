@@ -87,7 +87,8 @@ function norm(r, kind) {
     text: r['Caption'] || r['Text Komentar'] || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
     sent: !s ? '' : resmi ? 'netral' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
-    link: r['Link'] || '', jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind
+    link: r['Link'] || '', jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind,
+    sub: (r['Catatan Klasifikasi'] || r['Sub Topik'] || r['Isu'] || '').trim()
   };
 }
 const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
@@ -232,11 +233,12 @@ async function render() {
   $('negNote').textContent = negK[0] ? `${negK[0][0]}: ${pct(negK[0][1], N.length)} dari negatif` : '';
 
   /* Penyebab */
-  const bars = (arr, c) => { const mx = arr[0]?.[1] || 1; return arr.slice(0, 6).map(([k, v], x) => `<li><span class="num">${x + 1}</span><div class="cb"><div class="t"><span>${esc(k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${v / mx * 100}%;background:${c}"></i></div></div></li>`).join('') || '<li>–</li>'; };
+  const bars = (arr, c, s) => { const mx = arr[0]?.[1] || 1; return arr.slice(0, 6).map(([k, v], x) => `<li class="clk" tabindex="0" role="button" aria-expanded="false" data-topik="${esc(k)}" data-sent="${s}"><span class="num">${x + 1}</span><div class="cb"><div class="t"><span>${esc(k)}</span><b>${fmt(v)}</b><em class="car">▸</em></div><div class="bar"><i style="width:${v / mx * 100}%;background:${c}"></i></div></div></li>`).join('') || '<li>–</li>'; };
   const negTop = count(N, 'topik');
   $('periode').insertAdjacentHTML('beforeend', `<span class="chip-m lv-${lvl.toLowerCase()}"><i class="lv-dot"></i>Risiko ${lvl[0] + lvl.slice(1).toLowerCase()}</span><span class="chip-m">NSI ${S.nsi > 0 ? '+' : ''}${S.nsi}</span>`);
-  $('causePos').innerHTML = bars(count(P, 'topik'), SENT.positif);
-  $('causeNeg').innerHTML = bars(negTop, SENT.negatif);
+  state.causeD = { positif: P, negatif: N };
+  $('causePos').innerHTML = bars(count(P, 'topik'), SENT.positif, 'positif');
+  $('causeNeg').innerHTML = bars(negTop, SENT.negatif, 'negatif');
   $('causeHint').textContent = periode;
 
   /* Postingan negatif */
@@ -366,7 +368,7 @@ setInterval(() => { delete cache.post; delete cache.komentar; delete cache.all; 
 document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b = e.target.closest('button'); if (!b) return; state[g.dataset.k] = b.dataset.v; [...g.children].forEach(x => x.classList.toggle('on', x === b)); render(); });
 
 /* ---------- Tab & Raw Data ---------- */
-const raw = { q: '', sent: '', pf: '', sort: 'dt', dir: -1, page: 1, size: 50 };
+const raw = { q: '', sent: '', pf: '', topik: '', sub: '', from: '', sort: 'dt', dir: -1, page: 1, size: 50 };
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
   $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewAna').hidden = b.dataset.tab !== 'ana'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
@@ -384,7 +386,8 @@ function renderRaw(reset) {
     $('rawPf').innerHTML = '<option value="">Semua platform</option>' + pfs.map(p => `<option ${p === raw.pf ? 'selected' : ''}>${esc(p)}</option>`).join('');
   }
   const q = raw.q.toLowerCase();
-  let rows = D.filter(r => (!raw.sent || r.sent === raw.sent) && (!raw.pf || r.platform === raw.pf) &&
+  renderRawChips();
+  let rows = D.filter(r => (!raw.sent || r.sent === raw.sent) && (!raw.pf || r.platform === raw.pf) && (!raw.topik || r.topik === raw.topik) && (!raw.sub || subOf(r) === raw.sub) &&
     (!q || (r.text + ' ' + r.user + ' ' + r.topik).toLowerCase().includes(q)));
   const key = r => raw.sort === 'eng' ? r.eng : r.tgl + ' ' + (r.jamStr || '');
   rows.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : 0) * raw.dir);
@@ -653,3 +656,50 @@ $('rawXlsx').onclick = async () => {
 
 /* Nama klien di halaman */
 document.querySelectorAll('[data-client]').forEach(e => e.textContent = CLIENT.name);
+
+/* ---------- v2.9: Drill-down Topik Utama Sentimen ---------- */
+const subOf = r => r.sub || 'Lainnya';
+function topicDetail(topik, sent) {
+  const rows = (state.causeD?.[sent] || []).filter(r => r.topik === topik);
+  const c = SENT[sent], total = rows.length;
+  // kelompokkan sub-isu (abaikan beda huruf besar/kecil); 5 teratas, sisanya "Lainnya"
+  const grp = {}; rows.forEach(r => { const k = subOf(r); const id = k.toLowerCase(); (grp[id] ??= { k, rows: [] }).rows.push(r); });
+  let subs = Object.values(grp).sort((a, b) => b.rows.length - a.rows.length);
+  if (subs.length > 5) { const rest = subs.slice(5).flatMap(s => s.rows); subs = subs.slice(0, 5); const l = subs.find(s => s.k === 'Lainnya'); l ? l.rows.push(...rest) : subs.push({ k: 'Lainnya', rows: rest, other: true }); }
+  const mx = Math.max(...subs.map(s => s.rows.length), 1);
+  const pf = count(rows, 'platform')[0];
+  const top = subs.filter(s => s.k !== 'Lainnya').slice(0, 2).map(s => `<b>${esc(s.k.toLowerCase())}</b>`);
+  const lead = `${fmt(total)} mention ${sent}${top.length ? ', didominasi ' + top.join(' dan ') : ''}${pf ? `, paling banyak di <b>${esc(pf[0])}</b> (${pct(pf[1], total)})` : ''}.`;
+  const ex = r => `<div class="cd-ex"><div class="cd-ex-h"><b>${esc(r.user || '–')}</b><span class="chip sm"><i style="background:${pColor(r.platform)}"></i>${esc(r.platform)}</span><span>${tglShort(r.tgl)}</span>${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">Lihat ↗</a>` : ''}</div><p>${esc(r.text.length > 180 ? r.text.slice(0, 180) + '…' : r.text)}</p></div>`;
+  const subHtml = subs.map(s => { const exs = [...s.rows].sort((a, b) => b.eng - a.eng || (b.tgl > a.tgl ? 1 : -1)).slice(0, s.other ? 0 : 2);
+    return `<div class="cd-sub"><button class="cd-sub-h" ${s.other ? '' : `data-sub="${esc(s.k)}"`} title="${s.other ? '' : 'Lihat di Raw Data'}"><span>${esc(s.k)}</span><b>${fmt(s.rows.length)}</b></button><div class="bar"><i style="width:${s.rows.length / mx * 100}%;background:${c}"></i></div>${exs.map(ex).join('')}</div>`; }).join('');
+  return `<li class="cause-detail"><div class="cd" style="--c:${c}"><p class="cd-lead">${lead}</p>${subHtml}<button class="btn cd-all" data-all>Lihat semua (${fmt(total)}) di Raw Data →</button></div></li>`;
+}
+function goRaw(topik, sent, sub) {
+  Object.assign(raw, { topik, sent, sub: sub || '', q: '', pf: '', page: 1, from: 'ana' });
+  $('rawQ').value = '';
+  [...$('rawSent').children].forEach(x => x.classList.toggle('on', x.dataset.v === sent));
+  document.querySelector('.tabs [data-tab=raw]').click();
+  renderRaw(true); document.querySelector('.raw-wrap').scrollTop = 0; window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function renderRawChips() {
+  let el = $('rawChips');
+  if (!el) { el = document.createElement('div'); el.id = 'rawChips'; el.className = 'raw-chips'; document.querySelector('.raw-wrap').before(el);
+    el.onclick = e => { const x = e.target.closest('[data-x]'); if (x) { raw[x.dataset.x] = ''; if (x.dataset.x === 'topik') raw.sub = ''; if (!raw.topik) raw.from = ''; raw.page = 1; renderRaw(); }
+      if (e.target.closest('[data-back]')) document.querySelector('.tabs [data-tab=ana]').click(); }; }
+  const ch = [];
+  if (raw.topik) ch.push(`<span class="fchip">Topik: ${esc(raw.topik)}<button data-x="topik" aria-label="Hapus filter">✕</button></span>`);
+  if (raw.sub) ch.push(`<span class="fchip">Isu: ${esc(raw.sub)}<button data-x="sub" aria-label="Hapus filter">✕</button></span>`);
+  el.innerHTML = (raw.from ? `<button class="btn ghost back" data-back>← Kembali ke Analytics</button>` : '') + ch.join('');
+  el.hidden = !ch.length && !raw.from;
+}
+document.querySelector('.cause').addEventListener('click', e => {
+  const sb = e.target.closest('.cd-sub-h[data-sub]'), all = e.target.closest('[data-all]');
+  if (sb || all) { const li = e.target.closest('.cause-detail').previousElementSibling; goRaw(li.dataset.topik, li.dataset.sent, sb ? sb.dataset.sub : ''); return; }
+  const li = e.target.closest('li.clk'); if (!li) return;
+  const open = li.classList.contains('open');
+  document.querySelectorAll('.cause li.open').forEach(x => { x.classList.remove('open'); x.setAttribute('aria-expanded', 'false'); });
+  document.querySelectorAll('.cause .cause-detail').forEach(x => x.remove());
+  if (!open) { li.classList.add('open'); li.setAttribute('aria-expanded', 'true'); li.insertAdjacentHTML('afterend', topicDetail(li.dataset.topik, li.dataset.sent)); }
+});
+document.querySelector('.cause').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li.clk')) { e.preventDefault(); e.target.click(); } });

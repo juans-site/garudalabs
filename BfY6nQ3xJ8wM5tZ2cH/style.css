@@ -749,3 +749,32 @@ body:before{background-position:center bottom!important;background-size:cover!im
 .hero h1.t-logo .lg-light{display:none}
 [data-theme=light] .hero h1.t-logo .lg-light{display:block}
 [data-theme=light] .hero h1.t-logo .lg-dark{display:none}
+
+/* v2.9: drill-down topik */
+.cause li.clk{cursor:pointer;border-radius:10px;padding:6px;margin:-6px -6px 6px;transition:background .15s}
+.cause li.clk:hover,.cause li.clk:focus-visible{background:var(--card2);outline:none}
+.cause li.clk .car{font-style:normal;color:var(--mute);margin-left:6px;display:inline-block;transition:transform .2s}
+.cause li.clk .t b{margin-left:auto}
+.cause li.open .car{transform:rotate(90deg)}
+.cause li.open{background:var(--card2)}
+.cause li.cause-detail{display:block;margin:-4px 0 14px}
+.cd{border-left:3px solid var(--c);background:color-mix(in srgb,var(--c) 6%,var(--card2));border-radius:0 12px 12px 0;padding:12px 14px;animation:cdIn .2s ease}
+@keyframes cdIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1}}
+.cd-lead{margin:0 0 12px;font-size:13px;line-height:1.55}
+.cd-sub{margin-bottom:12px}
+.cd-sub-h{all:unset;display:flex;justify-content:space-between;gap:8px;width:100%;font-size:12.5px;font-weight:600;cursor:pointer;box-sizing:border-box}
+.cd-sub-h:not([data-sub]){cursor:default;color:var(--mute)}
+.cd-sub-h[data-sub]:hover span{text-decoration:underline}
+.cd-sub .bar{height:5px;border-radius:4px;background:var(--card);margin:5px 0 6px;overflow:hidden}
+.cd-sub .bar i{display:block;height:100%;border-radius:4px}
+.cd-ex{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px;font-size:12px}
+.cd-ex-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--mute)}
+.cd-ex-h b{color:var(--ink)}
+.cd-ex-h a{margin-left:auto}
+.cd-ex p{margin:4px 0 0;line-height:1.45}
+.cd-all{margin-top:4px;width:100%}
+.raw-chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.raw-chips .back{padding:6px 12px}
+.fchip{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card2);font-size:12px;font-weight:600}
+.fchip button{all:unset;cursor:pointer;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10px;color:var(--mute)}
+.fchip button:hover{background:var(--line);color:var(--ink)}
