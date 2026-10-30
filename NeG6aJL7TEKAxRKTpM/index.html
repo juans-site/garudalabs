@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bank Mandiri - Garuda Labs Intelligent Media Monitoring</title>
-<link rel="icon" href="favicon.ico?v=60" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=60">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=60">
+<link rel="icon" href="favicon.ico?v=61" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=61">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=61">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Dashboard monitoring percakapan media sosial terkait Bank Mandiri: sentimen, platform, isu utama, dan level risiko.">
 <meta property="og:type" content="website">
@@ -19,8 +19,8 @@
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light'}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=60">
-<link rel="stylesheet" href="loader.css?v=60">
+<link rel="stylesheet" href="style.css?v=61">
+<link rel="stylesheet" href="loader.css?v=61">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
@@ -39,20 +39,21 @@
   <div class="footer"><em>SYS.01</em> / GARUDA NEURAL INTERFACE<br>DATA STREAM INITIALIZING</div>
   <div class="signal" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
 </div>
-<script src="loader.js?v=60"></script>
+<script src="loader.js?v=61"></script>
 <header class="topbar">
   <div class="brand">
-    <img class="logo logo-dark" src="logo-dark.png?v=60" alt="Logo">
-    <img class="logo logo-light" src="logo-light.png?v=60" alt="Logo">
+    <img class="logo logo-dark" src="logo-dark.png?v=61" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png?v=61" alt="Logo">
     <span class="divider"></span>
     <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="x-sep" aria-hidden="true">×</span>
-    <span class="cl-nav" title="Bank Mandiri"><img class="cl-logo cl-dark" src="client-logo-dark.png?v=60" alt="Bank Mandiri"><img class="cl-logo cl-light" src="client-logo-light.png?v=60" alt="Bank Mandiri"></span>
-    <span class="beta-ver" title="Versi dashboard"><b>BETA</b><i></i><span>v0.60</span></span>
+    <span class="cl-nav" title="Bank Mandiri"><img class="cl-logo cl-dark" src="client-logo-dark.png?v=61" alt="Bank Mandiri"><img class="cl-logo cl-light" src="client-logo-light.png?v=61" alt="Bank Mandiri"></span>
+    <span class="beta-ver" title="Versi dashboard"><b>BETA</b><i></i><span>v0.61</span></span>
   </div>
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="dash" class="on">Dashboard</button>
     <button role="tab" data-tab="ana">Analytics</button>
     <button role="tab" data-tab="raw">Raw Data</button>
+    <button role="tab" data-tab="aud">Audience Insight</button>
     <button role="tab" data-tab="sna">SNA</button>
   </nav>
   <div class="top-r">
@@ -165,6 +166,26 @@
       </section>
     </div>
 
+    <div id="viewAud" hidden>
+    <div class="row first">
+      <section class="card"><div class="card-h"><h2>Emosi Audiens</h2><span class="hint" id="emoHint"></span></div>
+        <div class="emo-wrap"><div class="chart emo-donut"><canvas id="cEmo"></canvas></div><ul class="emo-list" id="emoList"></ul></div></section>
+      <section class="card"><div class="card-h"><h2>Emosi per Topik</h2><span class="hint">5 topik terbanyak</span></div><div class="chart h300"><canvas id="cEmoTopik"></canvas></div></section>
+    </div>
+    <div class="row">
+      <section class="card"><div class="card-h"><h2>Profil Akun</h2><span class="hint" id="audHint"></span></div><div class="aud-kpi" id="audKpi"></div><div class="chart h240"><canvas id="cAudType"></canvas></div></section>
+      <section class="card"><div class="card-h"><h2>Waktu Aktif Audiens</h2><span class="hint">hari × jam (WIB)</span></div><div class="heat" id="audHeat"></div></section>
+    </div>
+    <div class="row">
+      <section class="card"><div class="card-h"><h2>Minat Audiens</h2><span class="hint">akun unik per topik</span></div><ol class="acc-list" id="audMinat"></ol></section>
+      <section class="card"><div class="card-h"><h2>KOL / Akun Berpengaruh</h2><span class="hint">volume × engagement</span></div><ol class="acc-list" id="audKol"></ol></section>
+    </div>
+    <section class="card mt"><div class="card-h"><h2>Segmentasi Loyalis vs Pengkritik</h2><span class="hint" id="segHint"></span></div>
+      <div class="seg-bar" id="segBar"></div>
+      <div class="cause"><div><h3 class="pos">Loyalis teratas</h3><ol class="acc-list" id="segLoy"></ol></div><div><h3 class="neg">Pengkritik teratas</h3><ol class="acc-list" id="segKri"></ol></div></div>
+    </section>
+    </div>
+
     <div id="viewSna" hidden>
       <div class="sna-bar">
         <div class="seg mini" id="snaPf"><button data-v="Twitter" class="on">Twitter</button><button data-v="Threads">Threads</button></div>
@@ -209,6 +230,6 @@
     <footer>© 2026 Garuda Labs Intelligent Media Monitoring</footer>
   </div>
 </main>
-<script src="app.js?v=60"></script>
+<script src="app.js?v=61"></script>
 </body>
 </html>

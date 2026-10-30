@@ -73,6 +73,7 @@ function norm(r, kind) {
     platform: (r['Platform'] || 'Lainnya').trim(), user: r['Username'] || '', tgl, jam,
     text: r['Caption'] || r['Text Komentar'] || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
+    emosi: (r['Emosi'] || '').trim(), tipe: (r['Tipe'] || '').trim(),
     isu: (r['Isu'] || r['Sub Topik'] || r['Sub-topik'] || '').trim(),
     sent: !s ? '' : resmi ? 'netral' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
     link: r['Link'] || '', jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind
@@ -115,6 +116,7 @@ async function render() {
   $('loading').hidden = true; $('main').hidden = false;
   window.GarudaLoader?.complete();
   if (!$('viewSna').hidden) renderSNA();
+  state.audD = D; if (!$('viewAud').hidden) renderAud();
   state.rawD = D; state.rawUnitPost = state.src; renderRaw(true); document.querySelector('.raw-wrap').scrollTop = 0;
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
@@ -358,10 +360,11 @@ document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b =
 const raw = { user: '', q: '', sent: '', pf: '', topik: '', isu: '', sort: 'dt', dir: -1, page: 1, size: 50 };
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
-  $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewAna').hidden = b.dataset.tab !== 'ana'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
+  $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewAna').hidden = b.dataset.tab !== 'ana'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna'; $('viewAud').hidden = b.dataset.tab !== 'aud';
   document.body.dataset.tab = b.dataset.tab;
   $('fSumber').style.display = b.dataset.tab === 'sna' ? 'none' : ''; // SNA selalu Post + Komentar
   if (b.dataset.tab === 'sna') renderSNA();
+  if (b.dataset.tab === 'aud') renderAud();
   if (b.dataset.tab === 'dash' || b.dataset.tab === 'ana') Object.values(charts).forEach(c => c.resize());
 });
 function renderRaw(reset) {
@@ -714,3 +717,60 @@ $('topAcc').addEventListener('click', e => {
 });
 $('topAcc').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('.acc-go')) e.target.click(); });
 $('rawUserChip').addEventListener('click', e => { if (e.target.closest('button')) setRawUser(''); });
+
+
+/* ---------- Audience Insight ---------- */
+const EMO = { Marah: '#F05252', Kecewa: '#F59E0B', Takut: '#A855F7', Sedih: '#3B82F6', Terkejut: '#06B6D4', Percaya: '#22C55E', Senang: '#84CC16', Netral: '#94A3B8' };
+const HARI = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+function akunTipe(r) {
+  if (r.resmi) return 'Akun resmi';
+  if (/^media$/i.test(r.tipe)) return HOMELESS_MEDIA.includes(r.user.toLowerCase()) ? 'Homeless media' : 'Media';
+  if (/buzzer/i.test(r.tipe)) return 'Buzzer';
+  if (/instansi/i.test(r.tipe)) return 'Instansi';
+  if (/kol|influencer/i.test(r.tipe)) return 'KOL / Influencer';
+  return 'Individu';
+}
+function renderAud() {
+  const D = state.audD || []; if (!D.length) return;
+  const avRow = (u, pf, right, sub) => `<li class="acc-go" data-user="${esc(u)}"><span class="av" style="background:${pColor(pf)}">${esc((u.replace(/^@/, '')[0] || '?').toUpperCase())}</span><div><div class="acc-top"><span class="nt">${esc(u)}</span>${right}</div><div class="hint">${sub}</div></div></li>`;
+  /* Emosi */
+  const DA = D.filter(r => !r.resmi), hasEmo = D.some(r => r.emosi); // emosi audiens: tanpa akun resmi
+  const em = hasEmo ? count(DA.filter(r => r.emosi), 'emosi') : [];
+  const emT = em.reduce((a, x) => a + x[1], 0), emN = em.filter(x => x[0] !== 'Netral');
+  $('emoHint').textContent = hasEmo ? `${fmt(emT)} mention · tanpa akun resmi` : 'Kolom Emosi belum ada di sheet';
+  mk('cEmo', { type: 'doughnut', data: { labels: em.map(x => x[0]), datasets: [{ data: em.map(x => x[1]), backgroundColor: em.map(x => EMO[x[0]] || '#888'), borderWidth: 0 }] }, options: { maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: baseOpts().plugins.tooltip } } });
+  $('emoList').innerHTML = em.map(([k, v]) => `<li><i style="background:${EMO[k] || '#888'}"></i><span>${esc(k)}</span><b>${pct(v, emT)}</b></li>`).join('') + (emN[0] ? `<li class="emo-note">Emosi dominan (di luar netral): <b style="color:${EMO[emN[0][0]]}">${emN[0][0]}</b></li>` : '');
+  const tops = count(DA, 'topik').slice(0, 5).map(x => x[0]), emoKeys = Object.keys(EMO).filter(k => k !== 'Netral');
+  mk('cEmoTopik', { type: 'bar', data: { labels: tops.map(t => t.length > 34 ? t.slice(0, 32) + '…' : t), datasets: emoKeys.map(k => ({ label: k, backgroundColor: EMO[k], borderRadius: 3, data: tops.map(t => DA.filter(r => r.topik === t && r.emosi === k).length) })) },
+    options: baseOpts({ indexAxis: 'y', scales: { x: { stacked: true, grid: { color: css('--line') }, ticks: { color: css('--mute'), precision: 0 } }, y: { stacked: true, grid: { display: false }, ticks: { color: css('--mute'), font: { size: 11 } } } } }) });
+  /* Profil akun */
+  const users = new Map(); D.forEach(r => { if (!r.user) return; const u = users.get(r.user) || { user: r.user, pf: r.platform, n: 0, eng: 0, pos: 0, neg: 0, tipe: akunTipe(r), topik: {} }; u.n++; u.eng += r.eng; if (r.sent === 'positif') u.pos++; if (r.sent === 'negatif') u.neg++; u.topik[r.topik] = (u.topik[r.topik] || 0) + 1; users.set(r.user, u); });
+  const U = [...users.values()], tipe = count(U, 'tipe');
+  $('audHint').textContent = `${fmt(U.length)} akun unik`;
+  const pfU = count(U, 'pf');
+  $('audKpi').innerHTML = `<div><b>${fmt(U.length)}</b><span>akun unik</span></div><div><b>${(D.length / (U.length || 1)).toFixed(1).replace('.', ',')}</b><span>mention / akun</span></div><div><b>${esc(pfU[0]?.[0] || '-')}</b><span>platform audiens terbesar</span></div>`;
+  const TC = { 'Individu': '#64748B', 'Media': '#F59E0B', 'Homeless media': '#F97316', 'Akun resmi': '#1E3A8A', 'Buzzer': '#F05252', 'KOL / Influencer': '#A855F7' };
+  mk('cAudType', { type: 'bar', data: { labels: tipe.map(x => x[0]), datasets: [{ data: tipe.map(x => x[1]), backgroundColor: tipe.map(x => TC[x[0]] || '#94a3b8'), borderRadius: 6 }] }, options: baseOpts({ indexAxis: 'y', plugins: { legend: { display: false }, tooltip: baseOpts().plugins.tooltip } }) });
+  /* Heatmap hari x jam */
+  const H = Array.from({ length: 7 }, () => Array(24).fill(0));
+  D.forEach(r => { if (isNaN(r.jam)) return; const d = new Date(r.tgl + 'T00:00:00').getDay(); H[d][r.jam]++; });
+  const hMax = Math.max(1, ...H.flat()); const order = [1, 2, 3, 4, 5, 6, 0];
+  let peak = [0, 0, 0]; order.forEach(d => H[d].forEach((v, h) => { if (v > peak[2]) peak = [d, h, v]; }));
+  $('audHeat').innerHTML = `<div class="heat-g"><span></span>${[...Array(24).keys()].map(h => `<span class="hx">${h % 3 ? '' : h}</span>`).join('')}${order.map(d => `<span class="hy">${HARI[d]}</span>${H[d].map((v, h) => `<i title="${HARI[d]} ${String(h).padStart(2, '0')}:00 · ${fmt(v)}" style="opacity:${v ? 0.12 + 0.88 * v / hMax : 0.05}"></i>`).join('')}`).join('')}</div><p class="hint">Puncak aktivitas: <b>${HARI[peak[0]]}, ${String(peak[1]).padStart(2, '0')}:00–${String(peak[1] + 1).padStart(2, '0')}:00</b> (${fmt(peak[2])} mention)</p>`;
+  /* Minat */
+  const minat = {}; U.forEach(u => Object.keys(u.topik).forEach(t => minat[t] = (minat[t] || 0) + 1));
+  const mi = Object.entries(minat).sort((a, b) => b[1] - a[1]).slice(0, 6), mMax = mi[0]?.[1] || 1;
+  $('audMinat').innerHTML = mi.map(([k, v], i) => `<li><span class="rank">${i + 1}</span><div><div class="acc-top"><span class="nt">${esc(k)}</span><b>${fmt(v)}</b></div><div class="acc-bar"><i style="width:${v / mMax * 100}%;background:var(--gold)"></i></div></div></li>`).join('');
+  /* KOL */
+  const kol = U.filter(u => u.tipe !== 'Akun resmi').map(u => ({ ...u, sc: u.n * Math.log10(10 + u.eng) })).sort((a, b) => b.sc - a.sc).slice(0, 6);
+  $('audKol').innerHTML = kol.map(u => avRow(u.user, u.pf, `<b>${fmt(u.n)}</b>`, `${esc(u.pf)} · ${esc(u.tipe)} · ${fmt(u.eng)} engagement · ${u.neg > u.pos ? '<span class="neg">cenderung negatif</span>' : u.pos > u.neg ? '<span class="pos">cenderung positif</span>' : 'netral'}`)).join('');
+  /* Segmentasi */
+  const act = U.filter(u => u.tipe !== 'Akun resmi' && u.tipe !== 'Media' && u.pos + u.neg > 0);
+  const loy = act.filter(u => u.pos / u.n >= 0.6), kri = act.filter(u => u.neg / u.n >= 0.6), mid = U.length - loy.length - kri.length;
+  $('segHint').textContent = 'loyalis/pengkritik: ≥60% mention akun positif/negatif';
+  const seg = [['Loyalis', loy.length, 'var(--pos)'], ['Pengkritik', kri.length, 'var(--neg)'], ['Netral / campuran', mid, 'var(--neu)']];
+  $('segBar').innerHTML = `<div class="sbar">${seg.map(([k, v, c]) => `<i style="flex:${v || 0.0001};background:${c}" title="${k}: ${fmt(v)}"></i>`).join('')}</div><div class="slg">${seg.map(([k, v, c]) => `<span><i style="background:${c}"></i>${k} <b>${fmt(v)}</b> (${pct(v, U.length)})</span>`).join('')}</div>`;
+  const topOf = (L, key) => L.sort((a, b) => b[key] - a[key] || b.eng - a.eng).slice(0, 5).map(u => avRow(u.user, u.pf, `<b>${fmt(u[key])}</b>`, `${esc(u.pf)} · ${esc(Object.entries(u.topik).sort((a, b) => b[1] - a[1])[0][0])}`)).join('') || '<li class="empty">Tidak ada</li>';
+  $('segLoy').innerHTML = topOf(loy, 'pos'); $('segKri').innerHTML = topOf(kri, 'neg');
+  document.querySelectorAll('#viewAud .acc-go').forEach(li => li.onclick = () => setRawUser(li.dataset.user));
+}
