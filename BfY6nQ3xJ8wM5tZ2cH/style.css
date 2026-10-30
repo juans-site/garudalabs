@@ -424,8 +424,8 @@ h1,.hero h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800
 @media(max-width:640px){.raw-bar .dl{width:100%}}
 
 /* ===== Desain v3: panggung gedung + kartu kaca ===== */
-:root{--stage-img:url("stage-dark.jpg?v=270")}
-[data-theme=light]{--stage-img:url("stage-light.jpg?v=270")}
+:root{--stage-img:url("stage-dark.jpg?v=280")}
+[data-theme=light]{--stage-img:url("stage-light.jpg?v=280")}
 [data-theme=dark]{--glass:rgba(30,31,34,.62);--glass-line:rgba(255,255,255,.08)}
 [data-theme=light]{--glass:rgba(255,255,255,.72);--glass-line:rgba(13,43,91,.10)}
 /* latar halaman: foto yang sama, diburamkan */
@@ -744,5 +744,8 @@ body:before{background-position:center bottom!important;background-size:cover!im
 /* v2.7: logo BTN menggantikan teks nama klien */
 .hero h1.t-logo{line-height:0;text-shadow:none}
 .hero h1.t-logo img{height:34px;width:auto;display:block;filter:drop-shadow(0 2px 10px rgba(0,0,0,.35))}
-[data-theme=dark] .hero h1.t-logo img{background:#fff;padding:5px 9px;border-radius:8px;box-sizing:content-box}
 @media(max-width:640px){.hero h1.t-logo img{height:26px}}
+/* v2.8: logo putih di mode gelap, logo asli di mode terang */
+.hero h1.t-logo .lg-light{display:none}
+[data-theme=light] .hero h1.t-logo .lg-light{display:block}
+[data-theme=light] .hero h1.t-logo .lg-dark{display:none}
