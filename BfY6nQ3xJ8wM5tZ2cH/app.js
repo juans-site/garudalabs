@@ -62,6 +62,7 @@ function norm(r, kind) {
   // Kolom sheet BTN: "Tanggal (WIB)" = "yyyy-mm-dd HH:MM", "Akun / Sumber", "Jenis Akun", "Konten", "Kategori", "URL", "Komentar"
   if (!r['Waktu'] && r['Tanggal (WIB)']) { const [d, h] = String(r['Tanggal (WIB)']).trim().split(/\s+/); r['Waktu'] = d; if (!r['Jam'] && h) r['Jam'] = h; }
   if (!r['Username']) r['Username'] = r['Akun / Sumber'] || '';
+  r['Username'] = String(r['Username']).trim().replace(/^@+/, ''); // tanpa '@' agar link profil & node SNA benar
   if (!r['Tipe']) r['Tipe'] = r['Jenis Akun'] || '';
   if (!r['Caption']) r['Caption'] = r['Konten'] || '';
   if (!r['Topik']) r['Topik'] = r['Kategori'] || '';
