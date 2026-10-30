@@ -228,6 +228,7 @@
 .g-earth img{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 3%,#000 84%,transparent 100%),linear-gradient(90deg,transparent 0,#000 12%,#000 92%,transparent 100%);-webkit-mask-composite:source-in;
   mask-image:linear-gradient(180deg,transparent 0,#000 3%,#000 84%,transparent 100%),linear-gradient(90deg,transparent 0,#000 12%,#000 92%,transparent 100%);mask-composite:intersect}
 .g-hero{position:relative;z-index:3}
+@media(min-width:1101px){.g-hero{grid-template-columns:1fr!important;max-width:560px;align-items:start}.g-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.g-int{top:calc(var(--heroH,0px) + 16px)!important}.g-stage{transition:none}}
 .g-stage{z-index:1}
 }
 .g-kpi{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.01) 45%),rgba(8,13,18,.5)!important;

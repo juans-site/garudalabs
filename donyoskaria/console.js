@@ -108,7 +108,8 @@
     const PIN = Object.fromEntries((GEO?.prov || []).map(p => [p.n, p.c]));
     const earth = root.querySelector('.g-earth'), stage = root.querySelector('.g-stage');
     const fit = () => { const hero = root.querySelector('.g-hero'), hh = innerWidth >= 1101 && hero ? hero.offsetHeight + 18 : 0;
-      stage.style.marginTop = hh ? -hh + 'px' : ''; stage.style.setProperty('--heroH', hh + 'px');
+      stage.style.marginTop = hh ? -hh + 'px' : ''; stage.style.setProperty('--heroH', hh + 'px'); const gi = root.querySelector('.g-int'), nx = stage.nextElementSibling; stage.style.minHeight = '';
+      if (hh && gi && nx) { const need = gi.getBoundingClientRect().bottom + 24 - nx.getBoundingClientRect().top; if (need > 0) stage.style.minHeight = (stage.offsetHeight + need) + 'px'; }
       const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
       if (!wide) { earth.style.cssText = ''; return; }
       // ukuran globe dibatasi seperti tata letak awal (lebar konten 1500px), lalu diletakkan di tengah area kanan
