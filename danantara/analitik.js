@@ -20,6 +20,9 @@
     const peak = perDay.slice().sort((a, b) => b.t - a.t).slice(0, 3).map(p => { const R = D.filter(r => r.tgl === p.d); const top = R.slice().sort((a, b) => b.eng - a.eng)[0];
       const i = perDay.findIndex(x => x.d === p.d), prv = perDay.slice(Math.max(0, i - 7), i), avg = prv.length ? prv.reduce((s, x) => s + x.t, 0) / prv.length : 0;
       return { ...p, top, d7: avg ? Math.round((p.t - avg) / avg * 100) : null, tp: cnt(R.filter(r => r.topik !== 'Lainnya'), 'topik')[0]?.[0] }; });
+    const emo = cnt(D.filter(r => r.emosi && !/^netral$/i.test(r.emosi)), 'emosi'), maxEmo = emo[0]?.[1] || 1;
+    const emoL = Object.fromEntries(cnt(L.filter(r => r.emosi), 'emosi')), emoP = Object.fromEntries(cnt(Pv.filter(r => r.emosi), 'emosi'));
+    const repOf = s => s.t ? Math.round((s.p - s.n) / s.t * 100) : 0, rep = repOf(S), repD = Pv.length ? rep - repOf(Ps) : null;
     const avgDay = perDay.length ? Math.round(S.t / perDay.length) : 0;
     // kata kunci
     const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue lu kamu dia mereka nya ya ga gak nggak tapi karena jadi lagi mau buat sama oleh dalam the https http www com co id yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu udah belum dapat hari jangan kena usai milik setelah sedang hingga sampai menjadi tersebut karna emang memang banget sangat orang terjadi kembali saat tengah selatan utara barat timur sejumlah kondisi kawasan wilayah sekitar terus video bukan harus kota lokasi kabupaten provinsi oktober tahun bulan minggu pagi siang sore malam dari menurut ujar kata katanya disebut melalui antara lain this that with from have will are was'.split(' '));
@@ -41,9 +44,12 @@
         <div class="g-kpis" title="Perubahan (%) dibanding periode sebelumnya dengan jumlah hari yang sama">
           <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('chat', 22)}</span><div><b>${f(S.t)}</b><small>Total postingan</small></div>${dChip(delta(Ls.t, Ps.t), false)}</div>
           <div class="g-kpi" style="--c:${RED}"><span class="gi">${ic('frown', 22)}</span><div><b>${pc(S.n, S.t)}</b><small>Sentimen negatif</small></div>${dChip(negD, true)}</div>
-          <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('pin', 22)}</span><div><b>${isl.length}<small style="font-size:13px"> / 7</small></b><small>Pulau disebut</small></div></div>
+          <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('spark', 22)}</span><div><b>${rep > 0 ? '+' : ''}${rep}</b><small>Indeks Reputasi</small></div>${dChip(repD, false, ' poin')}</div>
           <div class="g-kpi" style="--c:${ORANGE}"><span class="gi">${ic('alert', 22)}</span><div><b>${f(S.n)}</b><small>Postingan negatif</small></div>${dChip(delta(Ls.n, Ps.n), true)}</div>
         </div>
+        <div class="g-card g-emo-an"><div class="g-h"><h3>Emosi Percakapan</h3><span class="g-tag">tanpa netral</span></div>
+          <ol class="g-rank">${emo.slice(0, 7).map(([kk, v], i) => { const d = delta(emoL[kk] || 0, emoP[kk] || 0), neg = /kecewa|marah|khawatir|sinis|takut|sedih/i.test(kk);
+            return `<li><span class="n">${i + 1}</span><span>${esc(kk)}</span><span class="v">${f(v)}</span>${dChip(d, neg)}<span class="bar"><i style="width:${v / maxEmo * 100}%"></i></span></li>`; }).join('') || '<li>Belum ada data emosi</li>'}</ol></div>
       </div>
       <div class="g-grid3">
         <div class="g-card"><div class="g-h"><h3>Tren Percakapan</h3><span class="g-tag">Harian</span></div><div class="g-cv"><canvas id="gcTrend"></canvas></div></div>

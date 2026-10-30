@@ -55,5 +55,10 @@
         scales: { x: { grid: { display: false }, ticks: { color: tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 8, font: { size: 10.5 } }, border: { color: grid } },
           y: { beginAtZero: true, grid: { color: grid }, ticks: { color: tick, maxTicksLimit: 5, font: { size: 10.5 } }, border: { display: false } } } } });
   }
+  // Efek cahaya untuk semua grafik Chart.js lain (donut, bar, dll.)
+  if (window.Chart && !Chart.registry.plugins.get('hiGlowAll')) Chart.register({ id: 'hiGlowAll',
+    beforeDatasetDraw(ch, a) { if (ch.config.plugins?.includes?.(glow)) return; const ds = ch.data.datasets[a.index]; const col = typeof ds.borderColor === 'string' && ds.type !== 'doughnut' && ch.config.type !== 'doughnut' ? ds.borderColor : 'rgba(90,180,255,.55)';
+      ch.ctx.save(); ch.ctx.shadowColor = col; ch.ctx.shadowBlur = 10; },
+    afterDatasetDraw(ch) { if (ch.config.plugins?.includes?.(glow)) return; ch.ctx.restore(); } });
   window.G = Object.assign(window.G || {}, { hiTrend, hiLines });
 })();
