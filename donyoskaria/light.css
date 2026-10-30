@@ -1,0 +1,43 @@
+/* ===== Perbaikan keterbacaan mode terang (dimuat paling akhir) ===== */
+[data-theme=light]{--t-teal:#0B7F74;--t-orange:#B93E0C;--t-amber:#9A5B05;--t-grey:#4B5866;--t-red:#C0262D}
+
+/* Teks aksen: versi lebih gelap agar kontras di latar putih */
+[data-theme=light] .g-d.good,[data-theme=light] .g-live,[data-theme=light] .g-lv.lo,[data-theme=light] .g-ai-tab,
+[data-theme=light] .badge.positif,[data-theme=light] .sn.pos,[data-theme=light] .g-ins .lo{color:var(--t-teal)!important}
+[data-theme=light] .g-d.bad,[data-theme=light] .sn.neg,[data-theme=light] .badge.negatif,[data-theme=light] .g-tag.hot,
+[data-theme=light] .acc-n,[data-theme=light] span.neg,[data-theme=light] .g-peak .n,[data-theme=light] .g-lv.hi{color:var(--t-orange)!important}
+[data-theme=light] .badge.netral,[data-theme=light] .sn.net{color:var(--t-grey)!important;background:rgba(75,88,102,.1)!important}
+[data-theme=light] .g-lv.md,[data-theme=light] .risk-lv,[data-theme=light] td.r{color:var(--t-amber)!important}
+[data-theme=light] .g-ai-tab svg{color:var(--t-teal)}
+
+/* Tombol aktif berlatar teal: teks gelap */
+[data-theme=light] .seg button.on,[data-theme=light] .tabs .seg button.on,[data-theme=light] #rawSent button.on,
+[data-theme=light] .pager button.on,[data-theme=light] #rawPager button.on,[data-theme=light] .g-kw button.on{color:#04201D!important}
+
+/* Kartu Narasi / Insight */
+[data-theme=light] .g-ins li{background:#fff!important;border-color:rgba(4,7,10,.09)!important}
+[data-theme=light] .g-ins p,[data-theme=light] .g-ins li p{color:#334155!important}
+[data-theme=light] .g-ins li .nj{color:#0F1A24!important}
+[data-theme=light] .g-insight .g-tag{color:#475569!important}
+
+/* Dropdown & input */
+[data-theme=light] select,[data-theme=light] #rawPf,[data-theme=light] #rawTp,[data-theme=light] #rawKw,[data-theme=light] .gran{color-scheme:light;background-color:#fff!important;color:#0F1A24!important;border:1px solid rgba(4,7,10,.14)!important}
+[data-theme=light] select option{background:#fff!important;color:#0F1A24!important}
+[data-theme=light] select option:checked{background:#CDEFEB!important;color:#04201D!important}
+[data-theme=light] .raw-bar input{background:#fff!important;color:#0F1A24!important;border-color:rgba(4,7,10,.14)!important}
+[data-theme=light] .raw thead th{color:#475569!important}
+
+/* Word cloud di Analytics: warna inline dibuat lebih gelap */
+[data-theme=light] #gWc span{filter:brightness(.72) saturate(1.25)}
+
+/* Panel Isu Prioritas */
+[data-theme=light] .g-prio{background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.78))!important;border-color:rgba(4,7,10,.08)!important}
+[data-theme=light] .g-prio .q{color:#334155!important}
+
+/* Header tabel Raw Data */
+[data-theme=light] .raw thead th{background:#EEF3F5!important;color:#334155!important}
+/* Angka negatif & level risiko yang diberi warna inline */
+[data-theme=light]{--neg:#C2410C}
+[data-theme=light] b[style*="color:#f59e0b"],[data-theme=light] .risk-lv,[data-theme=light] [style*="color:#f59e0b"]{color:#9A5B05!important}
+[data-theme=light] .g-pl .q a{color:#0B7F74}
+[data-theme=light] .av{filter:brightness(.8) saturate(1.2)}

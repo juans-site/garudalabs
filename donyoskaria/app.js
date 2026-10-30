@@ -393,7 +393,7 @@ setInterval(() => { delete cache.post; delete cache.komentar; delete cache.all; 
 document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b = e.target.closest('button'); if (!b) return; state[g.dataset.k] = b.dataset.v; [...g.children].forEach(x => x.classList.toggle('on', x === b)); render(); });
 
 /* ---------- Tab & Raw Data ---------- */
-const raw = { q: '', sent: '', pf: '', sort: 'dt', dir: -1, page: 1, size: 50 };
+const raw = { q: '', sent: '', pf: '', tp: '', sort: 'dt', dir: -1, page: 1, size: 50 };
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
   $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
@@ -408,9 +408,13 @@ function renderRaw(reset) {
     const pfs = [...new Set(D.map(r => r.platform))].sort();
     if (raw.pf && !pfs.includes(raw.pf)) raw.pf = '';
     $('rawPf').innerHTML = '<option value="">Semua platform</option>' + pfs.map(p => `<option ${p === raw.pf ? 'selected' : ''}>${esc(p)}</option>`).join('');
+    const tps = [...new Set(D.map(r => r.topik))].sort((x, y) => (x === 'Lainnya') - (y === 'Lainnya') || x.localeCompare(y));
+    if (raw.tp && !tps.includes(raw.tp)) raw.tp = '';
+    $('rawTp').innerHTML = '<option value="">Semua topik</option>' + tps.map(p => `<option ${p === raw.tp ? 'selected' : ''}>${esc(p)}</option>`).join('');
+    $('rawKw').innerHTML = KATA_KUNCI.map(([v]) => `<option value="${v}" ${v === state.kw ? 'selected' : ''}>${v === 'Semua' ? 'Semua tokoh/lembaga' : v === 'SOE' ? 'SOE / BUMN' : v}</option>`).join('');
   }
   const q = raw.q.toLowerCase();
-  let rows = D.filter(r => (!raw.sent || r.sent === raw.sent) && (!raw.pf || r.platform === raw.pf) &&
+  let rows = D.filter(r => (!raw.sent || r.sent === raw.sent) && (!raw.pf || r.platform === raw.pf) && (!raw.tp || r.topik === raw.tp) &&
     (!q || (r.text + ' ' + r.user + ' ' + r.topik).toLowerCase().includes(q)));
   const key = r => raw.sort === 'eng' ? r.eng : r.tgl + ' ' + (r.jamStr || '');
   rows.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : 0) * raw.dir);
@@ -437,6 +441,8 @@ function renderRaw(reset) {
 let qT; $('rawQ').oninput = e => { clearTimeout(qT); qT = setTimeout(() => { raw.q = e.target.value; raw.page = 1; renderRaw(); }, 250); };
 $('rawSent').onclick = e => { const b = e.target.closest('button'); if (!b) return; raw.sent = b.dataset.v; raw.page = 1; [...$('rawSent').children].forEach(x => x.classList.toggle('on', x === b)); renderRaw(); };
 $('rawPf').onchange = e => { raw.pf = e.target.value; raw.page = 1; renderRaw(); };
+$('rawTp').onchange = e => { raw.tp = e.target.value; raw.page = 1; renderRaw(); };
+$('rawKw').onchange = e => setKw(e.target.value);
 document.querySelectorAll('th.sortable').forEach(th => th.onclick = () => { const s = th.dataset.sort; raw.dir = raw.sort === s ? -raw.dir : -1; raw.sort = s; raw.page = 1; renderRaw(); });
 $('rawPager').onclick = e => { const b = e.target.closest('button'); if (!b || b.disabled) return; raw.page = +b.dataset.p; renderRaw(); document.querySelector('.raw-wrap').scrollTop = 0; };
 // buka / tutup caption panjang
