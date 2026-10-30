@@ -170,7 +170,8 @@
 /* Peta foto bumi malam (1 gambar JPG ±80–300KB, sisanya HTML ringan) */
 .g-stage{background:#01040A!important;height:clamp(500px,46vw,680px)!important}
 .g-earth{position:relative;width:100%;aspect-ratio:1672/1051}
-.g-earth img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none}
+.g-earth img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;object-fit:cover;object-position:70% 30%}
+.g-photo .ph-l{display:none}[data-theme=light] .g-photo .ph-l{display:block}[data-theme=light] .g-photo .ph-d{display:none}
 .g-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(1,4,10,.55),transparent 28%),linear-gradient(0deg,rgba(1,4,10,.7),transparent 22%)}
 .g-int,.g-ctrl{z-index:2}
 .g-pins{position:absolute;inset:0}

@@ -15,6 +15,7 @@
     const negShareL = Ls.t ? Ls.n / Ls.t * 100 : 0, negShareP = Ps.t ? Ps.n / Ps.t * 100 : 0;
     const per = rg.from ? (rg.from === rg.to ? tgY(rg.from) : `${tg(rg.from)} – ${tgY(rg.to)}`) : '';
     const maxIsl = isl[0]?.[1] || 1;
+    const prv = cnt(D.filter(r => r.prov), 'prov'), prvL = Object.fromEntries(cnt(L.filter(r => r.prov), 'prov')), prvP = Object.fromEntries(cnt(Pv.filter(r => r.prov), 'prov'));
     const emo = cnt(D.filter(r => r.emosi && !/^netral$/i.test(r.emosi)), 'emosi'), maxEmo = emo[0]?.[1] || 1;
     const emoL = Object.fromEntries(cnt(L.filter(r => r.emosi), 'emosi')), emoP = Object.fromEntries(cnt(Pv.filter(r => r.emosi), 'emosi'));
     const topics = cnt(D.filter(r => r.topik && r.topik !== 'Lainnya'), 'topik');
@@ -56,13 +57,13 @@
         <div class="g-kpis" title="Perubahan (%) dibanding periode sebelumnya dengan jumlah hari yang sama">
           <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('chat', 22)}</span><div><b>${f(S.t)}</b><small>Total postingan</small></div>${dChip(delta(Ls.t, Ps.t), false)}</div>
           <div class="g-kpi" style="--c:${RED}"><span class="gi">${ic('frown', 22)}</span><div><b>${pc(S.n, S.t)}</b><small>Sentimen negatif</small></div>${dChip(negShareP ? Math.round((negShareL - negShareP) / negShareP * 100) : null, true)}</div>
-          <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('pin', 22)}</span><div><b>${isl.length}<small style="font-size:13px"> / 7</small></b><small>Pulau disebut</small></div></div>
+          <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('pin', 22)}</span><div><b>${prv.length}<small style="font-size:13px"> / 38</small></b><small>Provinsi disebut</small></div></div>
           <div class="g-kpi" style="--c:${ORANGE}"><span class="gi">${ic('alert', 22)}</span><div><b>${f(S.n)}</b><small>Postingan negatif</small></div>${dChip(delta(Ls.n, Ps.n), true)}</div>
         </div>
       </div>
 
       <div class="g-stage">
-        <div class="g-earth"><img src="earth.jpg?v=3" srcset="earth-sm.jpg?v=3 836w, earth.jpg?v=3 1672w" sizes="(max-width:700px) 100vw, 1400px" alt="Peta sebaran percakapan Danantara & BUMN di Indonesia" decoding="async" fetchpriority="high"><canvas class="g-smoke" aria-hidden="true"></canvas><div class="g-pins"></div></div>
+        <div class="g-earth g-photo"><img class="ph-d" src="stage-dark.jpg?v=1" srcset="stage-dark-sm.jpg?v=1 900w, stage-dark.jpg?v=1 1717w" sizes="(max-width:700px) 100vw, 1400px" alt="Gedung Danantara Indonesia" decoding="async" fetchpriority="high"><img class="ph-l e-day" src="stage-light.jpg?v=1" srcset="stage-light-sm.jpg?v=1 900w, stage-light.jpg?v=1 1704w" sizes="(max-width:700px) 100vw, 1400px" alt="Gedung Danantara Indonesia" decoding="async"><div class="g-pins"></div></div>
         <div class="g-glass g-int">
           <div class="g-h"><h3>Emosi Percakapan</h3><span class="g-live">Live</span></div>
           <div class="g-scale"></div><div class="g-scale-l"><span>Rendah</span><span>Tinggi</span></div>
@@ -102,13 +103,8 @@
       </div>`;
 
     // peta foto bumi + pin data
-    const PIN = { 'Sumatera': [328, 450], 'Kalimantan': [740, 503], 'Sulawesi': [978, 601], 'Jawa': [576, 741], 'Bali & Nusa Tenggara': [932, 811], 'Papua': [1445, 651], 'Maluku': [1185, 508] };
-    const IW = 1672, IH = 1051, mx = Math.max(1, ...isl.map(x => x[1]));
-    const pins = root.querySelector('.g-pins');
-    pins.innerHTML = isl.map(([kk, v]) => { const p = PIN[kk]; if (!p) return ''; const d = delta(islL[kk] || 0, islP[kk] || 0), t = v / mx;
-      const nm = kk === 'Bali & Nusa Tenggara' ? 'Nusa Tenggara' : kk;
-      return `<div class="g-pin${p[0] > 1350 ? ' l' : ''}" style="left:${p[0] / IW * 100}%;top:${p[1] / IH * 100}%;--s:${(10 + t * 10).toFixed(1)}px">
-        <i class="dot"></i><i class="stem"></i><div class="lab"><b>${esc(nm.toUpperCase())}</b><span>${k(v)} postingan</span>${d != null ? `<em class="${d >= 0 ? 'eu' : 'ed'}">${d >= 0 ? '↑ +' : '↓ '}${d}%</em>` : ''}</div></div>`; }).join('');
+    const GEO = window.PETA_GEO, IW = 1672, IH = 1051, mx = Math.max(1, ...prv.map(x => x[1]));
+    const PIN = Object.fromEntries((GEO?.prov || []).map(p => [p.n, p.c]));
     const earth = root.querySelector('.g-earth'), stage = root.querySelector('.g-stage');
     const fit = () => { const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
       if (!wide) { earth.style.cssText = ''; return; }
@@ -118,7 +114,6 @@
       const below = Math.max(0, (H - 70) / 2 - 460 * sc + h - H); stage.style.setProperty('--below', below + 'px'); };
     fit(); if (!buildConsole.fitBound) { buildConsole.fitBound = 1; addEventListener('resize', () => { const f = document.querySelector('#gConsole')?._fit; f && f(); }); }
     root._fit = fit;
-    window.G.smoke?.(root.querySelector('.g-smoke'), earth, isl, mx);
     root.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { if (typeof state === 'undefined') return; state.preset = b.dataset.p; render(); });
     root.querySelectorAll('[data-pf]').forEach(b => b.onclick = () => { feedPf = b.dataset.pf; buildConsole(); });
     root.querySelector('[data-ask]')?.addEventListener('click', () => document.querySelector('.ai-fab')?.click());

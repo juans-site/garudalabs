@@ -74,7 +74,7 @@ function norm(r, kind) {
   if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(t)) { const [d, m, y] = t.split(/[\/ ]/); tgl = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`; }
   else if (/^\d+([.,]\d+)?$/.test(t)) tgl = new Date(Date.UTC(1899, 11, 30) + parseFloat(t.replace(',', '.')) * 864e5).toISOString().slice(0, 10);
   else if (/^\d{4}-\d{2}-\d{2}/.test(t)) tgl = t.slice(0, 10);
-  let j = r['Jam'] || r['Jam (WIB)'] || ''; if (!j && /^\d+[.,]\d+$/.test(t)) j = '0.' + t.split(/[.,]/)[1]; let jam = NaN;
+  let j = r['Jam'] || r['Jam (WIB)'] || ''; if (!j && /^\d+[.,]\d+$/.test(t)) { const m = Math.round(parseFloat('0.' + t.split(/[.,]/)[1]) * 1440) % 1440; j = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); } let jam = NaN;
   if (/^\d{1,2}[:.]\d{2}/.test(j)) jam = parseInt(j);
   else if (/^0?[.,]\d+$|^[01]$/.test(j)) jam = Math.floor(parseFloat(j.replace(',', '.')) * 24);
   // jam lengkap HH:MM untuk tabel raw data
