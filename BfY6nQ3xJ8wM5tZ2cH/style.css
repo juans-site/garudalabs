@@ -807,3 +807,8 @@ select option:checked{background:var(--card2)}
 .hl-wrap.a{grid-template-columns:1fr!important}
 .hl-wrap.a .hl-meta{justify-self:center!important;justify-content:center!important}
 @media(max-width:640px){.hl-wrap.a .hl-meta{justify-self:start!important;justify-content:flex-start!important}}
+
+/* v3.4: Top 5 Akun bisa diklik */
+#topAcc li.clk-acc{cursor:pointer;border-radius:10px;transition:background .15s}
+#topAcc li.clk-acc:hover,#topAcc li.clk-acc:focus-visible{background:var(--card2);outline:none}
+#topAcc li.clk-acc:hover b{text-decoration:underline}
