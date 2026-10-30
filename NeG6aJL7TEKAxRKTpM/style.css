@@ -794,3 +794,11 @@ body:before{background-position:center bottom!important;background-size:cover!im
   .topbar{column-gap:5px!important;padding:10px 10px!important}
 }
 @media(max-width:420px){.dr-btn .caret{display:none}.content{overflow-x:clip}}
+
+/* v0.60: akun bisa diklik -> Raw Data */
+.acc-go{cursor:pointer;border-radius:10px;transition:background .15s}
+.acc-go:hover{background:var(--hover)}
+.acc-go:hover b{text-decoration:underline;text-underline-offset:3px}
+.user-chip{gap:8px;border-color:color-mix(in srgb,var(--gold) 55%,transparent);white-space:nowrap}
+.user-chip button{border:0;background:none;color:var(--mute);font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
+.user-chip button:hover{color:var(--ink)}

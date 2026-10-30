@@ -255,7 +255,7 @@ async function render() {
   const topAcc = Object.entries(acc).sort((a, b) => b[1].n - a[1].n || b[1].eng - a[1].eng).slice(0, 5);
   const accC = state.acc === 'pos' ? SENT.positif : SENT.negatif, accMax = topAcc[0]?.[1].n || 1, engLbl = state.src === 'post' ? 'komentar' : 'likes';
   $('accTitle').textContent = `Top 5 Akun ${state.acc === 'pos' ? 'Positif' : 'Negatif'}`;
-  $('topAcc').innerHTML = topAcc.map(([u, a], i) => `<li>
+  $('topAcc').innerHTML = topAcc.map(([u, a], i) => `<li class="acc-go" data-user="${esc(u)}" tabindex="0" role="button" title="Lihat semua postingan ${esc(u)} di Raw Data">
     <span class="rank">${i + 1}</span>
     <span class="av" style="background:${pColor(a.pf)}22;color:${pColor(a.pf)}">${esc(u[0]?.toUpperCase() || '?')}</span>
     <div class="acc-main"><div class="acc-top"><b title="${esc(u)}">${esc(u)}</b><span class="acc-n" style="color:${accC}">${a.n} ${unit}</span></div>
@@ -355,7 +355,7 @@ setInterval(() => { delete cache.post; delete cache.komentar; delete cache.all; 
 document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b = e.target.closest('button'); if (!b) return; state[g.dataset.k] = b.dataset.v; [...g.children].forEach(x => x.classList.toggle('on', x === b)); render(); });
 
 /* ---------- Tab & Raw Data ---------- */
-const raw = { q: '', sent: '', pf: '', topik: '', isu: '', sort: 'dt', dir: -1, page: 1, size: 50 };
+const raw = { user: '', q: '', sent: '', pf: '', topik: '', isu: '', sort: 'dt', dir: -1, page: 1, size: 50 };
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
   $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewAna').hidden = b.dataset.tab !== 'ana'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
@@ -378,7 +378,7 @@ function renderRaw(reset) {
   }
   const q = raw.q.toLowerCase();
   let rows = D.filter(r => (!raw.sent || r.sent === raw.sent) && (!raw.pf || r.platform === raw.pf) &&
-    (!raw.topik || r.topik === raw.topik) && (!raw.isu || r.isu === raw.isu) &&
+    (!raw.user || r.user === raw.user) && (!raw.topik || r.topik === raw.topik) && (!raw.isu || r.isu === raw.isu) &&
     (!q || (r.text + ' ' + r.user + ' ' + r.topik + ' ' + r.isu).toLowerCase().includes(q)));
   const key = r => raw.sort === 'eng' ? r.eng : r.tgl + ' ' + (r.jamStr || '');
   rows.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : 0) * raw.dir);
@@ -695,3 +695,22 @@ function fillIsuSelect(D) {
 }
 $('rawTopik').onchange = e => { raw.topik = e.target.value; raw.isu = ''; raw.page = 1; fillIsuSelect(state.rawD || []); renderRaw(); };
 $('rawIsu').onchange = e => { raw.isu = e.target.value; raw.page = 1; renderRaw(); };
+
+/* ---------- Klik akun (Analytics) -> Raw Data terfilter ---------- */
+function setRawUser(u) {
+  raw.user = u || ''; raw.page = 1;
+  raw.q = ''; raw.sent = ''; raw.pf = ''; raw.topik = ''; raw.isu = '';
+  $('rawQ').value = ''; [...$('rawSent').children].forEach(x => x.classList.toggle('on', x.dataset.v === ''));
+  $('rawPf').value = ''; $('rawTopik').value = ''; fillIsuSelect(state.rawD || []);
+  $('rawUserChip').hidden = !raw.user;
+  $('rawUserChip').innerHTML = raw.user ? `Akun: <b>${esc(raw.user)}</b><button aria-label="Hapus filter akun">×</button>` : '';
+  renderRaw();
+}
+$('topAcc').addEventListener('click', e => {
+  const li = e.target.closest('.acc-go'); if (!li) return;
+  document.querySelector('.tabs [data-tab=raw]').click();
+  setRawUser(li.dataset.user);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+$('topAcc').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('.acc-go')) e.target.click(); });
+$('rawUserChip').addEventListener('click', e => { if (e.target.closest('button')) setRawUser(''); });
