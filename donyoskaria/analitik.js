@@ -36,7 +36,7 @@
 
     root.innerHTML = `
       <div class="g-hero">
-        <div><div class="g-eyebrow">Analytics</div><h1 class="g-title"><b>Karhutla</b> <span>Indonesia</span></h1>
+        <div><div class="g-eyebrow">Analytics</div><h1 class="g-title"><b>Dony Oskaria</b> <span>&amp; Danantara</span></h1>
           <p class="g-sub">Analisis mendalam percakapan media sosial untuk memahami tren, isu, sentimen, dan sebaran wilayah.</p></div>
         <div class="g-kpis" title="Perubahan (%) dibanding periode sebelumnya dengan jumlah hari yang sama">
           <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('chat', 22)}</span><div><b>${f(S.t)}</b><small>Total postingan</small></div>${dChip(delta(Ls.t, Ps.t), false)}</div>

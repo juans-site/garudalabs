@@ -15,6 +15,8 @@
     const negShareL = Ls.t ? Ls.n / Ls.t * 100 : 0, negShareP = Ps.t ? Ps.n / Ps.t * 100 : 0;
     const per = rg.from ? (rg.from === rg.to ? tgY(rg.from) : `${tg(rg.from)} – ${tgY(rg.to)}`) : '';
     const maxIsl = isl[0]?.[1] || 1;
+    const emo = cnt(D.filter(r => r.emosi && !/^netral$/i.test(r.emosi)), 'emosi'), maxEmo = emo[0]?.[1] || 1;
+    const emoL = Object.fromEntries(cnt(L.filter(r => r.emosi), 'emosi')), emoP = Object.fromEntries(cnt(Pv.filter(r => r.emosi), 'emosi'));
     const topics = cnt(D.filter(r => r.topik && r.topik !== 'Lainnya'), 'topik');
     const plat = cnt(D, 'platform');
     const lastD = perDay.at(-1) || { t: 0 }, prevAvg = perDay.slice(-8, -1).reduce((s, x, _, a) => s + x.t / a.length, 0);
@@ -49,7 +51,7 @@
     root.innerHTML = `
       <div class="g-hero">
         <div><div class="g-eyebrow">Pemantauan Nasional · ${esc(per)}</div>
-          <h1 class="g-title"><b>Karhutla</b> <span>Indonesia</span></h1>
+          <h1 class="g-title"><b>Dony Oskaria</b> <span>&amp; Danantara</span></h1>
           <p class="g-sub">Pemantauan percakapan media sosial secara berkala dengan analitik AI untuk deteksi dini, pemetaan risiko, dan respons cepat.</p></div>
         <div class="g-kpis" title="Perubahan (%) dibanding periode sebelumnya dengan jumlah hari yang sama">
           <div class="g-kpi" style="--c:${TEAL}"><span class="gi">${ic('chat', 22)}</span><div><b>${f(S.t)}</b><small>Total postingan</small></div>${dChip(delta(Ls.t, Ps.t), false)}</div>
@@ -60,12 +62,12 @@
       </div>
 
       <div class="g-stage">
-        <div class="g-earth"><img src="earth.jpg?v=3" srcset="earth-sm.jpg?v=3 836w, earth.jpg?v=3 1672w" sizes="(max-width:700px) 100vw, 1400px" alt="Peta sebaran percakapan karhutla di Indonesia" decoding="async" fetchpriority="high"><canvas class="g-smoke" aria-hidden="true"></canvas><div class="g-pins"></div></div>
+        <div class="g-earth"><img src="earth.jpg?v=3" srcset="earth-sm.jpg?v=3 836w, earth.jpg?v=3 1672w" sizes="(max-width:700px) 100vw, 1400px" alt="Peta sebaran percakapan Danantara & BUMN di Indonesia" decoding="async" fetchpriority="high"><canvas class="g-smoke" aria-hidden="true"></canvas><div class="g-pins"></div></div>
         <div class="g-glass g-int">
-          <div class="g-h"><h3>Intensitas Percakapan</h3><span class="g-live">Live</span></div>
+          <div class="g-h"><h3>Emosi Percakapan</h3><span class="g-live">Live</span></div>
           <div class="g-scale"></div><div class="g-scale-l"><span>Rendah</span><span>Tinggi</span></div>
-          <ol class="g-rank">${isl.slice(0, 6).map(([kk, v], i) => { const d = delta(islL[kk] || 0, islP[kk] || 0);
-            return `<li><span class="n">${i + 1}</span><span>${esc(kk)}</span><span class="v">${k(v)}</span>${dChip(d, true)}<span class="bar"><i style="width:${v / maxIsl * 100}%"></i></span></li>`; }).join('') || '<li>Belum ada lokasi</li>'}</ol>
+          <ol class="g-rank">${emo.slice(0, 7).map(([kk, v], i) => { const d = delta(emoL[kk] || 0, emoP[kk] || 0), neg = /kecewa|marah|khawatir|sinis|takut|sedih/i.test(kk);
+            return `<li><span class="n">${i + 1}</span><span>${esc(kk)}</span><span class="v">${k(v)}</span>${dChip(d, neg)}<span class="bar"><i style="width:${v / maxEmo * 100}%"></i></span></li>`; }).join('') || '<li>Belum ada data emosi</li>'}</ol>
           <button class="g-btn" type="button" data-go="analitik">Lihat detail ${ic('arrow', 14)}</button>
         </div>
         <div class="g-ctrl">

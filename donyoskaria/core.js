@@ -1,4 +1,4 @@
-/* ===== Garuda Karhutla — core: helper, warna, CSS bersama, olah data =====
+/* ===== Garuda Dony Oskaria — core: helper, warna, CSS bersama, olah data =====
    Dipakai oleh globe.js, console.js, analitik.js (lewat window.G). */
 (() => {
   const P = {

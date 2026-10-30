@@ -1,10 +1,12 @@
 /* ===== PENGATURAN ===== */
-const SHEET_ID = "17TKTfowFucPllDf5fE1TTw6GizCWg5B1axB90xuzd2Q";
-const TABS = { post: "Data Postingan" }; // sheet ini belum punya tab Komentar
+const SHEET_ID = "1EvNZ5apr_wFBvOn9hfGlFJpc6aHrFNnoVL_36OcyNvE";
+const TABS = { post: "Data Bersih", komentar: "Komentar" };
 const RISK = { tinggi: 35, sedang: 20 };          // ambang % negatif
 const REFRESH_MENIT = 5;
-// Akun resmi pemerintah/lembaga terkait karhutla (huruf besar/kecil diabaikan). Dipakai untuk penanda & insight SNA.
-const AKUN_RESMI = ['bnpb_indonesia', 'bnpb', 'bmkgnews', 'infobmkg', 'kemenlhk', 'klhk', 'kementerianlhk', 'manggala_agni', 'brgmindonesia', 'divhumas_polri', 'tniad', 'puspentni', 'kemensetneg', 'jokowi', 'prabowo', 'setkabgoid'];
+// Akun resmi Danantara/BUMN/pemerintah (huruf besar/kecil diabaikan). Kolom 'Jenis Akun' berisi "Resmi" juga otomatis dihitung resmi.
+const AKUN_RESMI = []; // kosong: akun resmi cukup dari label 'Resmi' di kolom Jenis Akun
+// Filter Kata Kunci (kolom 'Kata Kunci'). Teks komentar dicocokkan dengan pola regex.
+const KATA_KUNCI = [['Semua', null], ['Dony Oskaria', /dony|oskaria/i], ['Danantara', /danantara|patriot bond/i], ['BUMN', /bumn|pelat merah|state-owned|soe/i]];
 // Top 5 Akun tidak memasukkan akun media/berita (Tipe "Media" di sheet),
 // KECUALI homeless media di daftar ini (huruf besar/kecil diabaikan) — silakan tambah/kurangi.
 const HOMELESS_MEDIA = ['putrapostdaily', 'mojiupdates', 'volleyballidn', 'democrazymedia', 'updatenusantaracom', 'mediakonsumenid'];
@@ -37,7 +39,7 @@ const TI = {
 };
 const tIcon = (n, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TI[n]}</svg>`;
 
-const state = { gran: 'harian', cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'last7' }; // from/to = 'yyyy-mm-dd', null = semua
+const state = { kw: 'Semua', gran: 'harian', cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'last7' }; // from/to = 'yyyy-mm-dd', null = semua
 const cache = {}, charts = {};
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
@@ -49,15 +51,30 @@ async function load(src) {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(TABS[src])}&_=${Date.now()}`;
   const txt = await fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); });
   const rows = Papa.parse(txt, { header: true, skipEmptyLines: true }).data;
-  return cache[src] = rows.map(r => norm(r, src)).filter(r => r.tgl && r.sent);
+  cache['_' + src] = rows.map(r => norm(r, src)).filter(r => r.tgl && r.sent);
+  return cache[src] = kwFilter(cache['_' + src]);
 }
+const kwFilter = R => { const re = (KATA_KUNCI.find(k => k[0] === state.kw) || [])[1]; return re ? R.filter(r => re.test(r.kw || r.text)) : R; };
+function setKw(v) { state.kw = v; ['post', 'komentar'].forEach(s => { if (cache['_' + s]) cache[s] = kwFilter(cache['_' + s]); }); delete cache.all;
+  document.querySelectorAll('[data-kw]').forEach(b => b.classList.toggle('on', b.dataset.kw === v)); render(); }
+// Lokasi profil (teks bebas) -> pulau besar untuk peta
+function pulau(l) { l = (l || '').toLowerCase();
+  if (!l || /tidak diketahui|unknown/.test(l)) return 'Tidak menyebutkan lokasi';
+  if (/papua|jayapura|sorong|merauke|timika/.test(l)) return 'Papua';
+  if (/maluku|ambon|ternate/.test(l)) return 'Maluku';
+  if (/sulawesi|makassar|manado|palu|kendari|gorontalo/.test(l)) return 'Sulawesi';
+  if (/kalimantan|balikpapan|samarinda|banjarmasin|pontianak|palangka|sampit/.test(l)) return 'Kalimantan';
+  if (/bali|denpasar|uluwatu|lombok|mataram|kupang|nusa tenggara|bima\b/.test(l)) return 'Bali & Nusa Tenggara';
+  if (/sumatera|sumatra|medan|padang|palembang|jambi|riau|pekanbaru|lampung|aceh|bengkulu|siantar|batipuh|musirawas|kayu tanam|bukittinggi|batam/.test(l)) return 'Sumatera';
+  if (/jakarta|jkt|bandung|bekasi|bogor|depok|tangerang|banten|jawa|java|jabar|semarang|surabaya|malang|yogya|jogja|solo|salatiga|kediri|karawang|kendal|sukabumi|senayan|senen|kebayoran|kemang|cipondoh|jagakarsa|kelapa gading|bojonggede|pancoran|lowokwaru|bulaksumur|kasihan|jepara|juanda|ckr/.test(l)) return 'Jawa';
+  return 'Tidak menyebutkan lokasi'; }
 // Tanggal: "dd/mm/yyyy", serial angka, atau "yyyy-mm-dd". Jam: "HH:MM" atau pecahan hari.
 function norm(r, kind) {
   const t = r['Waktu'] || r['Tanggal (WIB)'] || ''; let tgl = '';
   if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(t)) { const [d, m, y] = t.split(/[\/ ]/); tgl = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`; }
   else if (/^\d+([.,]\d+)?$/.test(t)) tgl = new Date(Date.UTC(1899, 11, 30) + parseFloat(t.replace(',', '.')) * 864e5).toISOString().slice(0, 10);
   else if (/^\d{4}-\d{2}-\d{2}/.test(t)) tgl = t.slice(0, 10);
-  const j = r['Jam'] || r['Jam (WIB)'] || ''; let jam = NaN;
+  let j = r['Jam'] || r['Jam (WIB)'] || ''; if (!j && /^\d+[.,]\d+$/.test(t)) j = '0.' + t.split(/[.,]/)[1]; let jam = NaN;
   if (/^\d{1,2}[:.]\d{2}/.test(j)) jam = parseInt(j);
   else if (/^0?[.,]\d+$|^[01]$/.test(j)) jam = Math.floor(parseFloat(j.replace(',', '.')) * 24);
   // jam lengkap HH:MM untuk tabel raw data
@@ -65,14 +82,16 @@ function norm(r, kind) {
   if (/^\d{1,2}[:.]\d{2}/.test(j)) { const [hh, mm] = j.split(/[:.]/); jamStr = hh.padStart(2, '0') + ':' + mm.slice(0, 2); }
   else if (/^0?[.,]\d+$|^[01]$/.test(j)) { const m = Math.round(parseFloat(j.replace(',', '.')) * 1440) % 1440; jamStr = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
   const s = (r['Sentimen'] || '').trim().toLowerCase();
-  const user = (r['Username'] || '').trim();
+  const isK = kind === 'komentar';
+  if (!r['Tipe']) r['Tipe'] = r['Jenis Akun'] || '';
+  const user = (r['Username'] || r['Akun / Sumber'] || r['Akun Komentator'] || '').trim().replace(/^@/, '');
   const resmi = /resmi/i.test(r['Tipe'] || '') || AKUN_RESMI.includes(user.toLowerCase());
   return {
-    platform: (r['Platform'] || 'Lainnya').trim(), user: r['Username'] || '', nama: (r['Nama Akun'] || '').trim(), tgl, jam,
-    text: r['Caption'] || r['Teks Postingan'] || r['Text Komentar'] || '',
-    topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
+    platform: (r['Platform'] || 'Lainnya').trim(), user, kw: r['Kata Kunci'] || '', emosi: (r['Emosi'] || '').trim(), nama: (r['Nama Akun'] || '').trim(), tgl, jam,
+    text: r['Caption'] || r['Teks Postingan'] || r['Text Komentar'] || r['Konten'] || (isK ? r['Komentar'] : '') || '',
+    topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || r['Kategori'] || 'Lainnya').trim().replace(/^Umum \/ Lainnya$/, 'Lainnya'),
     sent: !s ? '' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
-    link: r['Link'] || r['URL'] || '', lokasi: (() => { const l = (r['Lokasi (Pulau)'] || '').trim(); return !l || /^(lainnya|-|tidak ada|n\/?a)$/i.test(l) ? 'Tidak menyebutkan lokasi' : l; })(), jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), lk: parseInt(String(r['Likes/Reaksi'] || '0').replace(/[.,]/g, '')) || 0, km: parseInt(String(r['Komentar'] || '0').replace(/[.,]/g, '')) || 0, sh: parseInt(String(r['Share/Repost'] || '0').replace(/[.,]/g, '')) || 0, eng: ['Likes/Reaksi', 'Komentar', 'Share/Repost'].reduce((s, k) => s + (parseInt(String(r[k] || '0').replace(/[.,]/g, '')) || 0), 0), kind
+    link: r['Link'] || r['URL'] || (/^http/.test(r['URL Postingan'] || '') ? r['URL Postingan'] : ''), lokasi: r['Lokasi (Pulau)'] ? (() => { const l = r['Lokasi (Pulau)'].trim(); return /^(lainnya|-|tidak ada|n\/?a)$/i.test(l) ? 'Tidak menyebutkan lokasi' : l; })() : pulau(r['Lokasi (estimasi)']), jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), lk: parseInt(String(r['Likes/Reaksi'] || r['Likes'] || r['Likes Komentar'] || '0').replace(/[.,]/g, '')) || 0, km: isK ? 0 : parseInt(String(r['Komentar'] || '0').replace(/[.,]/g, '')) || 0, sh: parseInt(String(r['Share/Repost'] || r['Shares'] || '0').replace(/[.,]/g, '')) || 0, eng: (isK ? ['Likes Komentar'] : ['Likes/Reaksi', 'Likes', 'Komentar', 'Share/Repost', 'Shares']).reduce((s, k) => s + (parseInt(String(r[k] || '0').replace(/[.,]/g, '')) || 0), 0), kind
   };
 }
 const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
@@ -115,7 +134,7 @@ async function render() {
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
   const unit = { post: 'post', komentar: 'komentar', all: 'mention' }[state.src];
-  $('periode').textContent = `Percakapan media sosial terkait Kebakaran Hutan & Lahan (KARHUTLA) · ${periode} · ${unit}`;
+  $('periode').textContent = `Monitoring Dony Oskaria (Kepala BP BUMN) & Danantara${state.kw !== 'Semua' ? ' · filter: ' + state.kw : ''} · ${periode} · ${unit}`;
 
   const S = stats(D), N = D.filter(r => r.sent === 'negatif'), P = D.filter(r => r.sent === 'positif');
 
@@ -225,7 +244,7 @@ async function render() {
     <div class="meta"><span>💬 ${fmt(p.eng)} engagement · ${tglShort(p.tgl)}</span>${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">Lihat ↗</a>` : ''}</div></div>`).join('') || '<p>Tidak ada postingan negatif.</p>';
 
   /* Word cloud */
-  const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue gw lu kamu dia mereka nya ya ga gak nggak enggak tapi karena jadi lagi mau buat sama oleh dalam bank karhutla kebakaran hutan lahan terjadi kembali saat tengah selatan utara barat timur indonesia sejumlah kondisi kawasan wilayah sekitar terus video bukan harus kota lokasi kabupaten provinsi oktober september november tahun bulan minggu pagi siang sore malam juga masih baru dari menurut ujar kata katanya disebut melalui antara lain the https http www com co id dll yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu min admin mohon terima kasih halo sahabat apa siapa udah udh sdh tdk gimana bagaimana akibat belum dapat hari jangan kena usai terlihat milik khusus berbeda kapan setelah sedang hingga sampai menjadi tersebut karna emang memang banget sangat orang'.split(' '));
+  const STOP = new Set('yang dan di ke dari ini itu untuk dengan pada juga ada tidak bisa sudah akan atau aja saja kita kami saya aku gue gw lu kamu dia mereka nya ya ga gak nggak enggak tapi karena jadi lagi mau buat sama oleh dalam bank danantara bumn dony oskaria persero indonesia terjadi kembali saat tengah selatan utara barat timur indonesia sejumlah kondisi kawasan wilayah sekitar terus video bukan harus kota lokasi kabupaten provinsi oktober september november tahun bulan minggu pagi siang sore malam juga masih baru dari menurut ujar kata katanya disebut melalui antara lain the https http www com co id dll yg dgn utk sih kok deh dong lah kan pun para seperti lebih bagi masih hanya kalau kalo tak telah agar semua baru banyak pak bu min admin mohon terima kasih halo sahabat apa siapa udah udh sdh tdk gimana bagaimana akibat belum dapat hari jangan kena usai terlihat milik khusus berbeda kapan setelah sedang hingga sampai menjadi tersebut karna emang memang banget sangat orang'.split(' '));
   const cloudSrc = state.cloud === 'pos' ? P : N;
   const wc = {}; cloudSrc.forEach(r => r.text.toLowerCase().replace(/https?:\S+|[@#]\S+/g, ' ').split(/[^a-z0-9]+/).forEach(w => { if (w.length > 3 && !STOP.has(w) && !/^\d+$/.test(w)) wc[w] = (wc[w] || 0) + 1; }));
   // 30 kata terbanyak. Ukuran & warna = frekuensi; urutan = terbanyak di tengah.
@@ -261,7 +280,7 @@ async function render() {
   const nMax = negTop[0]?.[1] || 1;
   $('flow').innerHTML = negTop.slice(0, 4).map(([k, v], i) => `<li><span class="rank">${i + 1}</span><div><div class="acc-top"><span class="nt">${esc(k)}</span><b style="color:var(--neg)">${v}</b></div><div class="acc-bar"><i style="width:${v / nMax * 100}%;background:var(--neg)"></i></div></div></li>`).join('') || '<li class="empty">Tidak ada isu negatif</li>';
   const t3 = negTop.slice(0, 3).reduce((s, x) => s + x[1], 0);
-  $('impact').textContent = negTop.length ? `${t3} dari ${N.length} mention negatif (${pct(t3, N.length)}) berasal dari 3 topik teratas. Dampak: kepercayaan publik pada penanganan karhutla, kesehatan warga, dan hubungan lintas negara.` : '';
+  $('impact').textContent = negTop.length ? `${t3} dari ${N.length} mention negatif (${pct(t3, N.length)}) berasal dari 3 topik teratas. Dampak: kepercayaan publik pada Danantara & BUMN, iklim investasi, dan hubungan lintas negara.` : '';
 
   /* Rekomendasi (template otomatis) */
   const negPf = negK[0]?.[0] || 'kanal utama';
@@ -273,7 +292,7 @@ async function render() {
   const recos = [];
   if (negTopR[0]) recos.push(['Respons isu utama', `Siapkan holding statement & infografis singkat untuk isu "${negTopR[0][0]}" (${fmt(negTopR[0][1])} postingan negatif, ${pct(negTopR[0][1], N.length)} dari negatif). Fokus fakta & langkah penanganan.`]);
   if (negPf) recos.push(['Kanal prioritas', `Prioritaskan respons & konten di ${negPf} — kanal dengan negatif terbanyak. Gunakan format thread/video pendek yang mudah dibagikan.`]);
-  if (lokNeg[0]) recos.push(['Lokalisasi pesan', `Buat konten khusus wilayah ${lokNeg[0][0]}${lokNeg[1] ? ` & ${lokNeg[1][0]}` : ''}: update titik api, kualitas udara, dan posko bantuan; libatkan akun pemda/tokoh lokal.`]);
+  if (lokNeg[0]) recos.push(['Lokalisasi pesan', `Buat konten khusus wilayah ${lokNeg[0][0]}${lokNeg[1] ? ` & ${lokNeg[1][0]}` : ''}: update program BUMN/Danantara yang relevan bagi warga; libatkan akun pemda/tokoh lokal.`]);
   if (posTopR[0]) recos.push(['Amplifikasi positif', `Angkat narasi "${posTopR[0][0]}" (${fmt(posTopR[0][1])} postingan positif) — kisah petugas/relawan dengan foto lapangan untuk menyeimbangkan percakapan.`]);
   if (negAcc[0]) recos.push(['Engagement akun kunci', `Pantau & jangkau akun yang paling vokal (${negAcc.slice(0, 3).map(x => '@' + x[0]).join(', ')}) dengan data & klarifikasi, hindari debat terbuka.${peakH ? ` Jadwalkan posting sekitar pukul ${String(peakH[0]).padStart(2, '0')}.00 (jam tersibuk).` : ''}`]);
   $('reco').innerHTML = `<ol class="reco-list">${recos.slice(0, 5).map(([t, x], i) => `<li><span class="rn">${i + 1}</span><div><b>${esc(t)}</b><p>${esc(x)}</p></div></li>`).join('')}</ol>`;
@@ -479,7 +498,7 @@ async function renderSNA() {
   const bigGroup = komRank[0], bigHub = N.filter(n => lab.get(n.id) === bigGroup).sort((a, b) => (b.din + b.dout) - (a.din + a.dout))[0];
   const at = n => `<b>@${esc(n.label)}</b>`;
   $('snaExplain').innerHTML = !totalInter ? '<p>Belum ada akun yang saling menyebut atau berkomentar di platform dan tanggal ini, jadi belum ada jaringan yang bisa dibaca.</p>' : `
-    <div class="ex"><h4>Seberapa ramai?</h4><p>Pada <b>${per}</b>, ada <b>${fmt(totalNodes)} akun</b> ${sna.pf} yang ikut membicarakan karhutla sambil menyebut (@) atau membalas akun lain. Totalnya <b>${fmt(totalInter)} kali</b> saling sebut atau balas.</p></div>
+    <div class="ex"><h4>Seberapa ramai?</h4><p>Pada <b>${per}</b>, ada <b>${fmt(totalNodes)} akun</b> ${sna.pf} yang ikut membicarakan Dony Oskaria/Danantara/BUMN sambil menyebut (@) atau membalas akun lain. Totalnya <b>${fmt(totalInter)} kali</b> saling sebut atau balas.</p></div>
     <div class="ex"><h4>Siapa yang paling banyak dituju?</h4><p>${topIn.map(at).join(', ')}. Sekitar <b>${Math.round(top3Share)} dari setiap 100</b> sebutan dan balasan mengarah ke tiga akun ini. ${top3Share >= 25 ? 'Artinya, percakapan banyak <b>bertumpu pada akun-akun tersebut</b>: orang datang untuk menyapa, bertanya, atau mengeluh ke sana.' : 'Artinya, perhatian orang <b>tersebar</b> ke banyak akun, tidak tertuju pada beberapa akun saja.'}</p></div>
     <div class="ex"><h4>Apakah orang saling ngobrol?</h4><p>Rata-rata satu akun berinteraksi dengan <b>${f1(avgConn)} akun lain</b>. ${avgConn < 3 ? 'Jadi kebanyakan orang hanya menyebut satu-dua akun (biasanya akun besar seperti di atas) lalu selesai. <b>Jarang terjadi diskusi panjang</b> antar-pengguna.' : 'Jadi cukup banyak orang yang <b>saling membalas dan berdiskusi</b>, tidak hanya menyebut satu akun lalu selesai.'}</p></div>
     <div class="ex"><h4>Bagaimana nada percakapannya?</h4><p>${(() => { const au = [...nodes.values()].filter(n => n.posts > 0), ng = au.filter(n => sentOf(n) === 'negatif').length, ps = au.filter(n => sentOf(n) === 'positif').length;
@@ -530,7 +549,7 @@ async function renderSNA() {
     const negLoud = negA.slice().sort((a, b) => (b.dout + b.din) - (a.dout + a.din)).slice(0, 3);
     if (negLoud.length) ins.push(['👀', `Akun bernada negatif yang paling banyak berinteraksi: ${negLoud.map(nm).join(', ')}. Layak dipantau dan, bila perlu, dihubungi langsung sebelum keluhannya menyebar.`]);
     const nonResmi = byIn.filter(n => !resmiIds.has(n.id)).slice(0, 3);
-    if (nonResmi.length) ins.push(['📌', `Akun non-resmi yang paling sering dituju orang: ${nonResmi.map(nm).join(', ')}. Akun seperti ini (misalnya media, influencer, atau brand lain) ikut membentuk opini publik, jadi perlu dipantau apa yang mereka sampaikan tentang karhutla.`]);
+    if (nonResmi.length) ins.push(['📌', `Akun non-resmi yang paling sering dituju orang: ${nonResmi.map(nm).join(', ')}. Akun seperti ini (misalnya media, influencer, atau brand lain) ikut membentuk opini publik, jadi perlu dipantau apa yang mereka sampaikan tentang Dony Oskaria & Danantara.`]);
     if (negA.length > posA.length) ins.push(['⚖️', `Suara keluhan lebih banyak daripada suara dukungan (${pct(negA.length, authors.length)} vs ${pct(posA.length, authors.length)} akun). Konten positif dan klarifikasi perlu diperkuat di ${sna.pf}.`]);
   }
   $('snaInsight').innerHTML = ins.map(([i, t]) => `<li><span class="ii">${i}</span><span>${t}</span></li>`).join('');
@@ -610,3 +629,5 @@ $('snaClose').onclick = clearFocus;
 $('snaQ').onchange = e => { const id = e.target.value.trim().toLowerCase(); if (sna.nodes?.has(id)) focusNode(id); };
 
 let snaRT; addEventListener('resize', () => { clearTimeout(snaRT); snaRT = setTimeout(() => { if (!$('viewSna').hidden) sna.fitAll?.(); }, 200); });
+
+$('fKw').onclick = e => { const b = e.target.closest('[data-kw]'); if (b) setKw(b.dataset.kw); };

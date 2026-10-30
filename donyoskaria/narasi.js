@@ -2,7 +2,7 @@
    Data dihitung di browser (topik, contoh postingan, deteksi amplifikasi, topik baru),
    lalu diringkas Cloudflare Workers AI. Hasil di-cache 20 menit di Worker. */
 (() => {
-  const ENDPOINT = (typeof CHAT_ENDPOINT !== 'undefined' && CHAT_ENDPOINT) || 'https://karhutla-chat.abrahms-juan.workers.dev';
+  const ENDPOINT = (typeof CHAT_ENDPOINT !== 'undefined' && CHAT_ENDPOINT) || 'https://donyoskaria-chat.abrahms-juan.workers.dev';
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const norm = t => String(t).toLowerCase().replace(/https?:\S+|[@#]\S+/g, ' ').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
   const LV = { hi: ['hi', 'Kritis'], md: ['md', 'Pantau'], lo: ['lo', 'Positif'], new: ['md', 'Topik baru'] };

@@ -1,5 +1,5 @@
 /* ===== Asisten AI (Claude) — floating chat, teks saja ===== */
-const CHAT_ENDPOINT = 'https://karhutla-chat.abrahms-juan.workers.dev'; // ganti dengan URL Worker kamu
+const CHAT_ENDPOINT = 'https://donyoskaria-chat.abrahms-juan.workers.dev'; // ganti dengan URL Worker kamu
 const CHAT_MAX_POSTS = 50; // Workers AI punya batas konteks lebih kecil
 
 (() => {
@@ -42,7 +42,7 @@ const CHAT_MAX_POSTS = 50; // Workers AI punya batas konteks lebih kecil
   panel.className = 'ai-panel'; panel.hidden = true; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'AI Assistant');
   panel.innerHTML = `<div class="ai-h"><span class="ai-dot">${ico}</span><div><b>AI Assistant</b><small>Powered with Cloudflare AI</small></div><button type="button" aria-label="Tutup">×</button></div>
     <div class="ai-log" aria-live="polite"></div>
-    <div class="ai-f"><textarea rows="1" maxlength="2000" placeholder="Tanya tentang data karhutla…" aria-label="Pertanyaan"></textarea><button type="button" aria-label="Kirim">➤</button></div>
+    <div class="ai-f"><textarea rows="1" maxlength="2000" placeholder="Tanya tentang Dony Oskaria, Danantara, BUMN…" aria-label="Pertanyaan"></textarea><button type="button" aria-label="Kirim">➤</button></div>
     <div class="ai-note">Jawaban AI bisa keliru. Cek kembali angka penting di dashboard.</div>`;
   document.body.append(fab, panel);
   const log = panel.querySelector('.ai-log'), ta = panel.querySelector('textarea'), send = panel.querySelector('.ai-f button');
@@ -58,7 +58,7 @@ const CHAT_MAX_POSTS = 50; // Workers AI punya batas konteks lebih kecil
   const add = (cls, html) => { const d = document.createElement('div'); d.className = 'ai-m ' + cls; d.innerHTML = html; log.append(d); log.scrollTop = log.scrollHeight; return d; };
 
   function welcome() {
-    add('a', '<p>Halo! Saya asisten AI untuk dashboard karhutla ini. Tanyakan apa saja tentang sentimen, topik, lokasi, akun, atau tren pada periode yang sedang dipilih.</p>');
+    add('a', '<p>Halo! Saya asisten AI untuk dashboard monitoring Dony Oskaria & Danantara ini. Tanyakan apa saja tentang sentimen, topik, lokasi, akun, atau tren pada periode yang sedang dipilih.</p>');
     const s = document.createElement('div'); s.className = 'ai-sug';
     SUGGEST.forEach(q => { const b = document.createElement('button'); b.type = 'button'; b.textContent = q; b.onclick = () => { s.remove(); ask(q); }; s.append(b); });
     log.append(s);
