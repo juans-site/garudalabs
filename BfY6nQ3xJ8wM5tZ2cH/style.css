@@ -778,3 +778,8 @@ body:before{background-position:center bottom!important;background-size:cover!im
 .fchip{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card2);font-size:12px;font-weight:600}
 .fchip button{all:unset;cursor:pointer;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10px;color:var(--mute)}
 .fchip button:hover{background:var(--line);color:var(--ink)}
+
+/* v3.0 */
+.cd-desc{display:block;color:var(--mute);font-size:11.5px;margin-top:-1px}
+#rawTopik,#rawIsu{max-width:220px}
+#rawIsu:disabled{opacity:.5}

@@ -385,6 +385,7 @@ function renderRaw(reset) {
     if (raw.pf && !pfs.includes(raw.pf)) raw.pf = '';
     $('rawPf').innerHTML = '<option value="">Semua platform</option>' + pfs.map(p => `<option ${p === raw.pf ? 'selected' : ''}>${esc(p)}</option>`).join('');
   }
+  fillTopikIsu(D);
   const q = raw.q.toLowerCase();
   renderRawChips();
   let rows = D.filter(r => (!raw.sent || r.sent === raw.sent) && (!raw.pf || r.platform === raw.pf) && (!raw.topik || r.topik === raw.topik) && (!raw.sub || subOf(r) === raw.sub) &&
@@ -671,8 +672,9 @@ function topicDetail(topik, sent) {
   const top = subs.filter(s => s.k !== 'Lainnya').slice(0, 2).map(s => `<b>${esc(s.k.toLowerCase())}</b>`);
   const lead = `${fmt(total)} mention ${sent}${top.length ? ', didominasi ' + top.join(' dan ') : ''}${pf ? `, paling banyak di <b>${esc(pf[0])}</b> (${pct(pf[1], total)})` : ''}.`;
   const ex = r => `<div class="cd-ex"><div class="cd-ex-h"><b>${esc(r.user || '–')}</b><span class="chip sm"><i style="background:${pColor(r.platform)}"></i>${esc(r.platform)}</span><span>${tglShort(r.tgl)}</span>${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">Lihat ↗</a>` : ''}</div><p>${esc(r.text.length > 180 ? r.text.slice(0, 180) + '…' : r.text)}</p></div>`;
-  const subHtml = subs.map(s => { const exs = [...s.rows].sort((a, b) => b.eng - a.eng || (b.tgl > a.tgl ? 1 : -1)).slice(0, s.other ? 0 : 2);
-    return `<div class="cd-sub"><button class="cd-sub-h" ${s.other ? '' : `data-sub="${esc(s.k)}"`} title="${s.other ? '' : 'Lihat di Raw Data'}"><span>${esc(s.k)}</span><b>${fmt(s.rows.length)}</b></button><div class="bar"><i style="width:${s.rows.length / mx * 100}%;background:${c}"></i></div>${exs.map(ex).join('')}</div>`; }).join('');
+  const subHtml = subs.map(s => { const sp = count(s.rows, 'platform')[0], days = new Set(s.rows.map(r => r.tgl)).size;
+    const desc = `${pct(s.rows.length, total)} dari topik ini${sp ? ` · terbanyak di ${esc(sp[0])}` : ''}${s.other ? ' · gabungan isu kecil lainnya' : ` · muncul di ${fmt(days)} hari`}`;
+    return `<div class="cd-sub"><button class="cd-sub-h" ${s.other ? '' : `data-sub="${esc(s.k)}"`} title="${s.other ? '' : 'Lihat di Raw Data'}"><span>${esc(s.k)}</span><b>${fmt(s.rows.length)}</b></button><div class="bar"><i style="width:${s.rows.length / mx * 100}%;background:${c}"></i></div><small class="cd-desc">${desc}</small></div>`; }).join('');
   return `<li class="cause-detail"><div class="cd" style="--c:${c}"><p class="cd-lead">${lead}</p>${subHtml}<button class="btn cd-all" data-all>Lihat semua (${fmt(total)}) di Raw Data →</button></div></li>`;
 }
 function goRaw(topik, sent, sub) {
@@ -688,8 +690,6 @@ function renderRawChips() {
     el.onclick = e => { const x = e.target.closest('[data-x]'); if (x) { raw[x.dataset.x] = ''; if (x.dataset.x === 'topik') raw.sub = ''; if (!raw.topik) raw.from = ''; raw.page = 1; renderRaw(); }
       if (e.target.closest('[data-back]')) document.querySelector('.tabs [data-tab=ana]').click(); }; }
   const ch = [];
-  if (raw.topik) ch.push(`<span class="fchip">Topik: ${esc(raw.topik)}<button data-x="topik" aria-label="Hapus filter">✕</button></span>`);
-  if (raw.sub) ch.push(`<span class="fchip">Isu: ${esc(raw.sub)}<button data-x="sub" aria-label="Hapus filter">✕</button></span>`);
   el.innerHTML = (raw.from ? `<button class="btn ghost back" data-back>← Kembali ke Analytics</button>` : '') + ch.join('');
   el.hidden = !ch.length && !raw.from;
 }
@@ -703,3 +703,16 @@ document.querySelector('.cause').addEventListener('click', e => {
   if (!open) { li.classList.add('open'); li.setAttribute('aria-expanded', 'true'); li.insertAdjacentHTML('afterend', topicDetail(li.dataset.topik, li.dataset.sent)); }
 });
 document.querySelector('.cause').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li.clk')) { e.preventDefault(); e.target.click(); } });
+
+/* v3.0: dropdown Topik → Isu di Raw Data */
+function fillTopikIsu(D) {
+  const tps = count(D, 'topik').map(t => t[0]);
+  if (raw.topik && !tps.includes(raw.topik)) { raw.topik = ''; raw.sub = ''; }
+  $('rawTopik').innerHTML = '<option value="">Semua topik</option>' + tps.map(t => `<option ${t === raw.topik ? 'selected' : ''}>${esc(t)}</option>`).join('');
+  const isu = raw.topik ? count(D.filter(r => r.topik === raw.topik), subOf).map(t => t[0]) : [];
+  if (raw.sub && !isu.includes(raw.sub)) raw.sub = '';
+  $('rawIsu').innerHTML = `<option value="">${raw.topik ? 'Semua isu' : 'Pilih topik dulu'}</option>` + isu.map(t => `<option ${t === raw.sub ? 'selected' : ''}>${esc(t)}</option>`).join('');
+  $('rawIsu').disabled = !raw.topik;
+}
+$('rawTopik').onchange = e => { raw.topik = e.target.value; raw.sub = ''; if (!raw.topik) raw.from = ''; raw.page = 1; renderRaw(); };
+$('rawIsu').onchange = e => { raw.sub = e.target.value; raw.page = 1; renderRaw(); };
