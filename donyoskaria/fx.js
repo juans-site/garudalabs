@@ -62,14 +62,17 @@ html,body{overflow-x:clip}
   function parallax() {
     ticking = false;
     const root = document.getElementById('gConsole'), view = document.getElementById('viewDash');
-    if (!root || !view || view.hidden) return;
+    const hb0 = document.getElementById('heroBg');
+    if (!root || !view || view.hidden) { hb0 && hb0.classList.remove('on'); return; }
     if (innerWidth < 1100 || reduce) { // layar sempit: kembalikan semua ke posisi normal
+      hb0 && hb0.classList.remove('on');
       root.querySelectorAll('.g-earth,.g-pins,.g-int,.g-ctrl,.g-hero').forEach(el => { el.style.transform = ''; el.style.opacity = ''; el.style.filter = ''; el.style.clipPath = ''; });
       return; }
     const stage = root.querySelector('.g-stage'), earth = root.querySelector('.g-earth'), pins = root.querySelector('.g-pins'); if (!stage || !earth) return;
     const r = stage.getBoundingClientRect(), y = Math.max(0, -r.top + 90), p = Math.min(1, y / (r.height * .55));
-    if (earth.classList.contains('g-photo')) { const fy = Math.max(0, -r.top); earth.style.setProperty('transform', `translate3d(0,${fy.toFixed(1)}px,0)`, 'important'); earth.style.clipPath = `inset(0 0 ${fy.toFixed(1)}px 0)`; }
-    else earth.style.transform = `translate3d(0,${(y * .42).toFixed(1)}px,0) scale(${(1 + p * .04).toFixed(3)})`;
+    const hb = document.getElementById('heroBg');
+    if (hb) { const b = r.bottom; hb.classList.toggle('on', b > 0); hb.style.clipPath = `inset(0 0 ${Math.max(0, innerHeight - b).toFixed(0)}px 0)`; }
+    if (!earth.classList.contains('g-photo')) earth.style.transform = `translate3d(0,${(y * .42).toFixed(1)}px,0) scale(${(1 + p * .04).toFixed(3)})`;
     if (pins) { pins.style.opacity = (1 - p * 1.4).toFixed(3); pins.style.filter = p > .02 ? `blur(${(p * 6).toFixed(1)}px)` : ''; pins.style.transform = `translate3d(0,${(-p * 30).toFixed(1)}px,0)`; }
     const side = root.querySelectorAll('.g-int,.g-ctrl,.g-hero');
     side.forEach(el => { el.style.opacity = (1 - p * 1.1).toFixed(3); el.style.transform = `translate3d(0,${(-y * .12).toFixed(1)}px,0)`; });
@@ -77,6 +80,7 @@ html,body{overflow-x:clip}
   const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(parallax); } };
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', onScroll);
+  document.addEventListener('click', () => setTimeout(onScroll, 60));
 
   window.addEventListener('lok:update', () => setTimeout(() => { intro(); parallax(); }, (window.__afterLoader = !!document.getElementById('loader')) ? 950 : 40));
 })();

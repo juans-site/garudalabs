@@ -43,6 +43,12 @@
 <link rel="stylesheet" href="loader.css?v=98">
 <style>#loading .spinner{display:none}</style>
 <style>.top-r{display:flex;align-items:center;gap:10px}.th-btn{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}.th-btn:hover{border-color:#46D6C8;color:#46D6C8}[data-theme=dark] .th-btn .i-moon,[data-theme=light] .th-btn .i-sun{display:none}</style>
+<style>#heroBg{position:fixed;inset:0;z-index:0;pointer-events:none;display:none}
+#heroBg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right bottom;display:block}
+#heroBg .hb-l{display:none}[data-theme=light] #heroBg .hb-l{display:block}[data-theme=light] #heroBg .hb-d{display:none}
+#heroBg:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,6,14,.8) 0%,rgba(2,6,14,.5) 26%,rgba(2,6,14,.1) 46%,transparent 60%)}
+[data-theme=light] #heroBg:after{background:linear-gradient(90deg,rgba(244,248,249,.85) 0%,rgba(244,248,249,.5) 26%,rgba(244,248,249,.08) 46%,transparent 60%)}
+@media(min-width:1101px){#heroBg.on{display:block}.g-earth.g-photo{display:none!important}.content{position:relative;z-index:1}}</style>
 </head>
 <body>
 <div id="loader" role="status" aria-label="Garuda Labs sedang memuat">
@@ -60,12 +66,13 @@
 <script src="loader.js?v=98"></script>
 <script>(function(){var done=false,fin=function(){if(done)return;done=true;try{GarudaLoader.complete()}catch(e){}};addEventListener("lok:update",fin,{once:true});setTimeout(function(){var l=document.getElementById("loading");if(l&&/Gagal/.test(l.textContent))fin()},4000);setTimeout(fin,20000);})();</script>
 
+<div id="heroBg" aria-hidden="true"><img class="hb-d" src="hero-dark.jpg?v=1" srcset="hero-dark-sm.jpg?v=1 1280w, hero-dark.jpg?v=1 2560w" sizes="100vw" alt="" fetchpriority="high" decoding="async"><img class="hb-l" src="hero-light.jpg?v=1" srcset="hero-light-sm.jpg?v=1 1280w, hero-light.jpg?v=1 2560w" sizes="100vw" alt="" decoding="async"></div>
 <header class="topbar">
   <div class="brand">
     <img class="logo logo-dark" src="logo-dark.png?v=73" alt="Logo">
     <img class="logo logo-light" src="logo-light.png?v=73" alt="Logo">
     <span class="divider"></span>
-    <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="beta" title="Versi 0.13 · diperbarui 30 Okt 2026">Beta<i class="ver">v0.13</i></span>
+    <span class="brand-t"><b>Garuda Labs</b><small>Intelligent Media Monitoring</small></span><span class="beta" title="Versi 0.14 · diperbarui 30 Okt 2026">Beta<i class="ver">v0.14</i></span>
   </div>
   <div class="top-r">
       <div class="dr">
@@ -216,7 +223,7 @@
 <script src="analitik.js?v=84"></script>
 <script src="console.js?v=96"></script>
 <script src="narasi.js?v=102"></script>
-<script src="fx.js?v=98"></script>
+<script src="fx.js?v=99"></script>
 <script src="chat.js?v=73"></script>
 </body>
 </html>
