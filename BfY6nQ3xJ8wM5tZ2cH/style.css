@@ -805,5 +805,5 @@ select option:checked{background:var(--card2)}
 @media(max-width:640px){.logo-cl{height:22px}.topbar .brand{gap:8px}}
 .hl-wrap.a .ttl{display:none!important}
 .hl-wrap.a{grid-template-columns:1fr!important}
-.hl-wrap.a .hl-meta{justify-self:end!important;justify-content:flex-end!important}
+.hl-wrap.a .hl-meta{justify-self:center!important;justify-content:center!important}
 @media(max-width:640px){.hl-wrap.a .hl-meta{justify-self:start!important;justify-content:flex-start!important}}
