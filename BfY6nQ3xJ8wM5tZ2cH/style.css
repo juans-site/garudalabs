@@ -783,3 +783,14 @@ body:before{background-position:center bottom!important;background-size:cover!im
 .cd-desc{display:block;color:var(--mute);font-size:11.5px;margin-top:-1px}
 #rawTopik,#rawIsu{max-width:220px}
 #rawIsu:disabled{opacity:.5}
+
+/* v3.1: dropdown terbaca di mode gelap (popup native) */
+select option{background:var(--card);color:var(--ink)}
+select option:checked{background:var(--card2)}
+/* v3.1: header halaman — logo kiri, info periode di tengah, beri jarak ke kartu */
+.page-head.hero{padding:6px 2px 0!important;margin-bottom:26px!important}
+.hl-wrap.a{display:grid!important;width:100%;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px 24px}
+.hl-wrap.a .ttl{justify-self:start}
+.hl-wrap.a .hl-meta{justify-self:center;justify-content:center}
+@media(max-width:1100px){.hl-wrap.a{grid-template-columns:1fr}.hl-wrap.a .hl-meta{justify-self:start;justify-content:flex-start}}
+#viewDash>.stage:first-child{margin-top:18px!important}
