@@ -697,7 +697,7 @@ function renderRawChips() {
   if (raw.emosi) ch.push(`<span class="fchip">Emosi: ${esc(raw.emosi)}<button data-x="emosi" aria-label="Hapus filter">✕</button></span>`);
   if (raw.lokasi) ch.push(`<span class="fchip">Lokasi: ${esc(raw.lokasi)}<button data-x="lokasi" aria-label="Hapus filter">✕</button></span>`);
   if (raw.user) ch.push(`<span class="fchip">Akun: ${esc(raw.user)}<button data-x="user" aria-label="Hapus filter">✕</button></span>`);
-  el.innerHTML = (raw.from ? `<button class="btn ghost back" data-back>← Kembali ke ${raw.from === 'per' ? 'Persona &amp; Emosi' : 'Analytics'}</button>` : '') + ch.join('');
+  el.innerHTML = (raw.from ? `<button class="btn ghost back" data-back>← Kembali ke ${raw.from === 'per' ? 'Audience Insight' : 'Analytics'}</button>` : '') + ch.join('');
   el.hidden = !ch.length && !raw.from;
 }
 document.querySelector('.cause').addEventListener('click', e => {
@@ -736,7 +736,7 @@ function goRawUser(user) {
 $('topAcc').addEventListener('click', e => { const li = e.target.closest('li.clk-acc'); if (li) goRawUser(li.dataset.user); });
 $('topAcc').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li.clk-acc')) { e.preventDefault(); goRawUser(e.target.dataset.user); } });
 
-/* ================= v3.6: Persona & Emosi ================= */
+/* ================= v3.6: Audience Insight ================= */
 const EMO = { Senang: '#22C55E', Percaya: '#3B82F6', Netral: '#94A3B8', Terkejut: '#A855F7', Cemas: '#F59E0B', Kecewa: '#F97316', Marah: '#EF4444' };
 const EMO_ORDER = ['Senang', 'Percaya', 'Terkejut', 'Netral', 'Cemas', 'Kecewa', 'Marah'];
 const SEG = {
