@@ -71,10 +71,10 @@ html,body{overflow-x:clip}
     const stage = root.querySelector('.g-stage'), earth = root.querySelector('.g-earth'), pins = root.querySelector('.g-pins'); if (!stage || !earth) return;
     const r = stage.getBoundingClientRect(), y = Math.max(0, -r.top + 90), p = Math.min(1, y / (r.height * .55));
     const hb = document.getElementById('heroBg');
-    if (hb) { const b = r.bottom; hb.classList.toggle('on', b > 0); hb.style.height = Math.round(b + scrollY) + 'px'; hb.style.clipPath = `inset(0 0 ${Math.max(0, scrollY).toFixed(0)}px 0)`; }
+    if (hb) { const b = r.bottom; hb.classList.toggle('on', b > 0); hb.style.clipPath = `inset(0 0 ${Math.max(0, innerHeight - b).toFixed(0)}px 0)`; }
     if (!earth.classList.contains('g-photo')) earth.style.transform = `translate3d(0,${(y * .42).toFixed(1)}px,0) scale(${(1 + p * .04).toFixed(3)})`;
     if (pins) { pins.style.opacity = (1 - p * 1.4).toFixed(3); pins.style.filter = p > .02 ? `blur(${(p * 6).toFixed(1)}px)` : ''; pins.style.transform = `translate3d(0,${(-p * 30).toFixed(1)}px,0)`; }
-    const side = root.querySelectorAll('.g-ctrl,.g-hero');
+    const side = root.querySelectorAll('.g-ctrl,.g-hero,.g-prio');
     side.forEach(el => { const op = 1 - p * 1.1; el.style.visibility = op <= .02 ? 'hidden' : ''; el.style.opacity = op.toFixed(3); el.style.transform = `translate3d(0,${(-y * .12).toFixed(1)}px,0)`; });
   }
   const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(parallax); } };
