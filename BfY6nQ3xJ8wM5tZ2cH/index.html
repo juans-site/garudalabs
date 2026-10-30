@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bank BTN - Garuda Labs Intelligent Media Monitoring</title>
-<link rel="icon" href="favicon.ico?v=350" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=350">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=350">
+<link rel="icon" href="favicon.ico?v=360" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=360">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=360">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Dashboard monitoring percakapan media sosial terkait Bank BTN: sentimen, platform, isu utama, dan level risiko.">
 <meta property="og:type" content="website">
@@ -19,8 +19,8 @@
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light'}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=350">
-<link rel="stylesheet" href="loader.css?v=350">
+<link rel="stylesheet" href="style.css?v=360">
+<link rel="stylesheet" href="loader.css?v=360">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
@@ -39,17 +39,18 @@
   <div class="footer"><em>SYS.01</em> / GARUDA NEURAL INTERFACE<br>DATA STREAM INITIALIZING</div>
   <div class="signal" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
 </div>
-<script src="loader.js?v=350"></script>
+<script src="loader.js?v=360"></script>
 <header class="topbar">
   <div class="brand">
-    <img class="logo logo-dark" src="logo-dark.png?v=350" alt="Logo">
-    <img class="logo logo-light" src="logo-light.png?v=350" alt="Logo">
+    <img class="logo logo-dark" src="logo-dark.png?v=360" alt="Logo">
+    <img class="logo logo-light" src="logo-light.png?v=360" alt="Logo">
     <span class="x-sep">×</span>
-    <img class="logo-cl lg-dark" src="logo-btn-white.png?v=350" alt="Bank BTN"><img class="logo-cl lg-light" src="logo-btn.png?v=350" alt="Bank BTN"><!-- versi: v3.5 -->
+    <img class="logo-cl lg-dark" src="logo-btn-white.png?v=360" alt="Bank BTN"><img class="logo-cl lg-light" src="logo-btn.png?v=360" alt="Bank BTN"><!-- versi: v3.6 -->
   </div>
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="dash" class="on">Dashboard</button>
     <button role="tab" data-tab="ana">Analytics</button>
+    <button role="tab" data-tab="per">Persona &amp; Emosi</button>
     <button role="tab" data-tab="raw">Raw Data</button>
     <button role="tab" data-tab="sna">SNA</button>
   </nav>
@@ -74,7 +75,7 @@
 <main class="content">
   <div class="page-head hero">
     <div class="hl-wrap a">
-      <div class="ttl"><h1 class="t-main t-logo"><img class="lg-dark" src="logo-btn-white.png?v=350" alt="Bank BTN"><img class="lg-light" src="logo-btn.png?v=350" alt="Bank BTN"></h1><span class="t-sub">Media Monitoring</span></div>
+      <div class="ttl"><h1 class="t-main t-logo"><img class="lg-dark" src="logo-btn-white.png?v=360" alt="Bank BTN"><img class="lg-light" src="logo-btn.png?v=360" alt="Bank BTN"></h1><span class="t-sub">Media Monitoring</span></div>
       <div class="hl-meta" id="periode"></div>
     </div>
     </div>
@@ -162,6 +163,21 @@
       </section>
     </div>
 
+    <div id="viewPer" hidden>
+      <div class="row first">
+        <section class="card"><div class="card-h"><h2>Komposisi Emosi</h2><span class="hint">klik untuk lihat postingan</span></div><ul class="emo-bars" id="emoBars"></ul><p class="impact" id="emoNote"></p></section>
+        <section class="card"><div class="card-h"><h2>Tren Emosi per Hari</h2><span class="hint">tanpa Netral</span></div><div class="chart h300"><canvas id="cEmoTrend"></canvas></div></section>
+      </div>
+      <section class="card mt"><div class="card-h"><h2>Emosi per Topik</h2><span class="hint">klik sel untuk lihat postingan</span></div><div class="hm-wrap"><table class="heat" id="emoHeat"></table></div></section>
+      <section class="card mt"><div class="card-h"><h2>Segmentasi Persona</h2><span class="hint" id="segHint"></span></div><div class="seg-cards" id="segCards"></div></section>
+      <section class="card mt"><div class="card-h"><h2>KOL &amp; Akun Berpengaruh</h2><span class="hint" id="kolHint"></span></div>
+        <div class="kol-wrap"><table class="raw kol"><thead><tr><th class="c">#</th><th>Akun</th><th>Tier</th><th class="r">Followers</th><th class="r">Engagement</th><th class="r">Post</th><th>Persona</th><th class="r">Skor</th></tr></thead><tbody id="kolBody"></tbody></table></div></section>
+      <div class="row">
+        <section class="card"><div class="card-h"><h2>Jenis Akun per Topik</h2></div><div class="chart h300"><canvas id="cJenis"></canvas></div></section>
+        <section class="card"><div class="card-h"><h2>Sebaran Lokasi</h2><span class="hint" id="lokHint"></span></div><ul class="lok-bars" id="lokBars"></ul></section>
+      </div>
+    </div>
+
     <div id="viewSna" hidden>
       <div class="sna-bar">
         <div class="seg mini" id="snaPf"><button data-v="Twitter" class="on">Twitter</button><button data-v="Threads">Threads</button></div>
@@ -206,6 +222,6 @@
     <footer>© 2026 Garuda Labs Intelligent Media Monitoring</footer>
   </div>
 </main>
-<script src="app.js?v=350"></script>
+<script src="app.js?v=360"></script>
 </body>
 </html>

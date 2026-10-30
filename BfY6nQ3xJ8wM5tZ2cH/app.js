@@ -89,7 +89,10 @@ function norm(r, kind) {
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
     sent: !s ? '' : resmi ? 'netral' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
     link: r['Link'] || '', jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind,
-    sub: (r['Catatan Klasifikasi'] || r['Sub Topik'] || r['Isu'] || '').trim()
+    sub: (r['Catatan Klasifikasi'] || r['Sub Topik'] || r['Isu'] || '').trim(),
+    emosi: (r['Emosi'] || '').trim(), lokasi: (r['Lokasi (estimasi)'] || r['Lokasi'] || '').trim(), tipe: (r['Tipe'] || '').trim(),
+    likes: Math.max(0, parseInt(r['Likes']) || 0), shares: Math.max(0, parseInt(r['Shares']) || 0), views: Math.max(0, parseInt(r['Views']) || 0),
+    followers: Math.max(0, parseInt(String(r['Followers / Subscriber'] || r['Followers'] || '').replace(/[^\d]/g, '')) || 0)
   };
 }
 const count = (arr, key) => { const m = {}; arr.forEach(x => { const k = typeof key == 'function' ? key(x) : x[key]; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
@@ -129,7 +132,7 @@ async function render() {
   $('loading').hidden = true; $('main').hidden = false;
   window.GarudaLoader?.complete();
   if (!$('viewSna').hidden) renderSNA();
-  state.rawD = D; state.rawUnitPost = state.src; renderRaw(true); document.querySelector('.raw-wrap').scrollTop = 0;
+  state.rawD = D; state.rawUnitPost = state.src; renderRaw(true); if (!$('viewPer').hidden) renderPersona(D); document.querySelector('.raw-wrap').scrollTop = 0;
 
   const periode = single ? tglLabel(from) : `${tglLabel(from)} – ${tglLabel(to)}`;
   const unit = { post: 'post', komentar: 'komentar', all: 'mention' }[state.src];
@@ -369,14 +372,14 @@ setInterval(() => { delete cache.post; delete cache.komentar; delete cache.all; 
 document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b = e.target.closest('button'); if (!b) return; state[g.dataset.k] = b.dataset.v; [...g.children].forEach(x => x.classList.toggle('on', x === b)); render(); });
 
 /* ---------- Tab & Raw Data ---------- */
-const raw = { q: '', sent: '', pf: '', topik: '', sub: '', user: '', from: '', sort: 'dt', dir: -1, page: 1, size: 50 };
+const raw = { q: '', sent: '', pf: '', topik: '', sub: '', user: '', emosi: '', lokasi: '', from: '', sort: 'dt', dir: -1, page: 1, size: 50 };
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
-  $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewAna').hidden = b.dataset.tab !== 'ana'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
+  $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewAna').hidden = b.dataset.tab !== 'ana'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna'; $('viewPer').hidden = b.dataset.tab !== 'per';
   document.body.dataset.tab = b.dataset.tab;
   $('fSumber').style.display = 'none'; // SNA selalu Post + Komentar
-  if (b.dataset.tab === 'sna') renderSNA();
-  if (b.dataset.tab === 'dash' || b.dataset.tab === 'ana') Object.values(charts).forEach(c => c.resize());
+  if (b.dataset.tab === 'sna') renderSNA(); if (b.dataset.tab === 'per') renderPersona(state.rawD || []);
+  if (b.dataset.tab === 'dash' || b.dataset.tab === 'ana' || b.dataset.tab === 'per') Object.values(charts).forEach(c => c.resize());
 });
 function renderRaw(reset) {
   const D = state.rawD || [];
@@ -389,7 +392,7 @@ function renderRaw(reset) {
   fillTopikIsu(D);
   const q = raw.q.toLowerCase();
   renderRawChips();
-  let rows = D.filter(r => (!raw.sent || r.sent === raw.sent) && (!raw.pf || r.platform === raw.pf) && (!raw.topik || r.topik === raw.topik) && (!raw.user || r.user === raw.user) && (!raw.sub || subOf(r) === raw.sub) &&
+  let rows = D.filter(r => (!raw.sent || r.sent === raw.sent) && (!raw.pf || r.platform === raw.pf) && (!raw.topik || r.topik === raw.topik) && (!raw.user || r.user === raw.user) && (!raw.emosi || r.emosi === raw.emosi) && (!raw.lokasi || r.lokasi === raw.lokasi) && (!raw.sub || subOf(r) === raw.sub) &&
     (!q || (r.text + ' ' + r.user + ' ' + r.topik).toLowerCase().includes(q)));
   const key = r => raw.sort === 'eng' ? r.eng : r.tgl + ' ' + (r.jamStr || '');
   rows.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : 0) * raw.dir);
@@ -688,11 +691,13 @@ function goRaw(topik, sent, sub) {
 function renderRawChips() {
   let el = $('rawChips');
   if (!el) { el = document.createElement('div'); el.id = 'rawChips'; el.className = 'raw-chips'; document.querySelector('.raw-wrap').before(el);
-    el.onclick = e => { const x = e.target.closest('[data-x]'); if (x) { raw[x.dataset.x] = ''; if (x.dataset.x === 'topik') raw.sub = ''; if (!raw.topik && !raw.user) raw.from = ''; raw.page = 1; renderRaw(); }
+    el.onclick = e => { if (e.target.closest('[data-back]')) { document.querySelector(`.tabs [data-tab=${raw.from || 'ana'}]`).click(); return; } const x = e.target.closest('[data-x]'); if (x) { raw[x.dataset.x] = ''; if (x.dataset.x === 'topik') raw.sub = ''; if (!raw.topik && !raw.user && !raw.emosi && !raw.lokasi) raw.from = ''; raw.page = 1; renderRaw(); }
       if (e.target.closest('[data-back]')) document.querySelector('.tabs [data-tab=ana]').click(); }; }
   const ch = [];
+  if (raw.emosi) ch.push(`<span class="fchip">Emosi: ${esc(raw.emosi)}<button data-x="emosi" aria-label="Hapus filter">✕</button></span>`);
+  if (raw.lokasi) ch.push(`<span class="fchip">Lokasi: ${esc(raw.lokasi)}<button data-x="lokasi" aria-label="Hapus filter">✕</button></span>`);
   if (raw.user) ch.push(`<span class="fchip">Akun: ${esc(raw.user)}<button data-x="user" aria-label="Hapus filter">✕</button></span>`);
-  el.innerHTML = (raw.from ? `<button class="btn ghost back" data-back>← Kembali ke Analytics</button>` : '') + ch.join('');
+  el.innerHTML = (raw.from ? `<button class="btn ghost back" data-back>← Kembali ke ${raw.from === 'per' ? 'Persona &amp; Emosi' : 'Analytics'}</button>` : '') + ch.join('');
   el.hidden = !ch.length && !raw.from;
 }
 document.querySelector('.cause').addEventListener('click', e => {
@@ -730,3 +735,78 @@ function goRawUser(user) {
 }
 $('topAcc').addEventListener('click', e => { const li = e.target.closest('li.clk-acc'); if (li) goRawUser(li.dataset.user); });
 $('topAcc').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li.clk-acc')) { e.preventDefault(); goRawUser(e.target.dataset.user); } });
+
+/* ================= v3.6: Persona & Emosi ================= */
+const EMO = { Senang: '#22C55E', Percaya: '#3B82F6', Netral: '#94A3B8', Terkejut: '#A855F7', Cemas: '#F59E0B', Kecewa: '#F97316', Marah: '#EF4444' };
+const EMO_ORDER = ['Senang', 'Percaya', 'Terkejut', 'Netral', 'Cemas', 'Kecewa', 'Marah'];
+const SEG = {
+  loyalis: { l: 'Loyalis', c: '#22C55E', d: 'Mayoritas tulisannya positif tentang BTN' },
+  kritik: { l: 'Pengkritik', c: '#EF4444', d: 'Mayoritas tulisannya negatif' },
+  swing: { l: 'Swing', c: '#F59E0B', d: 'Pernah positif dan negatif' },
+  pengamat: { l: 'Pengamat', c: '#94A3B8', d: 'Lebih banyak netral / informatif' }
+};
+const tierOf = f => !f ? '—' : f >= 1e6 ? 'Mega' : f >= 1e5 ? 'Makro' : f >= 1e4 ? 'Mikro' : 'Nano';
+const kfmt = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.', ',') + ' jt' : n >= 1e3 ? (n / 1e3).toFixed(1).replace('.', ',') + ' rb' : fmt(n);
+function goRawBy(f) {
+  Object.assign(raw, { topik: '', sub: '', user: '', emosi: '', lokasi: '', sent: '', q: '', pf: '', page: 1, from: 'per' }, f);
+  $('rawQ').value = '';
+  [...$('rawSent').children].forEach(x => x.classList.toggle('on', x.dataset.v === raw.sent));
+  document.querySelector('.tabs [data-tab=raw]').click();
+  renderRaw(true); document.querySelector('.raw-wrap').scrollTop = 0; window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function renderPersona(D) {
+  if (!$('viewPer')) return;
+  const hasEmo = D.some(r => r.emosi);
+  /* --- Emosi: komposisi --- */
+  const E = D.filter(r => r.emosi), eT = E.length || 1, ec = Object.fromEntries(count(E, 'emosi'));
+  const emoList = EMO_ORDER.filter(k => ec[k]);
+  $('emoBars').innerHTML = hasEmo ? emoList.map(k => `<li class="clk-f" data-f='${JSON.stringify({ emosi: k })}' title="Lihat di Raw Data"><div class="t"><span><i class="dot" style="background:${EMO[k]}"></i>${k}</span><b>${fmt(ec[k])} <small>${pct(ec[k], eT)}</small></b></div><div class="bar"><i style="width:${ec[k] / eT * 100}%;background:${EMO[k]}"></i></div></li>`).join('') : '<li class="empty">Kolom "Emosi" belum ada di sheet</li>';
+  const emoNeg = ['Marah', 'Kecewa', 'Cemas'].map(k => [k, ec[k] || 0]).sort((a, b) => b[1] - a[1]);
+  const emoTop = emoList.filter(k => k !== 'Netral').sort((a, b) => ec[b] - ec[a])[0];
+  $('emoNote').innerHTML = hasEmo ? `Emosi non-netral terbesar: <b>${emoTop || '–'}</b>. Di sisi negatif, <b>${emoNeg[0][0]}</b> paling banyak (${fmt(emoNeg[0][1])}). ${emoNeg.find(x => x[0] === 'Marah')[1] ? 'Konten bernada <b>marah</b> perlu respons cepat; <b>kecewa</b> perlu perbaikan layanan; <b>cemas</b> perlu edukasi/klarifikasi.' : ''}` : '';
+  /* --- Emosi: tren --- */
+  const days = [...new Set(E.map(r => r.tgl))].sort();
+  mk('cEmoTrend', { type: 'bar', data: { labels: days.map(tglShort), datasets: EMO_ORDER.filter(k => k !== 'Netral' && ec[k]).map(k => ({ label: k, data: days.map(d => E.filter(r => r.tgl === d && r.emosi === k).length), backgroundColor: EMO[k], borderRadius: 3, maxBarThickness: 22 })) },
+    options: baseOpts({ plugins: { ...baseOpts().plugins, legend: { display: true, position: 'bottom', labels: { color: css('--mute'), boxWidth: 10, boxHeight: 10, usePointStyle: true } } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { color: css('--mute') } }, y: { stacked: true, beginAtZero: true, grid: { color: css('--line') }, ticks: { color: css('--mute'), precision: 0 } } } }) });
+  /* --- Emosi × Topik heatmap --- */
+  const tps = count(E, 'topik').slice(0, 8).map(t => t[0]);
+  const hmEmo = emoList;
+  let mx = 1; const cell = {}; tps.forEach(t => hmEmo.forEach(k => { const v = E.filter(r => r.topik === t && r.emosi === k).length; cell[t + '|' + k] = v; if (k !== 'Netral') mx = Math.max(mx, v); }));
+  $('emoHeat').innerHTML = `<thead><tr><th>Topik</th>${hmEmo.map(k => `<th class="c"><i class="dot" style="background:${EMO[k]}"></i>${k}</th>`).join('')}</tr></thead><tbody>${tps.map(t => `<tr><td class="hm-t">${esc(t)}</td>${hmEmo.map(k => { const v = cell[t + '|' + k], a = k === 'Netral' ? Math.min(v / mx, 1) * .35 : v / mx; return `<td class="c hm${v ? ' clk-f' : ''}" ${v ? `data-f='${JSON.stringify({ topik: t, emosi: k }).replace(/'/g, '&#39;')}' title="Lihat di Raw Data"` : ''} style="background:${v ? EMO[k] + Math.round(18 + a * 200).toString(16).padStart(2, '0') : 'transparent'}">${v || '·'}</td>`; }).join('')}</tr>`).join('')}</tbody>`;
+  /* --- Persona akun (tanpa akun resmi & media) --- */
+  const A = {};
+  D.filter(r => !r.resmi && !/^media$/i.test(r.tipe)).forEach(r => {
+    const a = A[r.user] ??= { user: r.user, pf: r.platform, n: 0, pos: 0, neg: 0, net: 0, eng: 0, fol: 0, topik: {}, emo: {} };
+    a.n++; a[r.sent === 'positif' ? 'pos' : r.sent === 'negatif' ? 'neg' : 'net']++; a.eng += r.likes + r.eng * 2 + r.shares * 3; a.fol = Math.max(a.fol, r.followers);
+    a.topik[r.topik] = (a.topik[r.topik] || 0) + 1; if (r.emosi) a.emo[r.emosi] = (a.emo[r.emosi] || 0) + 1;
+  });
+  const accs = Object.values(A);
+  accs.forEach(a => { a.seg = a.pos / a.n >= .25 && a.neg / a.n >= .25 ? 'swing' : a.pos / a.n >= .5 ? 'loyalis' : a.neg / a.n >= .5 ? 'kritik' : 'pengamat'; });
+  const segC = Object.fromEntries(Object.keys(SEG).map(k => [k, accs.filter(a => a.seg === k)]));
+  const top1 = o => Object.entries(o).sort((x, y) => y[1] - x[1])[0]?.[0] || '–';
+  $('segCards').innerHTML = Object.entries(SEG).map(([k, s]) => {
+    const L = segC[k].sort((a, b) => b.n - a.n || b.eng - a.eng), tp = {}; L.forEach(a => Object.entries(a.topik).forEach(([t, v]) => tp[t] = (tp[t] || 0) + v));
+    const tt = Object.entries(tp).sort((a, b) => b[1] - a[1]).slice(0, 2).map(t => esc(t[0]));
+    return `<div class="seg-card" style="--c:${s.c}"><div class="sc-h"><b>${s.l}</b><span>${fmt(L.length)} akun · ${pct(L.length, accs.length)}</span></div><small class="sc-d">${s.d}</small>
+      <div class="sc-k">Minat utama</div><div class="sc-v">${tt.join(', ') || '–'}</div>
+      <div class="sc-k">Akun teratas</div><ul class="sc-acc">${L.slice(0, 3).map(a => `<li class="clk-f" data-f='${JSON.stringify({ user: a.user }).replace(/'/g, '&#39;')}' title="Lihat di Raw Data"><span>${esc(a.user)}</span><b>${a.n}</b></li>`).join('') || '<li class="empty">–</li>'}</ul></div>`;
+  }).join('');
+  $('segHint').textContent = `${fmt(accs.length)} akun publik (di luar akun resmi & media)`;
+  /* --- KOL --- */
+  const mxF = Math.max(1, ...accs.map(a => a.fol)), mxE = Math.max(1, ...accs.map(a => a.eng)), mxN = Math.max(1, ...accs.map(a => a.n));
+  accs.forEach(a => a.score = Math.round(100 * (.4 * Math.log10(a.fol + 1) / Math.log10(mxF + 1) + .4 * Math.log10(a.eng + 1) / Math.log10(mxE + 1) + .2 * a.n / mxN)));
+  const kol = [...accs].sort((a, b) => b.score - a.score).slice(0, 10);
+  const folCov = accs.filter(a => a.fol).length;
+  $('kolHint').textContent = `skor = 40% followers · 40% engagement · 20% jumlah post${folCov < accs.length * .5 ? ` · followers hanya tersedia untuk ${pct(folCov, accs.length)} akun` : ''}`;
+  $('kolBody').innerHTML = kol.map((a, i) => `<tr class="clk-f" data-f='${JSON.stringify({ user: a.user }).replace(/'/g, '&#39;')}' title="Lihat di Raw Data"><td class="c">${i + 1}</td><td><b>${esc(a.user)}</b><br><span class="chip sm"><i style="background:${pColor(a.pf)}"></i>${esc(a.pf)}</span></td><td><span class="tier t-${tierOf(a.fol)}">${tierOf(a.fol)}</span></td><td class="r">${a.fol ? kfmt(a.fol) : '–'}</td><td class="r">${kfmt(a.eng)}</td><td class="r">${a.n}</td><td><span class="dotseg" style="background:${SEG[a.seg].c}"></span>${SEG[a.seg].l}</td><td class="r"><b>${a.score}</b></td></tr>`).join('') || '<tr><td colspan="8" class="empty">Belum ada data</td></tr>';
+  /* --- Jenis akun × topik --- */
+  const jen = count(D, r => r.tipe || 'Lainnya').map(x => x[0]), tps2 = count(D, 'topik').slice(0, 7).map(t => t[0]);
+  const JC = { 'Publik': '#3B82F6', 'Media': '#F59E0B', 'Resmi BTN': '#14B8A6', 'Lainnya': '#94A3B8' };
+  mk('cJenis', { type: 'bar', data: { labels: tps2.map(t => t.length > 26 ? t.slice(0, 25) + '…' : t), datasets: jen.map((j, i) => ({ label: j, data: tps2.map(t => D.filter(r => r.topik === t && (r.tipe || 'Lainnya') === j).length), backgroundColor: JC[j] || PLATFORM_COLOR.threads, borderRadius: 3, barThickness: 14 })) },
+    options: baseOpts({ indexAxis: 'y', plugins: { ...baseOpts().plugins, legend: { display: true, position: 'bottom', labels: { color: css('--mute'), boxWidth: 10, boxHeight: 10, usePointStyle: true } } }, scales: { x: { stacked: true, grid: { color: css('--line') }, ticks: { color: css('--mute'), precision: 0 } }, y: { stacked: true, grid: { display: false }, ticks: { color: css('--ink') } } } }) });
+  /* --- Lokasi --- */
+  const L = D.filter(r => r.lokasi && !/tidak diketahui/i.test(r.lokasi)), lc = count(L, 'lokasi').slice(0, 10), lmx = lc[0]?.[1] || 1;
+  $('lokHint').textContent = D.some(r => r.lokasi) ? `estimasi · lokasi terdeteksi di ${pct(L.length, D.length)} konten` : 'kolom "Lokasi (estimasi)" belum ada di sheet';
+  $('lokBars').innerHTML = lc.map(([k, v], i) => `<li class="clk-f" data-f='${JSON.stringify({ lokasi: k })}' title="Lihat di Raw Data"><span class="num">${i + 1}</span><div class="cb"><div class="t"><span>${esc(k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${v / lmx * 100}%;background:#3B82F6"></i></div></div></li>`).join('') || '<li class="empty">Belum ada data lokasi</li>';
+}
+$('viewPer')?.addEventListener('click', e => { const el = e.target.closest('.clk-f[data-f]'); if (el) goRawBy(JSON.parse(el.dataset.f)); });
