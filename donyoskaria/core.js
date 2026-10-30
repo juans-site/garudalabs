@@ -172,6 +172,8 @@
 .g-stage{background:#01040A!important;height:clamp(500px,46vw,680px)!important}
 .g-earth{position:relative;width:100%;aspect-ratio:1672/1051}
 .g-earth img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;object-fit:cover;object-position:70% 30%}
+.g-photo img{-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.35) 10%,#000 30%,#000 82%,rgba(0,0,0,.4) 93%,transparent 100%),linear-gradient(180deg,transparent 0%,rgba(0,0,0,.45) 9%,#000 24%,#000 78%,rgba(0,0,0,.4) 91%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.35) 10%,#000 30%,#000 82%,rgba(0,0,0,.4) 93%,transparent 100%),linear-gradient(180deg,transparent 0%,rgba(0,0,0,.45) 9%,#000 24%,#000 78%,rgba(0,0,0,.4) 91%,transparent 100%);mask-composite:intersect}
+[data-theme=light] .g-kpi,[data-theme=light] .g-insight{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.72))!important;border-color:rgba(4,7,10,.08)!important;box-shadow:0 8px 24px rgba(15,30,45,.08)}
 .g-photo .ph-l{display:none}[data-theme=light] .g-photo .ph-l{display:block}[data-theme=light] .g-photo .ph-d{display:none}
 .g-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(1,4,10,.55),transparent 28%),linear-gradient(0deg,rgba(1,4,10,.7),transparent 22%)}
 .g-int,.g-ctrl{z-index:2}
@@ -228,7 +230,7 @@
 .g-earth img{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 3%,#000 84%,transparent 100%),linear-gradient(90deg,transparent 0,#000 12%,#000 92%,transparent 100%);-webkit-mask-composite:source-in;
   mask-image:linear-gradient(180deg,transparent 0,#000 3%,#000 84%,transparent 100%),linear-gradient(90deg,transparent 0,#000 12%,#000 92%,transparent 100%);mask-composite:intersect}
 .g-hero{position:relative;z-index:3}
-@media(min-width:1101px){.g-hero{grid-template-columns:1fr!important;max-width:560px;align-items:start}.g-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.g-int{top:calc(var(--heroH,0px) + 16px)!important}.g-stage{transition:none}}
+@media(min-width:1101px){.g-hero{grid-template-columns:1fr!important;max-width:560px;align-items:start}.g-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.g-int{top:calc(var(--heroH,0px) + 16px)!important;left:0!important}.g-stage{transition:none}}
 .g-stage{z-index:1}
 }
 .g-kpi{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.01) 45%),rgba(8,13,18,.5)!important;

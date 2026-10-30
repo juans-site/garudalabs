@@ -664,3 +664,5 @@ $('snaQ').onchange = e => { const id = e.target.value.trim().toLowerCase(); if (
 let snaRT; addEventListener('resize', () => { clearTimeout(snaRT); snaRT = setTimeout(() => { if (!$('viewSna').hidden) sna.fitAll?.(); }, 200); });
 
 document.addEventListener('click', e => { const b = e.target.closest('[data-kw]'); if (b) setKw(b.dataset.kw); });
+
+$('thBtn').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; try { localStorage.setItem('gl-theme', t); } catch (e) {} render(); };
