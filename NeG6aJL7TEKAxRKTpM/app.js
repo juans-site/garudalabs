@@ -1,6 +1,7 @@
 /* ===== PENGATURAN ===== */
 const SHEET_ID = "12BRmeOf5no04WlzBuokYGDkqMUivziw3dCLE6lcSz8M";
 const TABS = { post: "Post", komentar: "Komentar" };
+const TAB_ISU = "Deskripsi Isu"; // tab opsional: kolom Topik, Isu, Deskripsi
 const RISK = { tinggi: 35, sedang: 20 };          // ambang % negatif
 const REFRESH_MENIT = 5;
 // Akun resmi Mandiri: sentimennya selalu dihitung Netral.
@@ -72,6 +73,7 @@ function norm(r, kind) {
     platform: (r['Platform'] || 'Lainnya').trim(), user: r['Username'] || '', tgl, jam,
     text: r['Caption'] || r['Text Komentar'] || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || 'Lainnya').trim(),
+    isu: (r['Isu'] || r['Sub Topik'] || r['Sub-topik'] || '').trim(),
     sent: !s ? '' : resmi ? 'netral' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
     link: r['Link'] || '', jamStr, media: /^media$/i.test((r['Tipe'] || '').trim()) && !HOMELESS_MEDIA.includes(user.toLowerCase()), eng: parseInt(r['Jumlah Komentar'] || r['Jumlah Likes'] || 0) || 0, kind
   };
@@ -205,7 +207,7 @@ async function render() {
     options: baseOpts({ indexAxis: 'y', plugins: { ...baseOpts().plugins, legend: { display: false }, tooltip: { ...baseOpts().plugins.tooltip, callbacks: { label: c => ` ${fmt(c.raw)} mention (${pct(c.raw, S.T)})` } } },
       layout: { padding: { right: 56 } }, scales: { x: { display: false, beginAtZero: true }, y: { grid: { display: false }, ticks: { color: css('--ink'), font: { weight: 600 } }, border: { display: false } } } }) });
   $('sovNote').textContent = kanal[0] ? `${kanal[0][0]} dominan (${pct(kanal[0][1], S.T)})` : '';
-  co('coKanal', 'Kanal Dominan', kanal[0] ? esc(kanal[0][0]) : '–', kanal[0] ? `${pct(kanal[0][1], S.T)} dari total ${unit}` : '');
+  co('coKanal', 'Platform Dominan', kanal[0] ? esc(kanal[0][0]) : '–', kanal[0] ? `${pct(kanal[0][1], S.T)} dari total ${unit}` : '');
 
   /* Sentimen per kanal: grouped bar */
   const pf = kanal.map(k => k[0]);
@@ -218,12 +220,13 @@ async function render() {
   $('negNote').textContent = negK[0] ? `${negK[0][0]}: ${pct(negK[0][1], N.length)} dari negatif` : '';
 
   /* Penyebab */
-  const bars = (arr, c) => { const mx = arr[0]?.[1] || 1; return arr.slice(0, 6).map(([k, v], x) => `<li><span class="num">${x + 1}</span><div class="cb"><div class="t"><span>${esc(k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${v / mx * 100}%;background:${c}"></i></div></div></li>`).join('') || '<li>–</li>'; };
+  const bars = (arr, c) => { const mx = arr[0]?.[1] || 1; return arr.slice(0, 6).map(([k, v], x) => `<li class="tp" data-topik="${esc(k)}" tabindex="0" role="button"><span class="num">${x + 1}</span><div class="cb"><div class="t"><span>${esc(k)}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${v / mx * 100}%;background:${c}"></i></div></div></li>`).join('') || '<li>–</li>'; };
   const negTop = count(N, 'topik');
   $('periode').insertAdjacentHTML('beforeend', `<span class="chip-m lv-${lvl.toLowerCase()}"><i class="lv-dot"></i>Risiko ${lvl[0] + lvl.slice(1).toLowerCase()}</span><span class="chip-m">NSI ${S.nsi > 0 ? '+' : ''}${S.nsi}</span>`);
   $('causePos').innerHTML = bars(count(P, 'topik'), SENT.positif);
   $('causeNeg').innerHTML = bars(negTop, SENT.negatif);
-  $('causeHint').textContent = periode;
+  $('causeHint').textContent = periode + ' · klik topik untuk detail isu';
+  state.anaD = D; if (state.openTopik) showIsu(state.openTopik);
 
   /* Postingan negatif */
   const NN = N.filter(r => !/^news/i.test(r.platform));
@@ -272,12 +275,12 @@ async function render() {
   $('impact').textContent = negTop.length ? `${t3} dari ${N.length} mention negatif (${pct(t3, N.length)}) berasal dari 3 topik teratas. Dampak: reputasi, kepercayaan nasabah, dan sentimen investor.` : '';
 
   /* Rekomendasi (template otomatis) */
-  const negPf = negK[0]?.[0] || 'kanal utama';
+  const negPf = negK[0]?.[0] || 'platform utama';
   // Rekomendasi taktis untuk tim PR / campaign (3–5 poin, dari data)
   const posTopR = count(P, 'topik')[0]?.[0];
   const reco = [
-    negTop[0] && ['Klarifikasi isu utama', `Rilis holding statement singkat untuk isu "${negTop[0][0]}" (${fmt(negTop[0][1])} mention negatif), lalu pin di kanal resmi.`],
-    negPf && ['Fokus kanal', `Prioritaskan respons di ${negPf}, kanal dengan keluhan terbanyak; targetkan balasan < 1 jam pada jam sibuk.`],
+    negTop[0] && ['Klarifikasi isu utama', `Rilis holding statement singkat untuk isu "${negTop[0][0]}" (${fmt(negTop[0][1])} mention negatif), lalu pin di akun resmi.`],
+    negPf && ['Fokus platform', `Prioritaskan respons di ${negPf}, platform dengan keluhan terbanyak; targetkan balasan < 1 jam pada jam sibuk.`],
     negTop[1] && ['Siapkan jawaban baku', `Buat FAQ & template balasan untuk "${negTop[1][0]}" agar respons admin konsisten.`],
     posTopR && ['Dorong narasi positif', `Perbanyak konten tentang "${posTopR}" dan ajak akun pendukung ikut menyebarkannya.`],
     ['Pantau & laporkan', `Level risiko ${lvl.toLowerCase()} (NSI ${S.nsi > 0 ? '+' : ''}${S.nsi}). Laporkan perkembangan harian ke manajemen.`]
@@ -292,7 +295,7 @@ async function render() {
     ['Net Sentiment Index', `${S.nsi > 0 ? '+' : ''}${S.nsi}`],
     negTop[0] && ['Isu negatif utama', esc(negTop.slice(0, 2).map(x => `${x[0]} (${fmt(x[1])})`).join('; '))],
     posTop[0] && ['Isu positif utama', esc(posTop.slice(0, 2).map(x => `${x[0]} (${fmt(x[1])})`).join('; '))],
-    kanal[0] && ['Kanal dominan', `${esc(kanal[0][0])} (${pct(kanal[0][1], S.T)})${negK[0] ? `; negatif terbanyak di ${esc(negK[0][0])}` : ''}`],
+    kanal[0] && ['Platform dominan', `${esc(kanal[0][0])} (${pct(kanal[0][1], S.T)})${negK[0] ? `; negatif terbanyak di ${esc(negK[0][0])}` : ''}`],
     ['Level risiko', `<b style="color:${lvlColor}">${lvl}</b>`]
   ].filter(Boolean);
   $('summaryText').innerHTML = pts.map(([k, v]) => `<li><span class="sk">${k}</span><span class="sv">${v}</span></li>`).join('');
@@ -352,7 +355,7 @@ setInterval(() => { delete cache.post; delete cache.komentar; delete cache.all; 
 document.querySelectorAll('.seg.mini').forEach(g => g.onclick = e => { const b = e.target.closest('button'); if (!b) return; state[g.dataset.k] = b.dataset.v; [...g.children].forEach(x => x.classList.toggle('on', x === b)); render(); });
 
 /* ---------- Tab & Raw Data ---------- */
-const raw = { q: '', sent: '', pf: '', sort: 'dt', dir: -1, page: 1, size: 50 };
+const raw = { q: '', sent: '', pf: '', topik: '', isu: '', sort: 'dt', dir: -1, page: 1, size: 50 };
 document.querySelectorAll('.tabs [role=tab]').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tabs [role=tab]').forEach(x => x.classList.toggle('on', x === b));
   $('viewDash').hidden = b.dataset.tab !== 'dash'; $('viewAna').hidden = b.dataset.tab !== 'ana'; $('viewRaw').hidden = b.dataset.tab !== 'raw'; $('viewSna').hidden = b.dataset.tab !== 'sna';
@@ -368,10 +371,15 @@ function renderRaw(reset) {
     const pfs = [...new Set(D.map(r => r.platform))].sort();
     if (raw.pf && !pfs.includes(raw.pf)) raw.pf = '';
     $('rawPf').innerHTML = '<option value="">Semua platform</option>' + pfs.map(p => `<option ${p === raw.pf ? 'selected' : ''}>${esc(p)}</option>`).join('');
+    const tps = count(D, 'topik').map(x => x[0]);
+    if (raw.topik && !tps.includes(raw.topik)) { raw.topik = ''; raw.isu = ''; }
+    $('rawTopik').innerHTML = '<option value="">Semua topik</option>' + tps.map(t => `<option ${t === raw.topik ? 'selected' : ''} value="${esc(t)}">${esc(t)}</option>`).join('');
+    fillIsuSelect(D);
   }
   const q = raw.q.toLowerCase();
   let rows = D.filter(r => (!raw.sent || r.sent === raw.sent) && (!raw.pf || r.platform === raw.pf) &&
-    (!q || (r.text + ' ' + r.user + ' ' + r.topik).toLowerCase().includes(q)));
+    (!raw.topik || r.topik === raw.topik) && (!raw.isu || r.isu === raw.isu) &&
+    (!q || (r.text + ' ' + r.user + ' ' + r.topik + ' ' + r.isu).toLowerCase().includes(q)));
   const key = r => raw.sort === 'eng' ? r.eng : r.tgl + ' ' + (r.jamStr || '');
   rows.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : 0) * raw.dir);
   raw.rows = rows;
@@ -626,7 +634,7 @@ $('rawXlsx').onclick = async () => {
     await loadXLSX();
     const cut = s => { s = String(s ?? ''); return s.length > 32000 ? s.slice(0, 32000) + '…' : s; }; // batas 1 sel Excel: 32.767 karakter
     const data = rows.map(r => ({ 'Tanggal': r.tgl, 'Jam': r.jamStr || '', 'Platform': r.platform, 'Akun': r.user, 'Jenis': r.kind === 'post' ? 'Post' : 'Komentar',
-      'Caption': cut(r.text), 'Topik': cut(r.topik), 'Sentimen': r.sent[0].toUpperCase() + r.sent.slice(1), 'Akun resmi': r.resmi ? 'Ya' : '',
+      'Caption': cut(r.text), 'Topik': cut(r.topik), 'Isu': cut(r.isu), 'Sentimen': r.sent[0].toUpperCase() + r.sent.slice(1), 'Akun resmi': r.resmi ? 'Ya' : '',
       'Jumlah komentar/likes': r.eng, 'Link': cut(r.link) }));
     const ws = XLSX.utils.json_to_sheet(data);
     ws['!cols'] = [12, 7, 11, 22, 10, 70, 30, 10, 10, 12, 50].map(w => ({ wch: w }));
@@ -636,3 +644,54 @@ $('rawXlsx').onclick = async () => {
   btn.disabled = false; btn.innerHTML = old;
   } catch (e) { console.error(e); btn.disabled = false; btn.textContent = 'Gagal, coba lagi'; setTimeout(() => btn.innerHTML = old, 4000); }
 };
+
+/* ---------- Isu per topik ---------- */
+let isuDesc = null; // { "topik||isu": deskripsi }
+async function loadIsuDesc() {
+  if (isuDesc) return isuDesc;
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(TAB_ISU)}&_=${Date.now()}`;
+    const txt = await fetch(url).then(r => r.ok ? r.text() : '');
+    const rows = txt ? Papa.parse(txt, { header: true, skipEmptyLines: true }).data : [];
+    isuDesc = {};
+    rows.forEach(r => { const t = (r['Topik'] || '').trim(), i = (r['Isu'] || '').trim(), d = (r['Deskripsi'] || '').trim(); if (i && d) isuDesc[t.toLowerCase() + '||' + i.toLowerCase()] = d; });
+  } catch (e) { isuDesc = {}; }
+  return isuDesc;
+}
+async function showIsu(topik) {
+  const P = $('isuPanel'), D = (state.anaD || []).filter(r => r.topik === topik);
+  state.openTopik = topik;
+  document.querySelectorAll('.cause .tp').forEach(li => li.classList.toggle('on', li.dataset.topik === topik));
+  if (!D.length) { P.hidden = true; state.openTopik = null; return; }
+  const desc = await loadIsuDesc();
+  const isus = count(D.filter(r => r.isu), 'isu');
+  const S = stats(D);
+  const head = `<div class="isu-h"><div><small>Detail topik</small><h3>${esc(topik)}</h3>
+    <span class="isu-m">${fmt(S.T)} ${state.src === 'all' ? 'mention' : state.src} · <i style="color:${SENT.negatif}">${pct(S.n, S.T)} negatif</i> · <i style="color:${SENT.positif}">${pct(S.p, S.T)} positif</i></span></div>
+    <button class="x" id="isuClose" aria-label="Tutup">×</button></div>`;
+  let body;
+  if (!isus.length) {
+    body = `<p class="isu-empty">Belum ada data isu untuk topik ini. Tambahkan kolom <b>Isu</b> di tab Post/Komentar pada Google Sheets, dan (opsional) tab <b>${TAB_ISU}</b> berisi kolom <b>Topik, Isu, Deskripsi</b> untuk penjelasannya.</p>`;
+  } else {
+    const mx = isus[0][1];
+    body = `<ol class="isu-list">${isus.slice(0, 8).map(([i, v], x) => {
+      const d = desc[topik.toLowerCase() + '||' + i.toLowerCase()];
+      return `<li><span class="num">${x + 1}</span><div class="cb"><div class="t"><b>${esc(i)}</b><span>${fmt(v)} · ${pct(v, D.length)}</span></div>
+        <div class="bar"><i style="width:${v / mx * 100}%;background:var(--gold)"></i></div>
+        <p>${d ? esc(d) : '<span class="muted">Belum ada deskripsi untuk isu ini.</span>'}</p></div></li>`;
+    }).join('')}</ol>`;
+  }
+  P.innerHTML = head + body; P.hidden = false;
+  $('isuClose').onclick = () => { P.hidden = true; state.openTopik = null; document.querySelectorAll('.cause .tp').forEach(li => li.classList.remove('on')); };
+}
+document.querySelector('.cause').addEventListener('click', e => { const li = e.target.closest('.tp'); if (!li) return; if (state.openTopik === li.dataset.topik) { $('isuClose')?.click(); return; } showIsu(li.dataset.topik).then(() => $('isuPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' })); });
+document.querySelector('.cause').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('.tp')) e.target.click(); });
+
+function fillIsuSelect(D) {
+  const isus = raw.topik ? count(D.filter(r => r.topik === raw.topik && r.isu), 'isu').map(x => x[0]) : [];
+  if (raw.isu && !isus.includes(raw.isu)) raw.isu = '';
+  $('rawIsu').hidden = !isus.length;
+  $('rawIsu').innerHTML = '<option value="">Semua isu</option>' + isus.map(i => `<option ${i === raw.isu ? 'selected' : ''} value="${esc(i)}">${esc(i)}</option>`).join('');
+}
+$('rawTopik').onchange = e => { raw.topik = e.target.value; raw.isu = ''; raw.page = 1; fillIsuSelect(state.rawD || []); renderRaw(); };
+$('rawIsu').onchange = e => { raw.isu = e.target.value; raw.page = 1; renderRaw(); };

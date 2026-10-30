@@ -748,3 +748,31 @@ body:before{background-position:center bottom!important;background-size:cover!im
 /* blur bertingkat (navbar + dropdown) membuat dropdown tembus di Chrome: pakai latar solid */
 .dr-pop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#14161b!important}
 [data-theme=light] .dr-pop{background:#ffffff!important}
+
+/* v0.58: logo klien, header tengah, detail isu */
+.hl-wrap.a{flex-direction:column;align-items:center;text-align:center;gap:14px}
+.hl-meta{justify-content:center}
+.ttl{flex-direction:column;align-items:center;gap:8px}
+.hero h1.t-main{line-height:0}
+.cl-logo{height:46px;width:auto;display:block}
+[data-theme=dark] .cl-light,[data-theme=light] .cl-dark{display:none}
+.t-sub{border-left:0;padding-left:0}
+@media(max-width:640px){.cl-logo{height:34px}}
+.cause .tp{cursor:pointer;border-radius:10px;padding:6px;margin:-6px -6px 6px;transition:.15s}
+.cause .tp:hover{background:var(--hover)}
+.cause .tp.on{background:var(--active);outline:1px solid color-mix(in srgb,var(--gold) 55%,transparent)}
+.isu-panel{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.isu-h{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+.isu-h small{color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+.isu-h h3{margin:2px 0 4px;font-size:17px;text-transform:none;letter-spacing:0;color:var(--ink)}
+.isu-m{font-size:12.5px;color:var(--mute)}.isu-m i{font-style:normal;font-weight:600}
+.isu-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.isu-list li{display:flex;gap:12px}
+.isu-list .t{display:flex;justify-content:space-between;gap:10px;font-size:13.5px}
+.isu-list .t span{color:var(--mute);font-size:12px;white-space:nowrap}
+.isu-list .bar{height:5px;border-radius:4px;background:var(--card2);margin:6px 0;overflow:hidden}.isu-list .bar i{display:block;height:100%}
+.isu-list p{margin:0;font-size:13px;line-height:1.55;color:var(--mute)}
+.isu-list .muted{opacity:.7;font-style:italic}
+.isu-empty{font-size:13px;color:var(--mute);line-height:1.6;margin:0}
+.raw-bar select{max-width:240px}
+.hero{justify-content:center!important}.hero>.hl-wrap.a{width:100%;max-width:none!important}
