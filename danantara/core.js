@@ -198,6 +198,7 @@
 .g-emorow .g-rank{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin:0}
 .g-emorow .g-btn{width:auto!important;margin:0!important;white-space:nowrap}
 @media(max-width:1100px){.g-emorow .g-int{grid-template-columns:1fr}.g-emorow .g-rank{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.g-vol-ht{grid-template-columns:minmax(0,1fr) auto!important}.g-htw{position:relative;height:140px;min-width:0}
 .g-photo .ph-l{display:none}[data-theme=light] .g-photo .ph-l{display:block}[data-theme=light] .g-photo .ph-d{display:none}
 .g-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(1,4,10,.55),transparent 28%),linear-gradient(0deg,rgba(1,4,10,.7),transparent 22%)}
 .g-int,.g-ctrl{z-index:2}

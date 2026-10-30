@@ -46,7 +46,7 @@
         </div>
       </div>
       <div class="g-grid3">
-        <div class="g-card"><div class="g-h"><h3>Tren Percakapan & Sentimen</h3><span class="g-tag">Harian</span></div><div class="g-cv"><canvas id="gcTrend"></canvas></div></div>
+        <div class="g-card"><div class="g-h"><h3>Tren Percakapan</h3><span class="g-tag">Harian</span></div><div class="g-cv"><canvas id="gcTrend"></canvas></div></div>
         <div class="g-card"><div class="g-h"><h3>Distribusi Sentimen</h3><span class="g-tag">Δ periode sebelumnya</span></div>
           <div class="g-donut"><div style="position:relative;height:150px"><canvas id="gcDonut"></canvas></div>
             <div class="g-legend"><div><span class="g-dot" style="background:${RED}"></span>Negatif <b>${pc(S.n, S.t)} ${dChip(negD, true)}</b></div><div><span class="g-dot" style="background:${GREY}"></span>Netral <b>${pc(S.z, S.t)} ${dChip(netD, false)}</b></div><div><span class="g-dot" style="background:${TEAL}"></span>Positif <b>${pc(S.p, S.t)} ${dChip(posD, false)}</b></div></div></div>
@@ -111,9 +111,7 @@
       scales: { x: { grid: { display: false }, ticks: { color: tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }, border: { color: grid } }, y: { beginAtZero: true, grid: { color: grid }, ticks: { color: tick }, border: { display: false } } } };
     const area = (label, data, c) => ({ type: 'line', label, data, borderColor: c, borderWidth: 2, tension: .35, pointRadius: 0, pointHoverRadius: 4, fill: true,
       backgroundColor: ctx => { const a = ctx.chart.chartArea; if (!a) return c + '22'; const g = ctx.chart.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, c + '55'); g.addColorStop(1, c + '00'); return g; } });
-    charts2.t = new Chart(document.getElementById('gcTrend'), { data: { labels, datasets: [
-      { type: 'bar', label: 'Total', data: perDay.map(x => x.t), backgroundColor: perDay.map(x => heat(x.t / Math.max(...perDay.map(y => y.t))) + '66'), borderRadius: 3, barPercentage: .7, order: 3 },
-      { ...area('Negatif', perDay.map(x => x.n), RED), order: 1 }, { ...area('Netral', perDay.map(x => x.z), GREY), order: 2 }, { ...area('Positif', perDay.map(x => x.p), TEAL), order: 2 }] }, options: base });
+    charts2.t = window.G.hiTrend(document.getElementById('gcTrend'), perDay);
     charts2.d = new Chart(document.getElementById('gcDonut'), { type: 'doughnut', data: { labels: ['Negatif', 'Netral', 'Positif'], datasets: [{ data: [S.n, S.z, S.p], backgroundColor: [RED, GREY, TEAL], borderWidth: 0, spacing: 3, borderRadius: 6 }] },
       options: { maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false }, tooltip: base.plugins.tooltip } } });
     const tCol = [ORANGE, RED, AMBER, TEAL, '#7FB8FF'];

@@ -105,9 +105,9 @@
         <div class="g-card"><div class="g-h"><h3>Volume Percakapan</h3><span class="g-tag">Harian</span></div>
           <div class="g-vol"><div>${barsSvg(perDay.map(x => x.t), 300, 120, (t) => heat(t))}</div>
           <div><span class="big">${f(lastD.t)}</span><small>postingan hari terakhir</small><div style="margin-top:8px">${dChip(chg, true)}</div><small>vs rata-rata 7 hari</small></div></div></div>
-        <div class="g-card"><div class="g-h"><h3>Tren Sentimen</h3><span class="g-tag">7 hari terakhir</span></div>
-          <div class="g-vol"><div>${linesSvg([{ id: 'n', c: RED, fill: 1, v: last7d.map(x => x.n) }, { id: 'p', c: TEAL, v: last7d.map(x => x.p) }, { id: 'z', c: GREY, v: last7d.map(x => x.z) }], 300, 120)}</div>
-          <div class="g-legend"><div><span class="g-dot" style="background:${RED}"></span>Negatif<b>${pc(Ls.n, Ls.t)}</b></div><div><span class="g-dot" style="background:${GREY}"></span>Netral<b>${pc(Ls.z, Ls.t)}</b></div><div><span class="g-dot" style="background:${TEAL}"></span>Positif<b>${pc(Ls.p, Ls.t)}</b></div></div></div></div>
+        <div class="g-card"><div class="g-h"><h3>Tren Percakapan</h3><span class="g-tag">7 hari terakhir</span></div>
+          <div class="g-vol g-vol-ht"><div class="g-htw"><canvas id="gcTrendOps"></canvas></div>
+          <div class="g-legend"><div><span class="g-dot" style="background:#2F8CFF"></span>Total<b>${f(Ls.t)}</b></div><div><span class="g-dot" style="background:${RED}"></span>Negatif<b>${pc(Ls.n, Ls.t)}</b></div><div><span class="g-dot" style="background:${GREY}"></span>Netral<b>${pc(Ls.z, Ls.t)}</b></div><div><span class="g-dot" style="background:#22C55E"></span>Positif<b>${pc(Ls.p, Ls.t)}</b></div></div></div></div>
         <div class="g-card"><div class="g-h"><h3>Top Isu Terkini</h3><span class="g-tag">Semua sumber</span></div>
           <ol class="g-list">${topics.slice(0, 5).map(([kk, v], i) => `<li><span class="n">${i + 1}</span><span class="t" title="${esc(kk)}">${esc(kk)}</span><span class="bar"><i style="width:${v / topics[0][1] * 100}%;background:${i < 1 ? RED : i < 3 ? ORANGE : AMBER}"></i></span><span class="p">${pc(v, S.t, 0)}</span></li>`).join('')}</ol></div>
         <div class="g-card"><div class="g-h"><h3>Sumber Percakapan</h3><span class="g-tag">Semua</span></div>
@@ -126,6 +126,7 @@
     // peta foto bumi + pin data
     const GEO = window.PETA_GEO, IW = 1672, IH = 1051, mx = Math.max(1, ...prv.map(x => x[1]));
     const PIN = Object.fromEntries((GEO?.prov || []).map(p => [p.n, p.c]));
+    window.G.hiTrend?.(document.getElementById('gcTrendOps'), last7d, { legend: false, ticks: 7 });
     const earth = root.querySelector('.g-earth'), stage = root.querySelector('.g-stage');
     { const it = root.querySelector('.g-int'); if (it) { const er = document.createElement('div'); er.className = 'g-emorow'; er.append(it); stage.after(er); } }
     const fit = () => { const hero = root.querySelector('.g-hero'), hh = innerWidth >= 1101 && hero ? hero.offsetHeight + 18 : 0;
