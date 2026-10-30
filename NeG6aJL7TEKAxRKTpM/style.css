@@ -776,3 +776,21 @@ body:before{background-position:center bottom!important;background-size:cover!im
 .isu-empty{font-size:13px;color:var(--mute);line-height:1.6;margin:0}
 .raw-bar select{max-width:240px}
 .hero{justify-content:center!important}.hero>.hl-wrap.a{width:100%;max-width:none!important}
+
+/* v0.59: logo klien di navbar, chip status di atas panggung */
+.brand{gap:12px}
+.x-sep{color:var(--mute);font-size:18px;font-weight:300;line-height:1}
+.cl-nav{display:flex;align-items:center}
+.cl-nav .cl-logo{height:26px;width:auto}
+.hero{padding:6px 0 18px!important}
+.hl-wrap.a{gap:0}
+@media(max-width:1200px){.cl-nav .cl-logo{height:22px}}
+@media(max-width:640px){.x-sep{font-size:14px}.cl-nav .cl-logo{height:18px}.brand{gap:6px}}
+@media(max-width:420px){
+  .x-sep{display:none}.cl-nav{padding-left:8px;border-left:1px solid var(--glass-line)}
+  .cl-nav .cl-logo{height:15px}.logo{height:22px!important}.brand{gap:7px}
+  .beta-ver{padding:2px 6px;gap:4px;font-size:9px;letter-spacing:.04em}
+  .icon-btn,.icon-btn.logout{width:34px!important;height:34px!important}.topbar .dr-btn{height:34px!important;padding:0 6px!important}
+  .topbar{column-gap:5px!important;padding:10px 10px!important}
+}
+@media(max-width:420px){.dr-btn .caret{display:none}.content{overflow-x:clip}}
