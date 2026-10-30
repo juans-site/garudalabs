@@ -199,14 +199,14 @@
 .g-emorow .g-btn{width:auto!important;margin:0!important;white-space:nowrap}
 @media(max-width:1100px){.g-emorow .g-int{grid-template-columns:1fr}.g-emorow .g-rank{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .g-vol-ht{grid-template-columns:minmax(0,1fr) auto!important}.g-htw{position:relative;height:140px;min-width:0}
-@media(min-width:1101px){#viewAnalitik .g-hero{grid-template-columns:minmax(0,560px) minmax(0,1fr)!important;max-width:none!important;align-items:end}#viewAnalitik .g-hero>div:first-child{grid-column:1/-1}}
+@media(min-width:1101px){#viewAnalitik .g-hero{grid-template-columns:minmax(0,560px) minmax(0,1fr)!important;max-width:none!important;align-items:stretch}#viewAnalitik .g-hero .g-kpis{align-content:stretch;grid-auto-rows:1fr}#viewAnalitik .g-emo-an{margin:0;display:flex;flex-direction:column;justify-content:space-between}#viewAnalitik .g-hero>div:first-child{grid-column:1/-1}}
 .g-emo-an .g-rank{display:grid;grid-template-columns:1fr 1fr;column-gap:22px;row-gap:8px;margin:10px 0 0}
 #viewAnalitik canvas,#viewAnalitik .g-vol svg,#viewAnalitik .g-list .bar i,#viewAnalitik .g-rank .bar i{filter:drop-shadow(0 0 6px rgba(80,170,255,.28))}
 #viewAnalitik .g-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 0 1px rgba(80,170,255,.06),0 10px 30px rgba(0,0,0,.25)}
 .g-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}@media(max-width:900px){.g-grid2{grid-template-columns:1fr}}
 /* Bar bercahaya: kilau + pendar, serasi dengan grafik garis */
 .g-rank .bar,.g-list .bar,.g-stack .sb{background:rgba(255,255,255,.05)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
-.g-rank .bar i,.g-list .bar i,.g-stack .sb i{background-image:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0) 65%)!important;filter:saturate(1.2) drop-shadow(0 0 5px rgba(120,180,255,.35)) drop-shadow(0 0 1px rgba(255,255,255,.4))!important}
+.g-rank .bar i,.g-list .bar i,.g-stack .sb i{box-shadow:inset 0 1px 0 rgba(255,255,255,.35);filter:saturate(1.2) drop-shadow(0 0 5px rgba(120,180,255,.35)) drop-shadow(0 0 1px rgba(255,255,255,.4))!important}
 .g-stack .sb{height:12px!important}
 [data-theme=light] .g-rank .bar,[data-theme=light] .g-list .bar,[data-theme=light] .g-stack .sb{background:rgba(4,7,10,.06)!important}
 .g-photo .ph-l{display:none}[data-theme=light] .g-photo .ph-l{display:block}[data-theme=light] .g-photo .ph-d{display:none}
