@@ -1,7 +1,7 @@
 /* ===== PENGATURAN ===== */
 const SHEET_ID = "1EvNZ5apr_wFBvOn9hfGlFJpc6aHrFNnoVL_36OcyNvE";
 const TABS = { post: "Data Bersih", komentar: "Komentar" };
-const RISK = { tinggi: 35, sedang: 20 };          // ambang % negatif
+const RISK = { kritis: 35, tinggi: 25, sedang: 15 }; // ambang % negatif: Rendah < Sedang < Tinggi < Kritis
 const REFRESH_MENIT = 5;
 // Akun resmi Danantara/BUMN/pemerintah (huruf besar/kecil diabaikan). Kolom 'Jenis Akun' berisi "Resmi" juga otomatis dihitung resmi.
 const AKUN_RESMI = []; // kosong: akun resmi cukup dari label 'Resmi' di kolom Jenis Akun
@@ -187,8 +187,8 @@ async function render() {
     const d = a - b, good = inverse ? d < 0 : d > 0, cls = d === 0 ? '' : good ? 'up' : 'down';
     return `<b class="${cls}">${d > 0 ? '▲ +' : d < 0 ? '▼ ' : ''}${(Math.round(d * 10) / 10).toString().replace('.', ',')}${unitTxt}</b> vs ${prevLbl}`;
   };
-  const lvl = S.negP >= RISK.tinggi ? 'TINGGI' : S.negP >= RISK.sedang ? 'SEDANG' : 'RENDAH';
-  const lvlColor = { TINGGI: SENT.negatif, SEDANG: '#f59e0b', RENDAH: SENT.positif }[lvl];
+  const lvl = S.negP >= RISK.kritis ? 'KRITIS' : S.negP >= RISK.tinggi ? 'TINGGI' : S.negP >= RISK.sedang ? 'SEDANG' : 'RENDAH';
+  const lvlColor = { KRITIS: '#EF4444', TINGGI: '#F97316', SEDANG: '#EAB308', RENDAH: '#22C55E' }[lvl];
   const sh = (s, k) => s ? s[k] / (s.T || 1) * 100 : undefined;
   const K = [
     ['radar', 'Total Mention', fmt(S.T), '', perDay.map(s => s.T), css('--accent'), delta(cur.T, prev?.T, '')],
@@ -309,7 +309,7 @@ async function render() {
   $('riskRing').style.setProperty('--p', S.negP.toFixed(1)); $('riskRing').style.setProperty('--c', lvlColor);
   $('riskPct').textContent = pct(S.n, S.T);
   $('risk').textContent = lvl; $('risk').style.color = lvlColor;
-  $('riskNote').textContent = `Tinggi ≥${RISK.tinggi}% · Sedang ≥${RISK.sedang}%`;
+  $('riskNote').textContent = `Kritis ≥${RISK.kritis}% · Tinggi ≥${RISK.tinggi}% · Sedang ≥${RISK.sedang}%`;
   const nMax = negTop[0]?.[1] || 1;
   $('flow').innerHTML = negTop.slice(0, 4).map(([k, v], i) => `<li><span class="rank">${i + 1}</span><div><div class="acc-top"><span class="nt">${esc(k)}</span><b style="color:var(--neg)">${v}</b></div><div class="acc-bar"><i style="width:${v / nMax * 100}%;background:var(--neg)"></i></div></div></li>`).join('') || '<li class="empty">Tidak ada isu negatif</li>';
   const t3 = negTop.slice(0, 3).reduce((s, x) => s + x[1], 0);
