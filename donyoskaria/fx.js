@@ -14,7 +14,7 @@
 .fx-scan:before{content:"";position:absolute;left:0;right:0;height:140px;top:-140px;background:linear-gradient(180deg,transparent,rgba(70,214,200,.10) 70%,rgba(120,240,225,.55) 98%,transparent);animation:fxScan 1.5s cubic-bezier(.4,0,.2,1) .2s both}
 .fx-scan:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 1px 1px,rgba(70,214,200,.35) 1px,transparent 1.6px) 0 0/22px 22px;animation:fxGrid 1.8s ease-out .2s both}
 .fx-quick .g-kpi,.fx-quick .g-int,.fx-quick .g-grid4>*,.fx-quick .g-insight{animation-duration:.45s!important;animation-delay:calc(var(--i,0)*.04s)!important}
-html,body{overflow-x:hidden}
+html,body{overflow-x:clip}
 @keyframes fxEarth{from{opacity:0;transform:scale(1.08);filter:brightness(1.8) saturate(.4)}to{opacity:1;transform:none;filter:none}}
 @keyframes fxPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes fxGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}

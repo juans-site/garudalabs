@@ -100,7 +100,7 @@
           <div class="g-feed">${feedSrc.map(r => `<div class="g-post"><div class="top">${pfIco(r.platform, 13)}<span>${tg(r.tgl)}${r.jamStr ? ' · ' + r.jamStr : ''}</span><span class="sn ${snC(r.sent)}">${esc(r.sent)}</span></div>
             <p>${esc(r.text.slice(0, 220))}</p><div class="g-eng"><span title="Likes/Reaksi">${ic('heart', 12, 2)}${k(r.lk || 0)}</span><span title="Komentar">${ic('chat', 12, 2)}${k(r.km || 0)}</span><span title="Share/Repost">${ic('ext', 12, 2)}${k(r.sh || 0)}</span></div><div class="ft"><span class="who">${esc(akun(r))}</span>${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">Buka ${ic('ext', 12)}</a>` : ''}</div></div>`).join('') || '<p class="hint">Tidak ada postingan</p>'}</div></div>
         <div class="g-card"><div class="g-h"><h3>Peringatan Dini</h3><span class="g-lv hi">Tinggi (${nHigh})</span></div>
-          <ul class="g-warn">${warn.slice(0, 4).map(w => `<li><span class="wi g-lv ${w.lv[0]}">${ic('flame', 18)}</span><div><b>${esc(w.kk)}</b><small>${esc(w.topT)} · ${pc(w.np, 100, 0)} negatif${w.d != null ? ` · ${w.d >= 0 ? '+' : ''}${w.d}%` : ''}</small></div><span class="g-lv ${w.lv[0]}">${ic('alert', 12, 2)}${w.lv[1]}</span></li>`).join('')}</ul></div>
+          <ul class="g-warn">${warn.slice(0, 4).map(w => `<li><span class="wi g-lv ${w.lv[0]}">${ic('alert', 18)}</span><div><b>${esc(w.kk)}</b><small>${esc(w.topT)} · ${pc(w.np, 100, 0)} negatif${w.d != null ? ` · ${w.d >= 0 ? '+' : ''}${w.d}%` : ''}</small></div><span class="g-lv ${w.lv[0]}">${ic('alert', 12, 2)}${w.lv[1]}</span></li>`).join('')}</ul></div>
       </div>`;
 
     // peta foto bumi + pin data
