@@ -1,6 +1,6 @@
 /* ===== Grafik tren bergaya hi-tech (Chart.js): garis halus bercahaya, area gradasi, crosshair, titik menyala ===== */
 (() => {
-  const C = { t: '#2F8CFF', p: '#22C55E', n: '#F0524F', z: '#8A97A6' };
+  const C = { t: '#9B8CFF', p: '#3AA6F0', n: '#F0524F', z: '#8A97A6' };
   const BL = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   const tgS = d => { const [, m, dd] = d.split('-'); return `${+dd} ${BL[m - 1]}`; };
   const tgL = d => { const [y, m, dd] = d.split('-'); return `${+dd} ${BL[m - 1]} ${y}`; };

@@ -31,7 +31,7 @@
     const tag5 = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const words = Object.entries(wc).sort((a, b) => b[1] - a[1]).slice(0, 45), wMax = words[0]?.[1] || 1;
     
-    const sCol = s => { const t = s.n + s.p + s.z || 1, nr = s.n / t, pr = s.p / t; return nr >= .5 ? RED : pr >= .5 ? TEAL : nr > pr ? ORANGE : pr > nr ? '#7FD8CE' : GREY; };
+    const sCol = s => { const t = s.n + s.p + s.z || 1, nr = s.n / t, pr = s.p / t; return nr >= .5 ? RED : pr >= .5 ? TEAL : nr > pr ? ORANGE : pr > nr ? '#8CC8F5' : GREY; };
     const cmpRows = isl.map(([kk, v]) => { const R = D.filter(r => r.lokasi === kk), n = R.filter(r => r.sent === 'negatif').length; return { kk, v, n, np: n / v * 100, d: delta(islL[kk] || 0, islP[kk] || 0) }; })
       .sort((a, b) => cmpMode === 'neg' ? b.np - a.np : cmpMode === 'grow' ? (b.d ?? -1e9) - (a.d ?? -1e9) : b.v - a.v);
     const rel = (x, y) => y ? Math.round((x - y) / y * 100) : null, sh = (b, kk) => b.t ? b[kk] / b.t : 0;
@@ -61,25 +61,20 @@
         <div class="g-card"><div class="g-h"><h3>Top Isu Dominan</h3><span class="g-tag">Semua sumber</span></div>
           <ol class="g-list" style="gap:14px">${topics.slice(0, 6).map(([kk, v], i) => `<li style="grid-template-columns:22px minmax(0,1fr) 70px 44px"><span class="n">${i + 1}</span><span class="t" title="${esc(kk)}">${esc(kk)}<small style="display:block;color:var(--mute);font-size:11px">${f(v)} postingan ${dChip(delta(topicsL[kk] || 0, topicsP[kk] || 0), true)}</small></span><span class="bar"><i style="width:${v / topics[0][1] * 100}%;background:${i < 1 ? RED : i < 3 ? ORANGE : AMBER}"></i></span><span class="p" style="color:${i < 1 ? RED : 'var(--ink)'}">${pc(v, S.t, 0)}</span></li>`).join('')}</ol></div>
       </div>
-      <div class="g-grid3">
-        <div class="g-card"><div class="g-h"><h3>Perbandingan Antar Pulau</h3></div>
-          <div class="g-sub-tabs">${[['vol', 'Volume'], ['neg', 'Sentimen negatif'], ['grow', 'Pertumbuhan']].map(([v, l]) => `<button type="button" data-cmp="${v}" class="${cmpMode === v ? 'on' : ''}">${l}</button>`).join('')}</div>
-          <div class="g-cmp"><div class="lokmap"></div>
-            <table class="g-tbl"><thead><tr><th></th><th>Pulau</th><th class="r">Volume</th><th class="r">Negatif</th><th class="r">Δ</th></tr></thead><tbody>
-            ${cmpRows.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${esc(r.kk)}</td><td class="r">${f(r.v)}</td><td class="r" style="color:${r.np >= 60 ? RED : r.np >= 45 ? AMBER : 'var(--ink)'}">${pc(r.np, 100, 0)}</td><td class="r">${dChip(r.d, true) || '–'}</td></tr>`).join('')}</tbody></table></div></div>
-        <div class="g-card"><div class="g-h"><h3>Sumber Percakapan</h3><span class="g-tag">Semua</span></div>
-          <ol class="g-list g-src" style="gap:16px">${plat.map(([kk, v]) => { const R = D.filter(r => r.platform === kk), n = R.filter(r => r.sent === 'negatif').length;
-            return `<li>${pfIco(kk)}<span class="t">${esc(kk)}<small style="display:block;color:var(--mute);font-size:11px">${f(v)} postingan · ${pc(n, v, 0)} negatif</small></span><span class="bar"><i style="width:${v / plat[0][1] * 100}%;background:linear-gradient(90deg,#2FB3A6,${TEAL})"></i></span><span class="p">${pc(v, S.t, 0)}</span></li>`; }).join('')}</ol></div>
-        <div class="g-card"><div class="g-h"><h3>Puncak Percakapan</h3><span class="g-tag">3 hari teratas</span></div>
-          <ol class="g-peak">${peak.map((p, i) => `<li><span class="n">${i + 1}</span><div><div class="meta"><span>${tgY(p.d)}</span>${dChip(p.d7, true)}</div><b>${f(p.t)}</b> <small style="color:var(--mute)">postingan · ${pc(p.n, p.t, 0)} negatif</small>
-            <p title="${esc(p.top?.text || '')}">${esc(p.tp || '')}${p.top ? ` — ${esc(akun(p.top))}: “${esc(p.top.text.slice(0, 80))}”` : ''}</p></div></li>`).join('')}</ol></div>
-      </div>
       <div class="g-grid-tt">
         <div class="g-card"><div class="g-h"><h3>Tren Topik</h3><span class="g-tag">5 topik teratas</span></div><div class="g-cv" style="height:260px"><canvas id="gcTopic"></canvas></div></div>
         <div class="g-card"><div class="g-h"><h3>Sentimen per Topik</h3><span class="g-tag"><span class="g-dot" style="background:${RED}"></span>Neg <span class="g-dot" style="background:${GREY};margin-left:6px"></span>Net <span class="g-dot" style="background:${TEAL};margin-left:6px"></span>Pos</span></div>
           <div class="g-stack">${T5.map(t => { const R = D.filter(r => r.topik === t), b = by(R);
             return `<div class="row"><span class="t" title="${esc(t)}">${esc(t)}</span><span class="sb"><i style="width:${b.n / b.t * 100}%;background:${RED}"></i><i style="width:${b.z / b.t * 100}%;background:${GREY}"></i><i style="width:${b.p / b.t * 100}%;background:${TEAL}"></i></span><span style="text-align:right;color:var(--mute)">${pc(b.p, b.t, 0)}</span></div>`; }).join('')}</div>
           <p class="hint" style="margin:12px 0 0">Angka kanan = porsi positif per topik.</p></div>
+      </div>
+      <div class="g-grid2">
+        <div class="g-card"><div class="g-h"><h3>Sumber Percakapan</h3><span class="g-tag">Semua</span></div>
+          <ol class="g-list g-src" style="gap:16px">${plat.map(([kk, v]) => { const R = D.filter(r => r.platform === kk), n = R.filter(r => r.sent === 'negatif').length;
+            return `<li>${pfIco(kk)}<span class="t">${esc(kk)}<small style="display:block;color:var(--mute);font-size:11px">${f(v)} postingan · ${pc(n, v, 0)} negatif</small></span><span class="bar"><i style="width:${v / plat[0][1] * 100}%;background:linear-gradient(90deg,#2A8FD0,${TEAL})"></i></span><span class="p">${pc(v, S.t, 0)}</span></li>`; }).join('')}</ol></div>
+        <div class="g-card"><div class="g-h"><h3>Puncak Percakapan</h3><span class="g-tag">3 hari teratas</span></div>
+          <ol class="g-peak">${peak.map((p, i) => `<li><span class="n">${i + 1}</span><div><div class="meta"><span>${tgY(p.d)}</span>${dChip(p.d7, true)}</div><b>${f(p.t)}</b> <small style="color:var(--mute)">postingan · ${pc(p.n, p.t, 0)} negatif</small>
+            <p title="${esc(p.top?.text || '')}">${esc(p.tp || '')}${p.top ? ` — ${esc(akun(p.top))}: “${esc(p.top.text.slice(0, 80))}”` : ''}</p></div></li>`).join('')}</ol></div>
       </div>
       <div class="g-grid-wh">
         <div class="g-card"><div class="g-h"><h3>Word Cloud</h3><span class="g-tag"><span class="g-dot" style="background:${RED}"></span>Negatif <span class="g-dot" style="background:${GREY};margin-left:6px"></span>Netral <span class="g-dot" style="background:${TEAL};margin-left:6px"></span>Positif</span></div>
@@ -102,7 +97,7 @@
       el.innerHTML = boxes.map(b => { const s = ws[b.word]; return `<span title="${esc(b.word)} — ${f(b.c)} postingan · neg ${s.n} / net ${s.z} / pos ${s.p}" style="left:${b.x}px;top:${b.y}px;font-size:${b.fs}px;font-weight:${b.fw};color:${sCol(s)};opacity:${(.6 + b.c / wMax * .4).toFixed(2)}">${esc(b.word)}</span>`; }).join(''); })();
     if (!buildAnalitik.rz) { buildAnalitik.rz = 1; let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { if (!document.getElementById('viewAnalitik')?.hidden) buildAnalitik(); }, 300); }); }
     const box = root.querySelector('.g-cmp .lokmap');
-    if (window.renderIdMap && window.__lok) window.renderIdMap(box, window.__lok);
+    if (box && window.renderIdMap && window.__lok) window.renderIdMap(box, window.__lok);
     root.querySelectorAll('[data-cmp]').forEach(b => b.onclick = () => { cmpMode = b.dataset.cmp; buildAnalitik(); });
 
     // Chart.js (hanya bila tab terlihat agar ukuran benar)
@@ -112,7 +107,7 @@
     const grid = getComputedStyle(document.documentElement).getPropertyValue('--line').trim() || 'rgba(255,255,255,.08)';
     const labels = perDay.map(x => tg(x.d));
     const base = { maintainAspectRatio: false, responsive: true, animation: { duration: 600 }, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(9,14,18,.95)', borderColor: 'rgba(70,214,200,.3)', borderWidth: 1, padding: 10, titleColor: '#EAF2F4', bodyColor: '#EAF2F4',
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(9,14,18,.95)', borderColor: 'rgba(58,166,240,.3)', borderWidth: 1, padding: 10, titleColor: '#EAF2F4', bodyColor: '#EAF2F4',
         callbacks: { footer: items => items.length > 1 ? 'Total: ' + f(items.filter(i => i.dataset.type !== 'bar' && i.dataset.label !== 'Total').reduce((s, i) => s + i.raw, 0)) : '' } } },
       scales: { x: { grid: { display: false }, ticks: { color: tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }, border: { color: grid } }, y: { beginAtZero: true, grid: { color: grid }, ticks: { color: tick }, border: { display: false } } } };
     const area = (label, data, c) => ({ type: 'line', label, data, borderColor: c, borderWidth: 2, tension: .35, pointRadius: 0, pointHoverRadius: 4, fill: true,

@@ -68,10 +68,10 @@
 
   const css = document.createElement('style');
   css.textContent = `.ai-load{border-left:0!important;padding:14px!important;position:relative;overflow:hidden}
-  .ai-load:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(70,214,200,.08),transparent);transform:translateX(-100%);animation:alSweep 1.6s ease-in-out infinite}
+  .ai-load:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(58,166,240,.08),transparent);transform:translateX(-100%);animation:alSweep 1.6s ease-in-out infinite}
   .al-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:12.5px;color:var(--mute)}
-  .al-orb{position:relative;width:18px;height:18px}.al-orb i{position:absolute;inset:0;border-radius:50%;border:1.5px solid #46D6C8;opacity:0;animation:alRing 1.8s ease-out infinite}.al-orb i:nth-child(2){animation-delay:.6s}.al-orb i:nth-child(3){animation-delay:1.2s}
-  .al-orb:after{content:"";position:absolute;inset:6px;border-radius:50%;background:#46D6C8;box-shadow:0 0 10px #46D6C8}
+  .al-orb{position:relative;width:18px;height:18px}.al-orb i{position:absolute;inset:0;border-radius:50%;border:1.5px solid #3AA6F0;opacity:0;animation:alRing 1.8s ease-out infinite}.al-orb i:nth-child(2){animation-delay:.6s}.al-orb i:nth-child(3){animation-delay:1.2s}
+  .al-orb:after{content:"";position:absolute;inset:6px;border-radius:50%;background:#3AA6F0;box-shadow:0 0 10px #3AA6F0}
   .al-txt em{font-style:normal;animation:alDot 1.2s infinite}.al-txt em:nth-child(2){animation-delay:.2s}.al-txt em:nth-child(3){animation-delay:.4s}
   .al-sk{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
   .al-sk>div{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
@@ -79,8 +79,8 @@
   @keyframes alSweep{to{transform:translateX(100%)}}@keyframes alRing{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.6);opacity:0}}@keyframes alDot{0%,100%{opacity:.2}50%{opacity:1}}
   @media(prefers-reduced-motion:reduce){.ai-load:after,.al-orb i,.al-txt em{animation:none}}
   .g-insight .g-h h3{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.g-insight .nt-t{font-size:16px;font-weight:600}.g-insight .nt-s{font-size:12px;font-weight:400;color:var(--mute)}
-  .g-insight .g-h h3 svg{align-self:center;color:#46D6C8}
-  .g-insight .g-tag{display:inline-flex;align-items:center;gap:6px}.ai-dot{width:6px;height:6px;border-radius:50%;background:#46D6C8;box-shadow:0 0 8px #46D6C8}
+  .g-insight .g-h h3 svg{align-self:center;color:#3AA6F0}
+  .g-insight .g-tag{display:inline-flex;align-items:center;gap:6px}.ai-dot{width:6px;height:6px;border-radius:50%;background:#3AA6F0;box-shadow:0 0 8px #3AA6F0}
   .g-ins li .nj{display:block;margin-top:8px;font-size:13.5px;color:var(--ink)}.g-ins li .nj+p{margin-top:4px}
   @media(min-width:1281px){.g-ins{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))!important}}`;
   document.head.append(css);

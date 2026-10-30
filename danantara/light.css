@@ -1,5 +1,5 @@
 /* ===== Perbaikan keterbacaan mode terang (dimuat paling akhir) ===== */
-[data-theme=light]{--t-teal:#0B7F74;--t-orange:#B93E0C;--t-amber:#9A5B05;--t-grey:#4B5866;--t-red:#C0262D}
+[data-theme=light]{--t-teal:#1565A8;--t-orange:#B93E0C;--t-amber:#9A5B05;--t-grey:#4B5866;--t-red:#C0262D}
 
 /* Teks aksen: versi lebih gelap agar kontras di latar putih */
 [data-theme=light] .g-d.good,[data-theme=light] .g-live,[data-theme=light] .g-lv.lo,[data-theme=light] .g-ai-tab,
@@ -12,7 +12,7 @@
 
 /* Tombol aktif berlatar teal: teks gelap */
 [data-theme=light] .seg button.on,[data-theme=light] .tabs .seg button.on,[data-theme=light] #rawSent button.on,
-[data-theme=light] .pager button.on,[data-theme=light] #rawPager button.on,[data-theme=light] .g-kw button.on{color:#04201D!important}
+[data-theme=light] .pager button.on,[data-theme=light] #rawPager button.on,[data-theme=light] .g-kw button.on{color:#031427!important}
 
 /* Kartu Narasi / Insight */
 [data-theme=light] .g-ins li{background:#fff!important;border-color:rgba(4,7,10,.09)!important}
@@ -23,7 +23,7 @@
 /* Dropdown & input */
 [data-theme=light] select,[data-theme=light] #rawPf,[data-theme=light] #rawTp,[data-theme=light] #rawKw,[data-theme=light] .gran{color-scheme:light;background-color:#fff!important;color:#0F1A24!important;border:1px solid rgba(4,7,10,.14)!important}
 [data-theme=light] select option{background:#fff!important;color:#0F1A24!important}
-[data-theme=light] select option:checked{background:#CDEFEB!important;color:#04201D!important}
+[data-theme=light] select option:checked{background:#D3E9FB!important;color:#031427!important}
 [data-theme=light] .raw-bar input{background:#fff!important;color:#0F1A24!important;border-color:rgba(4,7,10,.14)!important}
 [data-theme=light] .raw thead th{color:#475569!important}
 
@@ -39,5 +39,5 @@
 /* Angka negatif & level risiko yang diberi warna inline */
 [data-theme=light]{--neg:#C2410C}
 [data-theme=light] b[style*="color:#f59e0b"],[data-theme=light] .risk-lv,[data-theme=light] [style*="color:#f59e0b"]{color:#9A5B05!important}
-[data-theme=light] .g-pl .q a{color:#0B7F74}
+[data-theme=light] .g-pl .q a{color:#1565A8}
 [data-theme=light] .av{filter:brightness(.8) saturate(1.2)}

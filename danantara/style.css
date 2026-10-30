@@ -1,5 +1,5 @@
 :root{
-  --gold:#FFBE00;--navy:#0D2B5B;--pos:#22C55E;--neg:#F05252;--neu:#94A3B8;
+  --gold:#FFBE00;--navy:#0D2B5B;--pos:#3AA6F0;--neg:#F05252;--neu:#94A3B8;
   --radius:16px;--side:260px;
 }
 [data-theme=dark]{
