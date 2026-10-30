@@ -107,7 +107,9 @@
     const GEO = window.PETA_GEO, IW = 1672, IH = 1051, mx = Math.max(1, ...prv.map(x => x[1]));
     const PIN = Object.fromEntries((GEO?.prov || []).map(p => [p.n, p.c]));
     const earth = root.querySelector('.g-earth'), stage = root.querySelector('.g-stage');
-    const fit = () => { const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
+    const fit = () => { const hero = root.querySelector('.g-hero'), hh = innerWidth >= 1101 && hero ? hero.offsetHeight + 18 : 0;
+      stage.style.marginTop = hh ? -hh + 'px' : ''; stage.style.setProperty('--heroH', hh + 'px');
+      const W = stage.clientWidth, H = stage.clientHeight, wide = innerWidth >= 1100;
       if (!wide) { earth.style.cssText = ''; return; }
       // ukuran globe dibatasi seperti tata letak awal (lebar konten 1500px), lalu diletakkan di tengah area kanan
       const left = 300, right = 16, avail = W - left - right, sc = Math.min(avail, 1128) / (1640 - 150), w = IW * sc, h = IH * sc, gx = left - 150 * sc + (avail - 1490 * sc) / 2;
