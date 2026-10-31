@@ -466,13 +466,13 @@ async function setSent(ids, s) {
   ['_post', '_komentar'].forEach(k => (cache[k] || []).forEach(r => { if (ids.includes(r.tab + ':' + r.no)) r.sent = s; }));
   delete cache.all; ['post', 'komentar'].forEach(k => { if (cache['_' + k]) cache[k] = kwFilter(cache['_' + k]); });
   const keep = { page: raw.page }; await render(); raw.page = keep.page; renderRaw();
-  if (!SHEET_WRITE_URL) { toast(`${ids.length} sentimen diubah di tampilan (belum tersambung ke sheet).`); return; }
+  if (!SHEET_WRITE_URL) { toast('Perubahan diterapkan'); return; }
   const byTab = {}; ids.forEach(id => { const i = id.indexOf(':'); (byTab[id.slice(0, i)] ||= []).push({ no: id.slice(i + 1), sentimen: s }); });
   try { let n = 0; for (const [tab, rows] of Object.entries(byTab)) {
       const r = await fetch(SHEET_WRITE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ key: SHEET_WRITE_KEY, tab, rows }) });
       const j = await r.json(); if (!j.ok) throw new Error(j.error); n += j.updated; }
-    toast(`${n} sentimen tersimpan ke Google Sheet.`);
-  } catch (e) { toast('Gagal menyimpan ke sheet: ' + e.message, true); }
+    toast(n > 1 ? `${n} perubahan tersimpan` : 'Perubahan tersimpan');
+  } catch (e) { toast('Gagal menyimpan perubahan. Coba lagi.', true); }
 }
 function toast(msg, err) { let t = $('gToast'); if (!t) { t = document.createElement('div'); t.id = 'gToast'; document.body.append(t); }
   t.textContent = msg; t.className = err ? 'err on' : 'on'; clearTimeout(toast.t); toast.t = setTimeout(() => t.className = '', 3500); }
