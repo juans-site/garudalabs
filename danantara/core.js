@@ -210,6 +210,7 @@
 .g-stack .sb{height:12px!important}
 [data-theme=light] .g-rank .bar,[data-theme=light] .g-list .bar,[data-theme=light] .g-stack .sb{background:rgba(4,7,10,.06)!important}
 html:not([data-theme=light]) #gConsole .g-card,html:not([data-theme=light]) #viewAnalitik .g-card,html:not([data-theme=light]) .g-insight,html:not([data-theme=light]) .g-prio{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.01) 45%),rgba(10,16,24,.55)!important;-webkit-backdrop-filter:blur(18px) saturate(140%)!important;backdrop-filter:blur(18px) saturate(140%)!important}
+.g-pl .h .v small{font-weight:500;font-size:11px;color:var(--mute)}.g-pl .m.tr{margin-top:4px;font-size:11.5px;color:var(--mute)}.g-pl .m.tr.tu{color:#FF7F3B}.g-pl .m.tr.td{color:#3AA6F0}
 .g-photo .ph-l{display:none}[data-theme=light] .g-photo .ph-l{display:block}[data-theme=light] .g-photo .ph-d{display:none}
 .g-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(1,4,10,.55),transparent 28%),linear-gradient(0deg,rgba(1,4,10,.7),transparent 22%)}
 .g-int,.g-ctrl{z-index:2}

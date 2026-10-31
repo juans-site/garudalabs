@@ -17,13 +17,13 @@
     const maxIsl = isl[0]?.[1] || 1;
     // Isu prioritas: hari terakhir di periode (fallback seluruh periode bila < 15 postingan)
     const prio = (() => { const last = days.at(-1), prevDay = days.at(-2);
-      let R = D.filter(r => r.tgl === last), P = prevDay ? D.filter(r => r.tgl === prevDay) : [], lbl = last ? tg(last) : '';
-      if (R.length < 15) { R = D; P = Pv; lbl = 'periode ini'; }
+      let R = D.filter(r => r.tgl === last), P = prevDay ? D.filter(r => r.tgl === prevDay) : [], lbl = last ? tg(last) : '', cmp = prevDay ? 'kemarin (' + tg(prevDay) + ')' : '', unit = 'hari ini';
+      if (R.length < 15) { R = D; P = Pv; lbl = 'periode ini'; cmp = 'periode sebelumnya'; unit = 'periode ini'; }
       const score = x => x.v * (1 + x.n / Math.max(1, x.v));
       const list = cnt(R.filter(r => r.topik && r.topik !== 'Lainnya'), 'topik').map(([kk, v]) => { const T = R.filter(r => r.topik === kk), n = T.filter(r => r.sent === 'negatif').length;
         const top = T.slice().sort((a, b) => (b.sent === 'negatif') - (a.sent === 'negatif') || (b.eng || 0) - (a.eng || 0))[0];
         return { kk, v, n, np: n / v * 100, d: delta(v, P.filter(r => r.topik === kk).length), top }; }).sort((a, b) => score(b) - score(a)).slice(0, 3);
-      return { list, lbl, T: R.length }; })();
+      return { list, lbl, cmp, unit, T: R.length }; })();
     const repOf = s => s.t ? Math.round((s.p - s.n) / s.t * 100) : 0, rep = repOf(S), repD = Pv.length ? rep - repOf(Ps) : null;
     const prv = cnt(D.filter(r => r.prov), 'prov'), prvL = Object.fromEntries(cnt(L.filter(r => r.prov), 'prov')), prvP = Object.fromEntries(cnt(Pv.filter(r => r.prov), 'prov'));
     const emo = cnt(D.filter(r => r.emosi && !/^netral$/i.test(r.emosi)), 'emosi'), maxEmo = emo[0]?.[1] || 1;
@@ -87,8 +87,9 @@
         <div class="g-glass g-prio">
           <div class="g-h"><h3>Isu Prioritas Hari Ini</h3><span class="g-tag">${esc(prio.lbl)}</span></div>
           <ol class="g-pl">${prio.list.map((t, i) => `<li class="${t.np >= 45 ? 'hi' : t.np >= 25 ? 'md' : 'lo'}">
-            <div class="h"><span class="n">${i + 1}</span><b>${esc(t.kk)}</b><span class="v">${k(t.v)}</span>${dChip(t.d, true)}</div>
-            <div class="m"><span class="g-lv ${t.np >= 45 ? 'hi' : t.np >= 25 ? 'md' : 'lo'}">${pc(t.n, t.v, 0)} negatif</span><span class="sh">${pc(t.v, prio.T, 0)} dari percakapan</span></div>
+            <div class="h"><span class="n">${i + 1}</span><b>${esc(t.kk)}</b><span class="v" title="Jumlah postingan tentang isu ini ${esc(prio.unit)}">${f(t.v)} <small>postingan</small></span></div>
+            <div class="m"><span class="g-lv ${t.np >= 45 ? 'hi' : t.np >= 25 ? 'md' : 'lo'}" title="Porsi postingan bernada negatif dalam isu ini">${pc(t.n, t.v, 0)} bernada negatif</span><span class="sh">${pc(t.v, prio.T, 0)} dari total percakapan ${esc(prio.unit)}</span></div>
+            ${t.d != null && prio.cmp ? `<div class="m tr ${t.d > 0 ? 'tu' : t.d < 0 ? 'td' : ''}">${t.d > 0 ? '▲ Naik' : t.d < 0 ? '▼ Turun' : '■ Stabil'}${t.d ? ' ' + Math.abs(t.d) + '%' : ''} dibanding ${esc(prio.cmp)}</div>` : ''}
             ${t.top ? `<p class="q">"${esc(t.top.text.slice(0, 120))}${t.top.text.length > 120 ? '…' : ''}"<span class="src">— ${esc(t.top.user || t.top.platform)} · ${esc(t.top.platform)}${t.top.link ? ` · <a href="${esc(t.top.link)}" target="_blank" rel="noopener">buka ${ic('ext', 11, 2)}</a>` : ''}</span></p>` : ''}
           </li>`).join('') || '<li class="lo"><p class="q">Belum ada isu menonjol.</p></li>'}</ol>
         </div>
