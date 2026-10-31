@@ -36,7 +36,7 @@
     const pos = W.filter(r => r.sent === 'positif'); ctx += `\nSINYAL POSITIF (${pos.length}):\n${sample(pos, 5).map(line).join('\n')}\n`;
     // buang emoji/karakter khusus: model AI menolak input berisi surrogate/emoji
     ctx = ctx.replace(/[\uD800-\uDFFF]/g, '').replace(/[^\x09\x0A\x0D\x20-\x7E\u00A0-\u024F\u2010-\u2027]/g, '');
-    return { ctx, key: `${(typeof state !== "undefined" && state.src) || "post"}_${(typeof state !== "undefined" && state.kw) || ""}_${from}_${to}-${W.length}`, from, to: lastTgl, span, lastJam, n: W.length, amp };
+    return { ctx, key: `${(typeof state !== "undefined" && state.src) || "post"}_${(typeof state !== "undefined" && state.kw) || ""}_${from}_${to}`, from, to: lastTgl, span, lastJam, n: W.length, amp };
   }
 
   function render(box, data, meta, state) {

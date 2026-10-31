@@ -147,10 +147,9 @@
       const ep = (typeof CHAT_ENDPOINT !== 'undefined' && CHAT_ENDPOINT); if (!ep || !prio.list.length) return;
       const ctx = prio.list.map((t, i) => { const R = D.filter(r => r.topik === t.kk && (prio.unit !== 'hari ini' || r.tgl === days.at(-1))).sort((a, b) => (b.eng || 0) - (a.eng || 0)).slice(0, 8);
         return `ISU ${i + 1} (kategori: ${t.kk}, ${t.v} postingan, ${Math.round(t.np)}% negatif):\n` + R.map(r => '- ' + r.text.replace(/\s+/g, ' ').slice(0, 200)).join('\n'); }).join('\n\n');
-      const q = 'Untuk setiap ISU di data, tulis SATU judul kesimpulan isu yang spesifik dan to the point (maks 9 kata, Bahasa Indonesia, sebut aktor/peristiwa utamanya, tanpa tanda kutip). Jawab hanya ' + prio.list.length + ' baris dengan format persis: nomor || judul';
-      try { const r = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', content: q }], context: ctx }) });
-        const j = await r.json(); const out = window.__pj = window.__pj || {};
-        (j.reply || '').split('\n').forEach(l => { const m = l.match(/^\s*\**\s*(\d+)\s*\**\s*\|\|\s*(.+)$/); if (m && prio.list[m[1] - 1]) out[prio.list[m[1] - 1].kk] = m[2].replace(/[*"“”]/g, '').trim(); });
+      try { const r = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'judul', n: prio.list.length, key: `${state.src}_${state.kw}_${prio.lbl}_${prio.list.map(t => t.kk).join('|')}`, context: ctx }) });
+        const j = await r.json(), out = window.__pj = window.__pj || {};
+        Object.entries(j.judul || {}).forEach(([no, v]) => { const t = prio.list[no - 1]; if (t) out[t.kk] = v; });
         root.querySelectorAll('.g-pl .pj').forEach(b => { const v = out[b.dataset.kk]; if (v) { b.textContent = v; b.closest('li')?.querySelector('.pcat')?.removeAttribute('hidden'); } });
       } catch (e) {} })();
     { const kp = root.querySelector('.g-kpis'), pr = root.querySelector('.g-prio');

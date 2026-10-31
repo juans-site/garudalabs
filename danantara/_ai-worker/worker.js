@@ -49,6 +49,20 @@ function cors(origin, env) {
   } };
 }
 
+// ===== Cache harian (WIB): satu hasil per hari untuk semua pengunjung =====
+const today = () => new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10);
+const cacheReq = k => new Request('https://ai-cache.garudalabs.internal/' + encodeURIComponent(today() + ':' + k));
+async function cacheGet(env, k) {
+  try { if (env.RATE) { const v = await env.RATE.get('d:' + today() + ':' + k); if (v) return JSON.parse(v); } } catch (_) {}
+  try { const r = await caches.default.match(cacheReq(k)); if (r) return await r.json(); } catch (_) {}
+  return null;
+}
+async function cachePut(env, k, v) {
+  const s = JSON.stringify(v);
+  try { if (env.RATE) await env.RATE.put('d:' + today() + ':' + k, s, { expirationTtl: 90000 }); } catch (_) {}
+  try { await caches.default.put(cacheReq(k), new Response(s, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=90000' } })); } catch (_) {}
+}
+
 export default {
   async fetch(req, env) {
     const origin = req.headers.get('Origin') || '';
@@ -64,7 +78,7 @@ export default {
     // ===== Mode "narasi": ringkasan narasi otomatis untuk card dashboard =====
     if (body.mode === 'narasi') {
       const ctx = String(body.context || '').slice(0, MAX_CONTEXT_CHARS), key = 'narasi:' + String(body.key || '').slice(0, 80);
-      if (env.RATE) { const c = await env.RATE.get(key); if (c) return json(JSON.parse(c)); }   // cache 20 menit, hemat kuota
+      { const hit = await cacheGet(env, key); if (hit) return json({ ...hit, cached: true }); }   // cache harian, hemat kuota
       const sys = `Kamu analis media monitoring untuk Dony Oskaria, Danantara & BUMN. Dari DATA (kelompok topik, contoh postingan, kelompok teks identik/amplifikasi, topik baru, sinyal positif), tulis 4-5 poin NARASI YANG MENONJOL dalam Bahasa Indonesia.
 Aturan: tiap poin = judul pendek + 1-2 kalimat konkret yang menyebut peristiwa/aktor/tempat/tanggal SPESIFIK dari contoh postingan, dan jumlah postingan dari data. Jika ada kelompok teks identik dari banyak akun, sebutkan sebagai indikasi amplifikasi. Sertakan 1 poin kabar positif jika ada dan 1 poin topik baru jika ada. Jangan mengarang fakta di luar data. Tanpa pembuka/penutup.
 Format jawaban WAJIB: satu poin per baris, tanpa nomor/bullet, dengan pemisah ' || ' persis seperti ini:
@@ -84,9 +98,21 @@ hi || 41 || Kritik tata kelola Danantara || Warganet membandingkan Danantara den
         if (!poin.length) return json({ error: 'Format narasi tidak valid' }, 502);
         const parsed = { poin };
         const res = { poin: parsed.poin.slice(0, 5), at: new Date().toISOString() };
-        if (env.RATE) await env.RATE.put(key, JSON.stringify(res), { expirationTtl: 1200 });
+        await cachePut(env, key, res);
         return json(res);
       } catch (e) { const s = String(e?.message || e); return json({ error: /limit|quota|neuron|429/i.test(s) ? 'Kuota AI habis' : 'Gagal membuat narasi' }, 502); }
+    }
+    // ===== Mode "judul": judul kesimpulan untuk card Isu Prioritas (cache harian) =====
+    if (body.mode === 'judul') {
+      const ctx = String(body.context || '').slice(0, 12000), n = Math.min(5, +body.n || 3), key = 'judul:' + String(body.key || '').slice(0, 120);
+      { const hit = await cacheGet(env, key); if (hit) return json({ ...hit, cached: true }); }
+      const sys = `Kamu editor media monitoring Danantara & BUMN. Untuk setiap ISU di DATA, tulis SATU judul kesimpulan yang spesifik dan to the point (maks 9 kata, Bahasa Indonesia, sebut aktor/peristiwa utamanya, tanpa tanda kutip, tanpa mengarang di luar data). Jawab hanya ${n} baris, format persis: nomor || judul`;
+      try {
+        const out = await env.AI.run(env.MODEL || DEFAULT_MODEL, { max_tokens: 300, temperature: 0.2, messages: [{ role: 'system', content: sys }, { role: 'user', content: 'DATA:\n' + ctx }] });
+        const judul = {}; String(out?.response ?? '').split('\n').forEach(l => { const m = l.match(/^\s*\**\s*(\d+)\s*\**\s*\|\|\s*(.+)$/); if (m) judul[m[1]] = m[2].replace(/[*"“”]/g, '').trim().slice(0, 90); });
+        if (!Object.keys(judul).length) return json({ error: 'Format judul tidak valid' }, 502);
+        const res = { judul, at: new Date().toISOString() }; await cachePut(env, key, res); return json(res);
+      } catch (e) { const s = String(e?.message || e); return json({ error: /limit|quota|neuron|429/i.test(s) ? 'Kuota AI habis' : 'Gagal membuat judul' }, 502); }
     }
     const messages = (Array.isArray(body.messages) ? body.messages : [])
       .filter(m => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim())
