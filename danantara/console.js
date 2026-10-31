@@ -87,7 +87,8 @@
         <div class="g-glass g-prio">
           <div class="g-h"><h3>Isu Prioritas Hari Ini</h3><span class="g-tag">${esc(prio.lbl)}</span></div>
           <ol class="g-pl">${prio.list.map((t, i) => `<li class="${t.np >= 45 ? 'hi' : t.np >= 25 ? 'md' : 'lo'}">
-            <div class="h"><span class="n">${i + 1}</span><b>${esc(t.kk)}</b><span class="v" title="Jumlah postingan tentang isu ini ${esc(prio.unit)}">${f(t.v)} <small>postingan</small></span></div>
+            <div class="h"><span class="n">${i + 1}</span><b class="pj" data-kk="${esc(t.kk)}">${esc((window.__pj || {})[t.kk] || t.kk)}</b><span class="v" title="Jumlah postingan tentang isu ini ${esc(prio.unit)}">${f(t.v)} <small>postingan</small></span></div>
+            <div class="m pcat" ${(window.__pj || {})[t.kk] ? '' : 'hidden'}><span class="cat">${esc(t.kk)}</span></div>
             <div class="m"><span class="g-lv ${t.np >= 45 ? 'hi' : t.np >= 25 ? 'md' : 'lo'}" title="Porsi postingan bernada negatif dalam isu ini">${pc(t.n, t.v, 0)} bernada negatif</span><span class="sh">${pc(t.v, prio.T, 0)} dari total percakapan ${esc(prio.unit)}</span></div>
             ${t.d != null && prio.cmp ? `<div class="m tr ${t.d > 0 ? 'tu' : t.d < 0 ? 'td' : ''}">${t.d > 0 ? '▲ Naik' : t.d < 0 ? '▼ Turun' : '■ Stabil'}${t.d ? ' ' + Math.abs(t.d) + '%' : ''} dibanding ${esc(prio.cmp)}</div>` : ''}
             ${t.top ? `<p class="q">"${esc(t.top.text.slice(0, 120))}${t.top.text.length > 120 ? '…' : ''}"<span class="src">— ${esc(t.top.user || t.top.platform)} · ${esc(t.top.platform)}${t.top.link ? ` · <a href="${esc(t.top.link)}" target="_blank" rel="noopener">buka ${ic('ext', 11, 2)}</a>` : ''}</span></p>` : ''}
@@ -141,6 +142,17 @@
       const below = Math.max(0, (H - 70) / 2 - 460 * sc + h - H); stage.style.setProperty('--below', below + 'px'); };
     fit(); if (!buildConsole.fitBound) { buildConsole.fitBound = 1; addEventListener('resize', () => { const f = document.querySelector('#gConsole')?._fit; f && f(); }); }
     root._fit = fit;
+    // Judul isu to-the-point dari Garuda AI (fallback: nama kategori)
+    (async () => { const key = prio.lbl + '|' + prio.list.map(t => t.kk + t.v).join(','); if (buildConsole.pjKey === key) return; buildConsole.pjKey = key;
+      const ep = (typeof CHAT_ENDPOINT !== 'undefined' && CHAT_ENDPOINT); if (!ep || !prio.list.length) return;
+      const ctx = prio.list.map((t, i) => { const R = D.filter(r => r.topik === t.kk && (prio.unit !== 'hari ini' || r.tgl === days.at(-1))).sort((a, b) => (b.eng || 0) - (a.eng || 0)).slice(0, 8);
+        return `ISU ${i + 1} (kategori: ${t.kk}, ${t.v} postingan, ${Math.round(t.np)}% negatif):\n` + R.map(r => '- ' + r.text.replace(/\s+/g, ' ').slice(0, 200)).join('\n'); }).join('\n\n');
+      const q = 'Untuk setiap ISU di data, tulis SATU judul kesimpulan isu yang spesifik dan to the point (maks 9 kata, Bahasa Indonesia, sebut aktor/peristiwa utamanya, tanpa tanda kutip). Jawab hanya ' + prio.list.length + ' baris dengan format persis: nomor || judul';
+      try { const r = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', content: q }], context: ctx }) });
+        const j = await r.json(); const out = window.__pj = window.__pj || {};
+        (j.reply || '').split('\n').forEach(l => { const m = l.match(/^\s*\**\s*(\d+)\s*\**\s*\|\|\s*(.+)$/); if (m && prio.list[m[1] - 1]) out[prio.list[m[1] - 1].kk] = m[2].replace(/[*"“”]/g, '').trim(); });
+        root.querySelectorAll('.g-pl .pj').forEach(b => { const v = out[b.dataset.kk]; if (v) { b.textContent = v; b.closest('li')?.querySelector('.pcat')?.removeAttribute('hidden'); } });
+      } catch (e) {} })();
     { const kp = root.querySelector('.g-kpis'), pr = root.querySelector('.g-prio');
       if (kp && pr && window.ResizeObserver) { buildConsole.ro?.disconnect(); buildConsole.ro = new ResizeObserver(() => { if (kp.offsetWidth > 300 && innerWidth >= 1101) pr.style.width = kp.offsetWidth + 'px'; }); buildConsole.ro.observe(kp); } }
     root.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { if (typeof state === 'undefined') return; state.preset = b.dataset.p; render(); });
