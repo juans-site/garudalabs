@@ -75,7 +75,7 @@ html,body{overflow-x:clip}
     if (!earth.classList.contains('g-photo')) earth.style.transform = `translate3d(0,${(y * .42).toFixed(1)}px,0) scale(${(1 + p * .04).toFixed(3)})`;
     if (pins) { pins.style.opacity = (1 - p * 1.4).toFixed(3); pins.style.filter = p > .02 ? `blur(${(p * 6).toFixed(1)}px)` : ''; pins.style.transform = `translate3d(0,${(-p * 30).toFixed(1)}px,0)`; }
     const side = root.querySelectorAll('.g-ctrl,.g-hero,.g-prio');
-    side.forEach(el => { const op = 1 - p * 1.1; el.style.visibility = op <= .02 ? 'hidden' : ''; el.style.opacity = op.toFixed(3); el.style.transform = `translate3d(0,${(-y * .12).toFixed(1)}px,0)`; });
+    side.forEach(el => { el.style.transform = ''; const rb = el.getBoundingClientRect(), top = 90, op = Math.max(0, Math.min(1, (rb.bottom - top) / Math.max(120, rb.height * .6))); el.style.visibility = op <= .02 ? 'hidden' : ''; el.style.opacity = op.toFixed(3); });
   }
   const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(parallax); } };
   addEventListener('scroll', onScroll, { passive: true });
