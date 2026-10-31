@@ -71,7 +71,7 @@ html,body{overflow-x:clip}
     const stage = root.querySelector('.g-stage'), earth = root.querySelector('.g-earth'), pins = root.querySelector('.g-pins'); if (!stage || !earth) return;
     const r = stage.getBoundingClientRect(), y = Math.max(0, -r.top + 90), p = Math.min(1, y / (r.height * .55));
     const hb = document.getElementById('heroBg');
-    if (hb) { const b = r.bottom; hb.classList.toggle('on', b > 0); hb.style.clipPath = `inset(0 0 ${Math.max(0, innerHeight - b).toFixed(0)}px 0)`; }
+    if (hb) { hb.classList.add('on'); hb.style.clipPath = ''; }
     if (!earth.classList.contains('g-photo')) earth.style.transform = `translate3d(0,${(y * .42).toFixed(1)}px,0) scale(${(1 + p * .04).toFixed(3)})`;
     if (pins) { pins.style.opacity = (1 - p * 1.4).toFixed(3); pins.style.filter = p > .02 ? `blur(${(p * 6).toFixed(1)}px)` : ''; pins.style.transform = `translate3d(0,${(-p * 30).toFixed(1)}px,0)`; }
     const side = root.querySelectorAll('.g-ctrl,.g-hero,.g-prio');
