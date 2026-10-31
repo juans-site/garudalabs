@@ -108,7 +108,7 @@
         <div class="g-card"><div class="g-h"><h3>Tren Percakapan</h3><span class="g-tag">7 hari terakhir</span></div>
           <div class="g-vol g-vol-ht"><div class="g-htw"><canvas id="gcTrendOps"></canvas></div>
           <div class="g-legend"><div><span class="g-dot" style="background:#9B8CFF"></span>Total<b>${f(Ls.t)}</b></div><div><span class="g-dot" style="background:${RED}"></span>Negatif<b>${pc(Ls.n, Ls.t)}</b></div><div><span class="g-dot" style="background:${GREY}"></span>Netral<b>${pc(Ls.z, Ls.t)}</b></div><div><span class="g-dot" style="background:#3AA6F0"></span>Positif<b>${pc(Ls.p, Ls.t)}</b></div></div></div></div>
-        <div class="g-card"><div class="g-h"><h3>Top Isu Terkini</h3><span class="g-tag">Semua sumber</span></div>
+        <div class="g-card"><div class="g-h"><h3>Top 5 Isu Teramai</h3><span class="g-tag">Semua sumber</span></div>
           <ol class="g-list">${topics.slice(0, 5).map(([kk, v], i) => `<li><span class="n">${i + 1}</span><span class="t" title="${esc(kk)}">${esc(kk)}</span><span class="bar"><i style="width:${v / topics[0][1] * 100}%;background:${i < 1 ? RED : i < 3 ? ORANGE : AMBER}"></i></span><span class="p">${pc(v, S.t, 0)}</span></li>`).join('')}</ol></div>
         <div class="g-card"><div class="g-h"><h3>Sumber Percakapan</h3><span class="g-tag">Semua</span></div>
           <ol class="g-list g-src">${plat.map(([kk, v]) => `<li>${pfIco(kk)}<span class="t">${esc(kk)}</span><span class="bar"><i style="width:${v / plat[0][1] * 100}%;background:${TEAL}"></i></span><span class="p">${pc(v, S.t, 0)}</span></li>`).join('')}</ol></div>
