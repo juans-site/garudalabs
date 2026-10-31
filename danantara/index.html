@@ -49,6 +49,18 @@
 #heroBg:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,6,14,.8) 0%,rgba(2,6,14,.5) 26%,rgba(2,6,14,.1) 46%,transparent 60%)}
 [data-theme=light] #heroBg:after{background:linear-gradient(90deg,rgba(244,248,249,.85) 0%,rgba(244,248,249,.5) 26%,rgba(244,248,249,.08) 46%,transparent 60%)}
 @media(min-width:1101px){#heroBg.on{display:block}.g-earth.g-photo{display:none!important}.content{position:relative;z-index:1}}</style>
+<style>.raw td.ck,.raw th.ck{width:34px;padding-right:0}.raw td.ck input,.raw th.ck input{width:16px;height:16px;accent-color:#3AA6F0;cursor:pointer}
+.raw tr.sel td{background:rgba(58,166,240,.08)}
+select.sentsel{appearance:none;-webkit-appearance:none;border:0;cursor:pointer;font:700 12px var(--f-body,inherit);padding:4px 22px 4px 10px;border-radius:20px;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 11px) 52%,calc(100% - 7px) 52%;background-size:4px 4px;background-repeat:no-repeat}
+select.sentsel.positif{background-color:rgba(58,166,240,.16);color:#6CC4F7}select.sentsel.negatif{background-color:rgba(255,127,59,.16);color:#FF9A5E}select.sentsel.netral{background-color:rgba(138,151,166,.18)!important;color:#AEB8C4!important}
+select.sentsel option{background:#0E151A;color:#EAF2F4}
+.raw-bulk{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;padding:10px 12px;border-radius:12px;background:rgba(58,166,240,.1);border:1px solid rgba(58,166,240,.35);font-size:13px}
+.raw-bulk[hidden]{display:none}.raw-bulk select{flex:0 0 auto!important;height:32px}
+.raw-bulk button{height:32px;padding:0 14px;border-radius:9px;border:0;background:#3AA6F0;color:#031427;font-weight:700;cursor:pointer}.raw-bulk button.ghost{background:transparent;color:var(--mute);border:1px solid var(--line)}
+#gToast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;z-index:200;padding:10px 16px;border-radius:12px;background:#0B1B2E;color:#EAF2F4;border:1px solid rgba(58,166,240,.4);font-size:13px;transition:.25s;pointer-events:none}
+#gToast.on{opacity:1;transform:translate(-50%,0)}#gToast.err{border-color:#F0524F}
+[data-theme=light] select.sentsel.positif{color:#1565A8}[data-theme=light] select.sentsel.negatif{color:#B93E0C}[data-theme=light] select.sentsel.netral{color:#4B5866}[data-theme=light] select.sentsel option{background:#fff;color:#0F1A24}
+[data-theme=light] #gToast{background:#fff;color:#0F1A24}</style>
 </head>
 <body>
 <div id="loader" role="status" aria-label="Garuda Labs sedang memuat">
@@ -70,7 +82,7 @@
 <header class="topbar">
   <div class="brand">
     <img class="logo logo-dark" src="logo-dark.png?v=73" alt="Logo">
-    <img class="logo logo-light" src="logo-light.png?v=73" alt="Logo"><span class="beta" title="Versi 0.38 · diperbarui 31 Okt 2026">Beta<i class="ver">v0.38</i></span>
+    <img class="logo logo-light" src="logo-light.png?v=73" alt="Logo"><span class="beta" title="Versi 0.41 · diperbarui 31 Okt 2026">Beta<i class="ver">v0.41</i></span>
   </div>
   <div class="top-r">
       <div class="dr">
@@ -153,10 +165,12 @@
           <div class="seg mini" id="rawSent"><button data-v="" class="on">Semua</button><button data-v="positif">Positif</button><button data-v="negatif">Negatif</button><button data-v="netral">Netral</button></div>
           <select id="rawKw" aria-label="Filter tokoh/lembaga"></select><select id="rawTp" aria-label="Filter topik"><option value="">Semua topik</option></select><select id="rawPf"><option value="">Semua platform</option></select>
           <span class="hint" id="rawCount"></span>
+          <div class="raw-bulk" id="rawBulk" hidden><b id="rawBulkN"></b><span>Ubah sentimen menjadi</span><select id="rawBulkSent"><option value="positif">Positif</option><option value="netral">Netral</option><option value="negatif">Negatif</option></select><button type="button" id="rawBulkGo">Terapkan</button><button type="button" id="rawBulkClr" class="ghost">Batal pilih</button></div>
         </div>
         <div class="raw-wrap">
           <table class="raw">
             <thead><tr>
+              <th class="ck"><input type="checkbox" id="rawAll" aria-label="Pilih semua di halaman ini"></th>
               <th data-sort="dt" class="sortable">Tanggal &amp; Jam <i>▼</i></th>
               <th>Akun / Platform</th>
               <th>Caption</th>
@@ -215,7 +229,7 @@
     <footer>© 2026 Garuda Labs Intelligent Media Monitoring</footer>
   </div>
 </main>
-<script src="app.js?v=102"></script>
+<script src="app.js?v=105"></script>
 <script src="map.js?v=74"></script>
 <script src="hitrend.js?v=4"></script>
 <script src="core.js?v=111"></script>

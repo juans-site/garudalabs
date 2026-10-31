@@ -3,6 +3,9 @@ const SHEET_ID = "1EvNZ5apr_wFBvOn9hfGlFJpc6aHrFNnoVL_36OcyNvE";
 const TABS = { post: "Data Bersih", komentar: "Komentar" };
 const RISK = { kritis: 35, tinggi: 25, sedang: 15 }; // ambang % negatif: Rendah < Sedang < Tinggi < Kritis
 const REFRESH_MENIT = 5;
+// Simpan koreksi sentimen ke Google Sheet (Apps Script web app, lihat _sheet-script/Code.gs). Kosongkan = edit hanya di tampilan.
+const SHEET_WRITE_URL = 'https://script.google.com/macros/s/AKfycbytmwBHRprO5iAqV1gkM30KnCdgoYG_utTM3awyE2TjpvC6vnHdvIg8EmGVsPklpp3R4w/exec';
+const SHEET_WRITE_KEY = 'garuda-danantara-2026';
 // Akun resmi Danantara/BUMN/pemerintah (huruf besar/kecil diabaikan). Kolom 'Jenis Akun' berisi "Resmi" juga otomatis dihitung resmi.
 const AKUN_RESMI = []; // kosong: akun resmi cukup dari label 'Resmi' di kolom Jenis Akun
 // Filter Kata Kunci (kolom 'Kata Kunci'). Teks komentar dicocokkan dengan pola regex.
@@ -41,6 +44,8 @@ const tIcon = (n, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24
 
 const state = { kw: 'Semua', gran: 'harian', cloud: 'neg', acc: 'neg', src: 'post', from: null, to: null, preset: 'last7' }; // from/to = 'yyyy-mm-dd', null = semua
 const cache = {}, charts = {};
+const SENT_EDIT = {}; // koreksi lokal (tetap dipakai sampai sheet terbarui)
+const rawSel = new Set();
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
 /* ---------- Data ---------- */
@@ -113,14 +118,14 @@ function norm(r, kind) {
   let jamStr = '';
   if (/^\d{1,2}[:.]\d{2}/.test(j)) { const [hh, mm] = j.split(/[:.]/); jamStr = hh.padStart(2, '0') + ':' + mm.slice(0, 2); }
   else if (/^0?[.,]\d+$|^[01]$/.test(j)) { const m = Math.round(parseFloat(j.replace(',', '.')) * 1440) % 1440; jamStr = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
-  const s = (r['Sentimen'] || '').trim().toLowerCase();
+  const s = (SENT_EDIT[(TABS[kind] || '') + ':' + String(r['No'] || '').trim()] || r['Sentimen'] || '').trim().toLowerCase();
   const isK = kind === 'komentar';
   if (!r['Tipe']) r['Tipe'] = r['Jenis Akun'] || '';
   const user = (r['Username'] || r['Akun / Sumber'] || r['Akun Komentator'] || '').trim().replace(/^@/, '');
   const resmi = /resmi/i.test(r['Tipe'] || '') || AKUN_RESMI.includes(user.toLowerCase());
   const pv = provinsi(r['Lokasi (estimasi)'] || r['Lokasi (Pulau)'], r['Konten'] || r['Caption'] || (isK ? (r['Komentar'] || '') + ' ' + (r['Ringkasan Postingan'] || '') : ''));
   return {
-    platform: (r['Platform'] || 'Lainnya').trim(), user, kw: r['Kata Kunci'] || '', emosi: (r['Emosi'] || '').trim(), nama: (r['Nama Akun'] || '').trim(), tgl, jam,
+    no: String(r['No'] || '').trim(), tab: TABS[kind] || '', platform: (r['Platform'] || 'Lainnya').trim(), user, kw: r['Kata Kunci'] || '', emosi: (r['Emosi'] || '').trim(), nama: (r['Nama Akun'] || '').trim(), tgl, jam,
     text: r['Caption'] || r['Teks Postingan'] || r['Text Komentar'] || r['Konten'] || (isK ? r['Komentar'] : '') || '',
     topik: (r['Topik (tanpa label buzzer)'] || r['Topik'] || r['Kategori'] || 'Lainnya').trim().replace(/^Umum \/ Lainnya$/, 'Lainnya'),
     sent: !s ? '' : s.startsWith('pos') ? 'positif' : s.startsWith('neg') ? 'negatif' : 'netral', resmi,
@@ -424,14 +429,17 @@ function renderRaw(reset) {
   document.querySelector('th[data-sort=eng]').firstChild.textContent = engHead + ' ';
   document.querySelectorAll('th.sortable i').forEach(i => i.textContent = i.parentNode.dataset.sort === raw.sort ? (raw.dir < 0 ? '▼' : '▲') : '');
   $('rawCount').textContent = rows.length ? `${fmt(start + 1)}–${fmt(start + view.length)} dari ${fmt(rows.length)} baris` : '0 baris';
-  $('rawBody').innerHTML = view.map(r => `<tr>
+  $('rawBody').innerHTML = view.map(r => { const id = r.tab + ':' + r.no; return `<tr class="${rawSel.has(id) ? 'sel' : ''}">
+    <td class="ck"><input type="checkbox" data-id="${esc(id)}" ${rawSel.has(id) ? 'checked' : ''} ${r.no ? '' : 'disabled'} aria-label="Pilih baris"></td>
     <td class="nw"><b>${tglShort(r.tgl)} ${r.tgl.slice(0, 4)}</b><br><small>${r.jamStr || '–'}</small></td>
     <td class="acc"><b title="${esc(r.user)}">${esc(r.user || '–')}</b><span class="chip sm"><i style="background:${pColor(r.platform)}"></i>${esc(r.platform)}</span></td>
     <td class="cap"><div class="txt">${esc(r.text)}</div>${r.text.length > 220 ? '<button class="more">Selengkapnya</button>' : ''}</td>
-    <td><span class="badge ${r.sent}">${r.sent[0].toUpperCase() + r.sent.slice(1)}</span>${r.resmi ? '<br><small>akun resmi</small>' : ''}</td>
+    <td><select class="sentsel badge ${r.sent}" data-id="${esc(id)}" ${r.no ? '' : 'disabled'} aria-label="Ubah sentimen">${['positif', 'netral', 'negatif'].map(s => `<option value="${s}" ${s === r.sent ? 'selected' : ''}>${s[0].toUpperCase() + s.slice(1)}</option>`).join('')}</select>${SENT_EDIT[id] ? '<br><small>diedit</small>' : ''}${r.resmi ? '<br><small>akun resmi</small>' : ''}</td>
     <td class="r">${fmt(r.eng)}<br><small>likes+komen+share</small></td>
     <td class="c">${r.link ? `<a class="lnk" href="${esc(r.link)}" target="_blank" rel="noopener" title="Buka link" aria-label="Buka link">↗</a>` : '–'}</td>
-  </tr>`).join('') || '<tr><td colspan="6" class="empty">Tidak ada data yang cocok</td></tr>';
+  </tr>`; }).join('') || '<tr><td colspan="7" class="empty">Tidak ada data yang cocok</td></tr>';
+  state.rawView = view; const allIds = view.filter(r => r.no).map(r => r.tab + ':' + r.no);
+  $('rawAll').checked = allIds.length > 0 && allIds.every(i => rawSel.has(i)); updBulk();
   const btn = (p, l, dis) => `<button data-p="${p}" ${dis ? 'disabled' : ''} class="${p === raw.page ? 'on' : ''}">${l}</button>`;
   const nums = [...new Set([1, raw.page - 1, raw.page, raw.page + 1, pages])].filter(p => p >= 1 && p <= pages).sort((a, b) => a - b);
   let out = btn(raw.page - 1, '‹', raw.page === 1), prev = 0;
@@ -451,6 +459,30 @@ $('rawBody').onclick = e => {
   const txt = t.querySelector('.txt'), more = t.querySelector('.more'); if (!more) return;
   txt.classList.toggle('open'); more.textContent = txt.classList.contains('open') ? 'Tutup' : 'Selengkapnya';
 };
+
+function updBulk() { const n = rawSel.size; $('rawBulk').hidden = !n; $('rawBulkN').textContent = `${fmt(n)} baris dipilih`; }
+async function setSent(ids, s) {
+  ids.forEach(id => SENT_EDIT[id] = s);
+  ['_post', '_komentar'].forEach(k => (cache[k] || []).forEach(r => { if (ids.includes(r.tab + ':' + r.no)) r.sent = s; }));
+  delete cache.all; ['post', 'komentar'].forEach(k => { if (cache['_' + k]) cache[k] = kwFilter(cache['_' + k]); });
+  const keep = { page: raw.page }; await render(); raw.page = keep.page; renderRaw();
+  if (!SHEET_WRITE_URL) { toast(`${ids.length} sentimen diubah di tampilan (belum tersambung ke sheet).`); return; }
+  const byTab = {}; ids.forEach(id => { const i = id.indexOf(':'); (byTab[id.slice(0, i)] ||= []).push({ no: id.slice(i + 1), sentimen: s }); });
+  try { let n = 0; for (const [tab, rows] of Object.entries(byTab)) {
+      const r = await fetch(SHEET_WRITE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ key: SHEET_WRITE_KEY, tab, rows }) });
+      const j = await r.json(); if (!j.ok) throw new Error(j.error); n += j.updated; }
+    toast(`${n} sentimen tersimpan ke Google Sheet.`);
+  } catch (e) { toast('Gagal menyimpan ke sheet: ' + e.message, true); }
+}
+function toast(msg, err) { let t = $('gToast'); if (!t) { t = document.createElement('div'); t.id = 'gToast'; document.body.append(t); }
+  t.textContent = msg; t.className = err ? 'err on' : 'on'; clearTimeout(toast.t); toast.t = setTimeout(() => t.className = '', 3500); }
+$('rawBody').addEventListener('change', e => {
+  const c = e.target.closest('input[type=checkbox][data-id]'); if (c) { c.checked ? rawSel.add(c.dataset.id) : rawSel.delete(c.dataset.id); c.closest('tr').classList.toggle('sel', c.checked); $('rawAll').checked = (state.rawView || []).filter(r => r.no).every(r => rawSel.has(r.tab + ':' + r.no)); updBulk(); return; }
+  const s = e.target.closest('select.sentsel'); if (s) { const ids = rawSel.has(s.dataset.id) && rawSel.size > 1 && confirm(`Terapkan "${s.value}" ke ${rawSel.size} baris yang dipilih?`) ? [...rawSel] : [s.dataset.id]; setSent(ids, s.value); }
+});
+$('rawAll').onchange = e => { (state.rawView || []).filter(r => r.no).forEach(r => e.target.checked ? rawSel.add(r.tab + ':' + r.no) : rawSel.delete(r.tab + ':' + r.no)); renderRaw(); };
+$('rawBulkGo').onclick = () => { const v = $('rawBulkSent').value; if (!v || !rawSel.size) return; setSent([...rawSel], v); rawSel.clear(); };
+$('rawBulkClr').onclick = () => { rawSel.clear(); renderRaw(); };
 
 $('fGran').onchange = e => { state.gran = e.target.value; render(); };
 
