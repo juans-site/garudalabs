@@ -140,6 +140,8 @@
       const below = Math.max(0, (H - 70) / 2 - 460 * sc + h - H); stage.style.setProperty('--below', below + 'px'); };
     fit(); if (!buildConsole.fitBound) { buildConsole.fitBound = 1; addEventListener('resize', () => { const f = document.querySelector('#gConsole')?._fit; f && f(); }); }
     root._fit = fit;
+    { const kp = root.querySelector('.g-kpis'), pr = root.querySelector('.g-prio');
+      if (kp && pr && window.ResizeObserver) { buildConsole.ro?.disconnect(); buildConsole.ro = new ResizeObserver(() => { if (kp.offsetWidth > 300 && innerWidth >= 1101) pr.style.width = kp.offsetWidth + 'px'; }); buildConsole.ro.observe(kp); } }
     root.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { if (typeof state === 'undefined') return; state.preset = b.dataset.p; render(); });
     root.querySelectorAll('[data-pf]').forEach(b => b.onclick = () => { feedPf = b.dataset.pf; buildConsole(); });
     root.querySelector('[data-ask]')?.addEventListener('click', () => document.querySelector('.ai-fab')?.click());
@@ -154,7 +156,7 @@
       const an = document.createElement('div'); an.id = 'viewAnalitik'; an.hidden = true;
       [...dash.children].forEach(ch => { if (ch.id !== 'gConsole') an.append(ch); });
       dash.after(an);
-      const dBtn = tabs.querySelector('[data-tab=dash]'); if (dBtn) dBtn.textContent = 'Ops Console';
+      const dBtn = tabs.querySelector('[data-tab=dash]'); if (dBtn) dBtn.textContent = 'Dashboard';
       const aBtn = document.createElement('button'); aBtn.setAttribute('role', 'tab'); aBtn.dataset.tab = 'analitik'; aBtn.textContent = 'Analytics';
       dBtn ? dBtn.after(aBtn) : tabs.prepend(aBtn);
       const ai = document.createElement('button'); ai.type = 'button'; ai.className = 'g-ai-tab'; ai.setAttribute('role', 'tab'); ai.innerHTML = ic('spark', 15) + 'Garuda AI';
