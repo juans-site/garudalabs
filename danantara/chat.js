@@ -66,7 +66,7 @@ const CHAT_MAX_POSTS = 50; // Workers AI punya batas konteks lebih kecil
 
   /* Konteks data: ringkasan agregat periode aktif + postingan paling relevan dengan pertanyaan */
   function buildContext(q) {
-    const all = (typeof cache !== 'undefined' && cache.post) || [];
+    const all = (typeof cache !== 'undefined' && (cache[state.src] || cache.post)) || [];
     const rg = (typeof state !== 'undefined' && state.range) || {};
     const D = all.filter(r => !rg.from || (r.tgl >= rg.from && r.tgl <= rg.to));
     if (!D.length) return 'Data belum termuat.';

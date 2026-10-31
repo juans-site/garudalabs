@@ -209,6 +209,7 @@
 .g-rank .bar i,.g-list .bar i,.g-stack .sb i{box-shadow:inset 0 1px 0 rgba(255,255,255,.35);filter:saturate(1.2) drop-shadow(0 0 5px rgba(120,180,255,.35)) drop-shadow(0 0 1px rgba(255,255,255,.4))!important}
 .g-stack .sb{height:12px!important}
 [data-theme=light] .g-rank .bar,[data-theme=light] .g-list .bar,[data-theme=light] .g-stack .sb{background:rgba(4,7,10,.06)!important}
+html:not([data-theme=light]) #gConsole .g-card,html:not([data-theme=light]) #viewAnalitik .g-card,html:not([data-theme=light]) .g-insight,html:not([data-theme=light]) .g-prio{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.01) 45%),rgba(10,16,24,.55)!important;-webkit-backdrop-filter:blur(18px) saturate(140%)!important;backdrop-filter:blur(18px) saturate(140%)!important}
 .g-photo .ph-l{display:none}[data-theme=light] .g-photo .ph-l{display:block}[data-theme=light] .g-photo .ph-d{display:none}
 .g-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(1,4,10,.55),transparent 28%),linear-gradient(0deg,rgba(1,4,10,.7),transparent 22%)}
 .g-int,.g-ctrl{z-index:2}
@@ -309,7 +310,7 @@
 
   /* ---------------- Data ---------------- */
   function data() {
-    const all = (typeof cache !== 'undefined' && cache.post) || [];
+    const all = (typeof cache !== 'undefined' && (cache[state.src] || cache.post)) || [];
     const rg = (typeof state !== 'undefined' && state.range) || {};
     const D = all.filter(r => !rg.from || (r.tgl >= rg.from && r.tgl <= rg.to));
     const days = [...new Set(D.map(r => r.tgl))].sort();

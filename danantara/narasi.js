@@ -9,7 +9,7 @@
   let lastKey = '', busy = false, cached = null;
 
   function build() {
-    const all = (typeof cache !== 'undefined' && cache.post) || []; if (!all.length) return null;
+    const all = (typeof cache !== 'undefined' && (cache[state.src] || cache.post)) || []; if (!all.length) return null;
     // Ikut filter periode dashboard; pembanding = periode sebelumnya dengan jumlah hari sama
     const rg = (typeof state !== 'undefined' && state.range) || {}, days = [...new Set(all.map(r => r.tgl))].sort();
     const from = rg.from || days[0], to = rg.to || days.at(-1), latest = to;
@@ -36,7 +36,7 @@
     const pos = W.filter(r => r.sent === 'positif'); ctx += `\nSINYAL POSITIF (${pos.length}):\n${sample(pos, 5).map(line).join('\n')}\n`;
     // buang emoji/karakter khusus: model AI menolak input berisi surrogate/emoji
     ctx = ctx.replace(/[\uD800-\uDFFF]/g, '').replace(/[^\x09\x0A\x0D\x20-\x7E\u00A0-\u024F\u2010-\u2027]/g, '');
-    return { ctx, key: `${from}_${to}-${W.length}`, from, to: lastTgl, span, lastJam, n: W.length, amp };
+    return { ctx, key: `${(typeof state !== "undefined" && state.src) || "post"}_${(typeof state !== "undefined" && state.kw) || ""}_${from}_${to}-${W.length}`, from, to: lastTgl, span, lastJam, n: W.length, amp };
   }
 
   function render(box, data, meta, state) {
